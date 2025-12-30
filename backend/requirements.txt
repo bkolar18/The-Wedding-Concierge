@@ -3,10 +3,12 @@ fastapi
 uvicorn[standard]
 python-multipart
 
-# Database - using SQLite for testing (no Rust compilation needed)
+# Database
 sqlalchemy
 alembic
 aiosqlite
+asyncpg
+psycopg2-binary
 
 # LLM
 anthropic
