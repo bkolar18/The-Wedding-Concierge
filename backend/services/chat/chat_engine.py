@@ -1,9 +1,12 @@
 """Chat engine for answering wedding-related questions."""
-from typing import Optional, List, Dict, Any, Union
+from typing import Optional, List, Dict, Any, Union, TYPE_CHECKING
 from datetime import datetime, date
 import anthropic
 
 from core.config import settings
+
+if TYPE_CHECKING:
+    from models.wedding import Wedding
 
 
 class ChatEngine:
@@ -235,7 +238,7 @@ Now help the wedding guests with their questions!"""
             print(f"Claude API error: {e}")
             return "I'm having a little trouble right now. Please try again in a moment!"
 
-    async def get_greeting(self, wedding: Wedding) -> str:
+    async def get_greeting(self, wedding: "Wedding") -> str:
         """Get an initial greeting message for a new chat session."""
         return f"""Hi there! I'm here to help you with any questions about {wedding.partner1_name} and {wedding.partner2_name}'s upcoming wedding.
 
