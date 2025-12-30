@@ -1,0 +1,30 @@
+# Web Framework
+fastapi
+uvicorn[standard]
+python-multipart
+
+# Database - using SQLite for testing (no Rust compilation needed)
+sqlalchemy
+alembic
+aiosqlite
+
+# LLM
+anthropic
+
+# Web Scraping
+beautifulsoup4
+httpx
+playwright
+playwright-stealth
+
+# Validation & Settings
+pydantic
+pydantic-settings
+python-dotenv
+
+# Auth
+python-jose[cryptography]
+passlib[bcrypt]
+
+# Utilities
+python-dateutil

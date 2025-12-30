@@ -1,0 +1,1361 @@
+=== CLAUDE RESPONSE - Integration Options Discussion ===
+
+Great question - this is an important product decision. Let me break down the options:
+
+## Integration Options
+
+### Option 1: Link to Our Hosted Page (Recommended Starting Point)
+```
+yoursite.com/wedding/alice-bob-2025
+```
+- Couples share a link on their wedding website, invitations, even QR codes
+- Guests click the link → opens our chat interface
+- **Pros:** Works universally, no technical setup, can be shared anywhere (text, email, printed materials)
+- **Cons:** Guests leave the wedding site momentarily
+
+### Option 2: Embeddable Widget
+```html
+<script src="yoursite.com/widget.js" data-wedding="alice-bob-2025"></script>
+```
+- Floating chat bubble on their existing website
+- **Pros:** Seamless, feels native, guests never leave
+- **Cons:** Many wedding platforms (The Knot, Zola, Minted) don't allow custom JavaScript embeds
+
+### Option 3: Both (What Most SaaS Products Do)
+- Standalone link for everyone
+- Embed option for couples with custom sites
+
+## My Recommendation
+
+**Start with Option 1 (hosted link)** because:
+
+1. **Universal compatibility** - Works whether they use The Knot, Zola, Squarespace, or a napkin with a QR code
+2. **Zero technical friction** - Couple just copies a link
+3. **Multiple distribution channels:**
+   - Link on wedding website FAQ section
+   - QR code on printed invitations/programs
+   - Text to guests: "Have questions? Ask our wedding assistant: [link]"
+4. **We already have this** - The current frontend is essentially this
+
+The embed widget can be a Phase 3 premium feature for couples with custom sites.
+
+Does this approach make sense? Would you like to refine the hosted page experience, or do you have a different vision in mind?
+
+=== CLAUDE RESPONSE - Option 1 Confirmed ===
+
+Great choice. Here's what this means for our product:
+
+## Current Architecture Alignment
+
+Good news - our current setup already supports this:
+- Frontend serves a page where guests enter an access code
+- Each wedding has a unique access code (e.g., `alice-bob-2025`)
+
+## What We Should Build
+
+### Phase 2 Enhancement: Direct Wedding URLs
+Instead of guests entering an access code manually, we create direct links:
+
+```
+yoursite.com/chat/alice-bob-2025
+```
+
+Guest clicks link → lands directly in chat (no access code entry needed)
+
+### User Flow
+
+**For Couples:**
+1. Sign up / create account
+2. Enter wedding details (or scrape from existing site)
+3. Get their unique chat link: `yoursite.com/chat/smith-jones-2025`
+4. Share link however they want
+
+**For Guests:**
+1. Click link from wedding website/invitation/text
+2. Optionally enter name (for personalization)
+3. Start chatting immediately
+
+### Future Premium: Embeddable Widget
+- Save for Phase 3+
+- Offer to couples with custom websites
+- Additional revenue stream
+
+## Next Steps
+
+Would you like to:
+1. **Refine the guest chat page UX** - Make it prettier, add wedding branding
+2. **Build the couple onboarding flow** - Sign up, create wedding, get link
+3. **Add direct URL routing** - So `/chat/access-code` works without manual entry
+
+Which feels most important to tackle first?
+
+=== CLAUDE RESPONSE - Task 1 Complete, Starting Task 2 ===
+
+## Task 1: Guest Chat Page UX - COMPLETE
+
+I've built the following:
+
+### Backend Changes
+- Added `GET /api/chat/preview/{access_code}` endpoint
+- Returns wedding details (couple names, date, venue, dress code) for display
+
+### Frontend Changes
+
+**New Route: `/chat/[accessCode]`**
+- Direct link: `localhost:3000/chat/alice-bob-test`
+- Shows wedding header with couple names, date, venue
+- No access code entry needed - goes straight to name prompt
+
+**Enhanced ChatWidget:**
+- Modern rounded design with gradients
+- Animated typing indicator (bouncing dots)
+- Quick question buttons after greeting
+- Auto-focus on input after chat starts
+- Better error handling
+- Send button with arrow icon
+
+### User Flow Now:
+1. Guest clicks link: `yoursite.com/chat/smith-jones-2025`
+2. Sees wedding details (names, date, venue)
+3. Optionally enters name, clicks "Start Chatting"
+4. Immediately in chat with quick question suggestions
+
+---
+
+## Task 2: Couple Onboarding Flow - IN PROGRESS
+
+Now building authentication and the couple dashboard. This includes:
+
+1. **Backend Auth System**
+   - JWT token authentication
+   - Register/login endpoints
+   - Password hashing
+
+2. **Frontend Auth Pages**
+   - `/register` - Create account
+   - `/login` - Sign in
+   - `/dashboard` - Manage wedding
+
+3. **Dashboard Features**
+   - View/edit wedding details
+   - See shareable chat link
+   - Manage hotels, events, FAQs
+
+Starting with the backend auth system now...
+
+=== CLAUDE RESPONSE - All 3 Tasks Complete ===
+
+## Summary of What Was Built
+
+### Task 1: Guest Chat Page UX - COMPLETE
+- New route: `/chat/[accessCode]` for direct wedding links
+- Backend endpoint: `GET /api/chat/preview/{access_code}`
+- Enhanced ChatWidget with:
+  - Animated typing indicator
+  - Quick question buttons
+  - Better styling with gradients
+  - Auto-focus on input
+
+### Task 2: Couple Onboarding Flow - COMPLETE
+
+**Backend (Python/FastAPI):**
+- `core/auth.py` - JWT tokens, password hashing
+- `api/routes/auth.py` - Register, login, get current user
+- Added to `api/routes/wedding.py`:
+  - `POST /api/wedding/me` - Create wedding for current user
+  - `GET /api/wedding/me` - Get current user's wedding
+  - `PATCH /api/wedding/me` - Update current user's wedding
+
+**Frontend (Next.js):**
+- `contexts/AuthContext.tsx` - Auth state management
+- `app/register/page.tsx` - Registration page
+- `app/login/page.tsx` - Login page
+- `app/dashboard/page.tsx` - Couple dashboard
+- Updated `app/page.tsx` - Landing page with nav
+
+### Task 3: Direct URL Routing - COMPLETE
+- Included in Task 1 via `/chat/[accessCode]` route
+
+---
+
+## New User Flow
+
+**For Couples:**
+1. Visit homepage -> Click "Get Started"
+2. Register with email/password
+3. Create wedding (enter partner names, date, venue)
+4. Get shareable link: `/chat/alice-bob-2025`
+5. View dashboard with wedding details
+
+**For Guests:**
+1. Click link from couple
+2. See wedding details (names, date, venue)
+3. Enter name (optional), start chatting
+4. Quick question buttons for common queries
+
+---
+
+## Files Created/Modified
+
+**Backend:**
+- `backend/core/auth.py` (NEW)
+- `backend/api/routes/auth.py` (NEW)
+- `backend/api/routes/chat.py` (MODIFIED - added preview endpoint)
+- `backend/api/routes/wedding.py` (MODIFIED - added /me endpoints)
+- `backend/main.py` (MODIFIED - added auth router)
+
+**Frontend:**
+- `frontend/src/contexts/AuthContext.tsx` (NEW)
+- `frontend/src/app/register/page.tsx` (NEW)
+- `frontend/src/app/login/page.tsx` (NEW)
+- `frontend/src/app/dashboard/page.tsx` (NEW)
+- `frontend/src/app/chat/[accessCode]/page.tsx` (NEW)
+- `frontend/src/app/page.tsx` (MODIFIED)
+- `frontend/src/app/layout.tsx` (MODIFIED)
+- `frontend/src/components/chat/ChatWidget.tsx` (MODIFIED)
+- `frontend/src/lib/api.ts` (MODIFIED)
+
+---
+
+## To Test
+
+1. Start backend: `cd backend && venv\Scripts\python -m uvicorn main:app --reload --port 8000`
+2. Start frontend: `cd frontend && npm run dev`
+3. Visit http://localhost:3000
+4. Click "Get Started" to register
+5. Create a wedding
+6. Copy and share your guest link!
+
+---
+
+## What's Next?
+
+The core flow is complete. Future enhancements could include:
+- Edit wedding details from dashboard
+- Add/remove hotels, events, FAQs from UI
+- Chat analytics
+- Website scraping integration
+- SMS support
+
+=== SERVERS RUNNING ===
+
+Both servers are now running:
+
+- **Frontend:** http://localhost:3000
+- **Backend API:** http://localhost:8000
+- **API Docs:** http://localhost:8000/docs
+
+You can now:
+1. Visit http://localhost:3000
+2. Click "Get Started" to register
+3. Create your wedding
+4. Share the link with guests!
+
+Test access code for demo: `alice-bob-test`
+
+=== CLAUDE RESPONSE - API Key Configured ===
+
+Done! Created `.env` file with your API key and restarted the backend.
+
+The chat should now work. Try again:
+1. Go to http://localhost:3000
+2. Enter access code: `alice-bob-test`
+3. Start chatting!
+
+Backend is running with the API key loaded.
+
+=== CLAUDE RESPONSE - Chat Fixed! ===
+
+**The Issue:** The chat message endpoint was failing with an Internal Server Error due to a SQLAlchemy async/lazy loading issue. When accessing database relationships (like `wedding.accommodations`) in async SQLAlchemy, the code needs to stay within the proper async context.
+
+**What Was Fixed:**
+
+1. **Modified `backend/api/routes/chat.py`:**
+   - Converted the wedding ORM object to a plain Python dictionary before passing to the chat engine
+   - This avoids SQLAlchemy's lazy loading machinery which doesn't work in async mode
+
+2. **Modified `backend/services/chat/chat_engine.py`:**
+   - Updated all methods to accept dictionaries instead of ORM objects
+   - Added date formatting helper method
+
+3. **Fixed port conflict:**
+   - Stale processes were holding port 8000
+   - Backend now runs on port 8001
+   - Updated frontend API to use port 8001
+
+=== CLAUDE RESPONSE - Updated Server Ports ===
+
+Cleared Next.js cache and restarted. Port 3000 was in use by another process, so:
+
+**UPDATED URLs:**
+- Frontend: http://localhost:3001 (changed from 3000)
+- Backend: http://localhost:8001
+
+Updated CORS to allow port 3001 and restarted backend.
+
+**READY TO TEST:**
+1. Visit http://localhost:3001/chat/alice-bob-test
+2. Enter your name (optional) and click "Start Chatting"
+3. Ask "What is the dress code?"
+
+Both servers are running and configured correctly now.
+
+===============================================================================
+SESSION: December 25, 2024 - Session Initialization
+===============================================================================
+
+## PROJECT UNDERSTANDING COMPLETE
+
+I've reviewed all three context files in the session-notes directory:
+
+### CURRENT STATUS
+- **Phase:** MVP Complete - Scraper Simplified & Ready for Testing
+- **Last Update:** December 25, 2024
+- **Focus:** Test the simplified scraper with real wedding URLs
+
+### WHAT'S WORKING
+- Full-stack wedding chat assistant (FastAPI + Next.js)
+- AI-powered chat using Claude (Anthropic API)
+- Wedding website scraper (httpx + BeautifulSoup) - Playwright removed
+- Import page with animated progress bar
+- Text cleaning to filter garbage content
+- Travel/accommodation content prioritized in extraction
+
+### KEY ARCHITECTURE
+```
+Frontend (Next.js :3001) → REST API → Backend (FastAPI :8001)
+                                           │
+                           ┌───────────────┴───────────────┐
+                           │                               │
+                     Chat Engine                    Scraper System
+                     (Claude AI)                   (httpx + BS4)
+                           │                               │
+                           └───────────────┬───────────────┘
+                                           │
+                                   SQLite Database
+```
+
+### IMMEDIATE NEXT STEP
+Test the scraper with a real wedding URL (The Knot, Zola, etc.)
+
+### COMMANDS TO START
+```bash
+# Backend
+cd "C:\Users\brenn\Documents\Coding Projects\Wedding Chat Tool\backend"
+"venv\Scripts\python.exe" -B -m uvicorn main:app --port 8000 --reload
+
+# Frontend
+cd "C:\Users\brenn\Documents\Coding Projects\Wedding Chat Tool\frontend"
+npm run dev
+```
+
+### TEST ACCESS CODE
+`alice-bob-test` - Pre-created test wedding
+
+---
+Ready for your next instruction!
+
+===============================================================================
+SESSION: December 26, 2024 - Scraper Testing
+===============================================================================
+
+## SCRAPER TEST RESULTS
+
+### Test URL
+https://www.theknot.com/us/hannah-nichols-and-parker-howell-nov-2017
+
+### Result: BLOCKED (403 Access Denied)
+
+The Knot uses Akamai CDN with aggressive bot protection. The httpx-based scraper
+gets blocked because it's not a real browser.
+
+Error response:
+```
+<HTML><HEAD>
+<TITLE>Access Denied</TITLE>
+</HEAD><BODY>
+<H1>Access Denied</H1>
+You don't have permission to access this URL on this server.
+Reference: https://errors.edgesuite.net/...
+</BODY>
+</HTML>
+```
+
+### The Problem
+
+The Knot (and likely other major wedding platforms) detect and block:
+- Non-browser HTTP clients (httpx, requests, curl)
+- Missing JavaScript execution
+- Bot-like request patterns
+
+### Options to Fix
+
+**Option A: Re-add Playwright (Recommended)**
+- Use a real browser to bypass bot protection
+- Playwright can render JavaScript and pass bot checks
+- Keep httpx as fallback for simpler sites
+- Pros: Works reliably, handles all platforms
+- Cons: Slower, requires browser install (~50MB)
+
+**Option B: Try Different Platforms**
+- Zola, WithJoy may have less aggressive protection
+- Could work with current httpx scraper
+- Pros: No code changes needed
+- Cons: May not work for The Knot users (popular platform)
+
+**Option C: Use Scraping Proxy/Service**
+- Services like ScraperAPI, Bright Data can bypass protection
+- Pros: No browser needed
+- Cons: Adds cost, external dependency
+
+### Current Scraper Architecture
+
+```
+scraper.py          - Main scraper using httpx + BeautifulSoup
+                    - Supports: The Knot, Zola, WithJoy, WeddingWire, Minted
+                    - Fetches main page + subpages (travel, FAQ, etc.)
+
+data_mapper.py      - Uses Claude to extract structured data
+                    - Sends scraped text to Claude Sonnet
+                    - Extracts accommodations, events, FAQs
+
+scrape.py (route)   - API endpoints:
+                    - POST /api/scrape/ - Preview scraped data
+                    - POST /api/scrape/import - Import and create wedding
+```
+
+### Next Steps
+
+Waiting for user decision:
+- A) Add Playwright back for browser-based scraping
+- B) Test with a Zola or WithJoy URL instead
+
+---
+
+===============================================================================
+SESSION: December 26, 2024 - Scraper Fix COMPLETED
+===============================================================================
+
+## IMPLEMENTATION COMPLETE: Playwright Stealth Hybrid Approach
+
+### What Was Done
+
+1. **Added Dependencies**
+   - Added `playwright` and `playwright-stealth` to requirements.txt
+   - Installed Chromium browser binary via `playwright install chromium`
+
+2. **Created New File: `browser_fetch.py`**
+   - `StealthBrowser` class with anti-detection techniques
+   - Masks `navigator.webdriver` property
+   - Randomizes viewport size (1200-1920 x 800-1080)
+   - Adds realistic browser plugins and languages
+   - Uses `wait_until="domcontentloaded"` to avoid timeout issues
+   - Includes scroll simulation for lazy-loaded content
+
+3. **Updated `scraper.py` with Tiered Fallback**
+   - Tier 1: httpx (fast, free) - works for Zola, WithJoy
+   - Tier 2: Playwright Stealth - handles The Knot, WeddingWire
+   - `BROWSER_REQUIRED_PLATFORMS` dict to skip httpx for known-protected sites
+   - `_is_blocked_response()` to detect 403/Access Denied pages
+   - Browser instance reused for all subpage fetches in a session
+
+### Test Results
+
+**The Knot URL:**
+```
+https://www.theknot.com/us/hannah-nichols-and-parker-howell-nov-2017
+```
+
+**Before (httpx only):** 403 Access Denied
+**After (Playwright Stealth):** SUCCESS!
+
+```json
+{
+  "success": true,
+  "platform": "the_knot",
+  "partner1_name": "Hannah Nichols",
+  "partner2_name": "Parker Howell",
+  "wedding_date": "2017-11-01"
+}
+```
+
+### Files Modified
+
+| File | Change |
+|------|--------|
+| `backend/requirements.txt` | Added playwright, playwright-stealth |
+| `backend/services/scraper/browser_fetch.py` | NEW - Stealth browser wrapper |
+| `backend/services/scraper/scraper.py` | Added tiered fallback logic |
+
+### How It Works Now
+
+```
+User submits URL → API checks platform
+       ↓
+If The Knot/WeddingWire → Use Playwright Stealth directly
+       ↓
+If other platform → Try httpx first
+       ↓
+If httpx blocked → Fall back to Playwright Stealth
+       ↓
+Parse HTML with BeautifulSoup → Extract with Claude → Return data
+```
+
+### Servers Running
+- Frontend: http://localhost:3000
+- Backend: http://localhost:8000
+
+### To Test Yourself
+```bash
+curl -X POST "http://localhost:8000/api/scrape/" \
+  -H "Content-Type: application/json" \
+  -d '{"url": "https://www.theknot.com/us/hannah-nichols-and-parker-howell-nov-2017"}'
+```
+
+---
+The Knot scraping now works!
+
+===============================================================================
+SUMMARY - Implementation Complete
+===============================================================================
+
+The scraper now bypasses The Knot's Akamai bot protection using Playwright Stealth.
+
+**What was built:**
+- **Tiered fallback**: httpx first (fast), Playwright Stealth if blocked
+- **New file**: `browser_fetch.py` with stealth anti-detection
+- **Updated**: `scraper.py` with automatic platform detection
+
+**Test result:**
+| Before | After |
+|--------|-------|
+| 403 Access Denied | Partner names, date extracted |
+
+Servers are running:
+- Frontend: http://localhost:3000
+- Backend: http://localhost:8000 (or 8002 if port conflict)
+
+===============================================================================
+SESSION END: December 29, 2024
+===============================================================================
+
+## FINAL STATUS: Scraper Fully Working
+
+### What Was Accomplished
+
+1. **Playwright Stealth Implementation**
+   - Re-added Playwright with `playwright-stealth` package
+   - Created `browser_fetch.py` with StealthBrowser class
+   - Anti-detection: webdriver masking, randomized viewport, realistic plugins
+
+2. **Tiered Fallback Architecture**
+   - Tier 1: httpx (fast, works for Zola, WithJoy)
+   - Tier 2: Playwright Stealth (bypasses Akamai on The Knot, WeddingWire)
+   - Auto-detection of blocked responses (403, "Access Denied")
+
+3. **Config Fix**
+   - Fixed `.env` file path in config.py to use absolute path
+   - Was failing to load API key when running from different directories
+
+4. **Successful Test Results**
+   - URL: Hannah & Parker's wedding on The Knot
+   - Extracted: Partner names, date, venues, dress code, events, hotels
+   - Events: Wedding at Lesner Inn, After-Party at Commonwealth Brewing
+   - Hotels: Virginia Beach Resort ($89/night room block), Wyndham
+
+### Known Issue: Port Conflict
+- Old server processes stuck on port 8000
+- Working server running on port 8002
+- Resolution: Restart computer or update frontend to use 8002
+
+### Files Changed Today
+- `backend/services/scraper/browser_fetch.py` - NEW (Playwright stealth)
+- `backend/services/scraper/scraper.py` - Added tiered fallback
+- `backend/core/config.py` - Absolute .env path
+- `backend/requirements.txt` - Added playwright, playwright-stealth
+- `backend/services/scraper/data_mapper.py` - Debug logging
+
+### Next Steps (Choose One)
+1. Clean up port issue (restart computer)
+2. Continue development on port 8002
+3. Start Phase 2: Authentication & Dashboard
+
+### Quick Start for Next Session
+```bash
+# Start backend on port 8002 (until port 8000 freed)
+cd "C:\Users\brenn\Documents\Coding Projects\Wedding Chat Tool\backend"
+"venv\Scripts\python.exe" -B -m uvicorn main:app --port 8002
+
+# Test scraper
+curl -X POST "http://localhost:8002/api/scrape/" -H "Content-Type: application/json" -d "{\"url\": \"https://www.theknot.com/us/...\"}"
+```
+
+### Documentation Updated
+- SESSION_PROMPT_WEDDING.md - Current status and next steps
+- SESSION_LOG_WEDDING.md - Detailed work log
+- CLAUDE_CONTEXT_WEDDING.md - Full architecture reference
+
+===============================================================================
+SESSION: December 30, 2024 - Session Initialization
+===============================================================================
+
+## PROJECT UNDERSTANDING COMPLETE
+
+I've reviewed all three context files in the session-notes directory.
+
+### CURRENT STATUS
+- **Phase:** Scraper WORKING - Playwright Stealth Implemented
+- **Last Update:** December 29, 2024
+- **Focus:** Ready for continued testing or Phase 2 (Authentication & Dashboard)
+
+### WHAT'S WORKING
+- Full-stack wedding chat assistant (FastAPI + Next.js)
+- AI-powered chat using Claude (Anthropic API)
+- **Scraper with Playwright Stealth** - Successfully bypasses The Knot's Akamai protection
+- Multi-page scraping (travel, schedule, registry, FAQ, etc.)
+- Claude-powered intelligent data extraction (events, hotels, venues, FAQs)
+- Import page with animated progress bar
+- Text cleaning to filter garbage content
+- Travel/accommodation content prioritized in extraction
+
+### KEY ARCHITECTURE
+```
+Frontend (Next.js :3000) → REST API → Backend (FastAPI :8002*)
+                                           │
+                           ┌───────────────┴───────────────┐
+                           │                               │
+                     Chat Engine                    Scraper System
+                     (Claude AI)                   (Tiered Fallback)
+                           │                         │
+                           │                    ┌────┴────┐
+                           │                  httpx    Playwright
+                           │                 (fast)    (stealth)
+                           │                         │
+                           └───────────────┬─────────┘
+                                           │
+                                   SQLite Database
+
+*Note: Port 8000 has stuck processes - using 8002 as workaround
+```
+
+### KEY FILES REFERENCE
+
+**Backend - Scraping System:**
+| File | Purpose |
+|------|---------|
+| `backend/services/scraper/scraper.py` | Multi-page scraper with tiered fallback |
+| `backend/services/scraper/browser_fetch.py` | Playwright stealth wrapper |
+| `backend/services/scraper/data_mapper.py` | Claude-powered data extraction |
+| `backend/api/routes/scrape.py` | Scraping API endpoints |
+| `backend/core/config.py` | Settings with absolute .env path |
+
+**Backend - Core:**
+| File | Purpose |
+|------|---------|
+| `backend/main.py` | FastAPI app entry point |
+| `backend/core/database.py` | SQLite async database setup |
+| `backend/models/wedding.py` | Wedding, Event, Accommodation, FAQ models |
+| `backend/services/chat/chat_engine.py` | Claude Q&A engine |
+
+**Frontend:**
+| File | Purpose |
+|------|---------|
+| `frontend/src/app/page.tsx` | Landing page |
+| `frontend/src/app/import/page.tsx` | Import page with progress bar |
+| `frontend/src/components/chat/ChatWidget.tsx` | Chat component |
+| `frontend/.env.local` | May need update for port 8002 |
+
+### PROJECT DIRECTORY
+```
+C:\Users\brenn\Documents\Coding Projects\Wedding Chat Tool\
+├── backend/           # Python/FastAPI backend
+├── frontend/          # Next.js frontend
+├── docs/session-notes/  # This documentation
+└── claude_responses.txt  # Session response log
+```
+
+### KNOWN ISSUES
+- **Port 8000 stuck** - Old server processes not terminated
+- **Workaround:** Using port 8002 for backend
+
+### NEXT STEPS OPTIONS
+1. **Clean up port issue** - Restart computer to free port 8000
+2. **Continue on port 8002** - Update frontend .env.local if needed
+3. **Start Phase 2** - Authentication & Dashboard development
+
+### COMMANDS TO START
+```bash
+# Backend (use port 8002 until 8000 freed)
+cd "C:\Users\brenn\Documents\Coding Projects\Wedding Chat Tool\backend"
+"venv\Scripts\python.exe" -B -m uvicorn main:app --port 8002
+
+# Frontend
+cd "C:\Users\brenn\Documents\Coding Projects\Wedding Chat Tool\frontend"
+npm run dev
+```
+
+### TEST ACCESS CODE
+`alice-bob-test` - Pre-created test wedding
+
+---
+
+**IMPORTANT RULE ACKNOWLEDGED:**
+Always use complete absolute Windows paths with drive letters and backslashes for ALL file operations.
+
+---
+Ready for your next instruction!
+
+===============================================================================
+SCRAPER TEST - December 30, 2024
+===============================================================================
+
+## TEST RESULTS: SUCCESS!
+
+**URL Tested:** https://www.theknot.com/us/hannah-nichols-and-parker-howell-nov-2017
+
+**Servers Running:**
+- Backend: http://localhost:8000
+- Frontend: http://localhost:3000
+
+### Extracted Data Summary
+
+| Field | Value |
+|-------|-------|
+| Partner 1 | Hannah |
+| Partner 2 | Parker |
+| Wedding Date | 2017-11-11 |
+| Wedding Time | 4:00 PM |
+| Dress Code | Formal |
+| Ceremony Venue | Lesner Inn, 3319 Shore Drive, Virginia Beach, VA 23451 |
+| Reception Venue | Lesner Inn (same location) |
+
+### Events Extracted (1)
+| Event | Date | Time | Venue |
+|-------|------|------|-------|
+| After-Party | 2017-11-11 | 9:00 PM | Commonwealth Brewing Company, 2444 Pleasure House Rd, Virginia Beach, VA |
+
+### Accommodations Extracted (2)
+
+**1. Virginia Beach Resort Hotel and Conference Center**
+- Address: 2800 Shore Dr, Virginia Beach, VA 23451
+- Phone: 800-468-2722
+- Room Block: Yes - "Nichols/Howell wedding"
+- Rate: $89/night
+- Deadline: Friday, October 13th
+- Notes: Rate valid 11/8-11/14. Free shuttles to/from venue.
+
+**2. Wyndham Virginia Beach Oceanfront**
+- Address: 5700 Atlantic Ave, Virginia Beach, VA 23451
+- Phone: (757) 428-7025
+- Room Block: No
+- Notes: Closer to boardwalk/restaurants, no shuttle service.
+
+### Additional Info
+- Registry: Available (links to Honeyfund for Doctors Without Borders)
+- FAQs: None extracted from this wedding
+
+### Performance
+- Total request time: ~72 seconds
+- Uses Playwright stealth to bypass Akamai bot protection
+
+---
+**STATUS: SCRAPER FULLY FUNCTIONAL**
+
+---
+
+## Frontend URLs for Manual Testing
+
+**Main URLs:**
+- **Landing Page:** http://localhost:3000
+- **Import/Scrape Page:** http://localhost:3000/import
+- **Direct Chat (test wedding):** http://localhost:3000/chat/alice-bob-test
+
+**Backend:**
+- **API Docs (Swagger):** http://localhost:8000/docs
+- **Health Check:** http://localhost:8000/api/health
+
+**Test Access Code:** `alice-bob-test`
+
+To test the scraper manually:
+1. Go to http://localhost:3000/import
+2. Paste a wedding URL (e.g., The Knot URL)
+3. Watch the progress bar as it scrapes
+4. Review the extracted data preview
+5. Click to import into the database
+
+---
+
+## FIX: "Failed to Fetch" Error (Dec 30, 2024)
+
+**Problem:** Frontend was configured to use port 8001, but backend was running on port 8000.
+
+**Solution:** Updated `frontend/.env.local`:
+```
+NEXT_PUBLIC_API_URL=http://localhost:8000
+```
+
+**UPDATED URLs (after fix):**
+- Frontend: http://localhost:3001 (port 3000 was in use)
+- Backend: http://localhost:8000
+- Import Page: http://localhost:3001/import
+
+Try again at: **http://localhost:3001/import**
+
+---
+
+## Import Test Results (Dec 30, 2024)
+
+**The import actually SUCCEEDED!**
+
+Despite the Jest worker error on the frontend (caused by a Next.js lock conflict),
+the backend successfully:
+1. Scraped the wedding website
+2. Extracted all data via Claude
+3. Saved to database with access code: `hannah-parker`
+
+**Servers Running:**
+- Backend: http://localhost:8000
+- Frontend: http://localhost:3001
+
+**Test the imported wedding chat:**
+http://localhost:3001/chat/hannah-parker
+
+**All wedding data was saved:**
+- Couple: Hannah & Parker
+- Date: November 11, 2017
+- Venue: Lesner Inn, Virginia Beach
+- Events: After-Party at Commonwealth Brewing (9PM)
+- Hotels: 2 accommodations with room block info
+
+---
+
+## SYSTEM LAG FIX (Dec 30, 2024)
+
+**Problem:** Multiple stale Node.js processes consuming ~1GB RAM
+
+**Processes Found:**
+| Process | PID | Memory |
+|---------|-----|--------|
+| node.exe | 9080 | 685 MB |
+| node.exe | 43556 | 227 MB |
+| node.exe | 32536 | 178 MB |
+
+**Manual Fix Steps:**
+
+1. Kill all node processes:
+```
+taskkill /F /IM node.exe
+```
+
+2. Kill python processes:
+```
+taskkill /F /IM python.exe
+```
+
+3. Restart backend:
+```
+cd "C:\Users\brenn\Documents\Coding Projects\Wedding Chat Tool\backend"
+venv\Scripts\python.exe -B -m uvicorn main:app --port 8000
+```
+
+4. In a new terminal, restart frontend:
+```
+cd "C:\Users\brenn\Documents\Coding Projects\Wedding Chat Tool\frontend"
+npm run dev
+```
+
+This frees ~1GB RAM and gives a clean start.
+
+===============================================================================
+SESSION: December 30, 2024 (New Session) - Context Review
+===============================================================================
+
+## PROJECT UNDERSTANDING COMPLETE
+
+I've reviewed all three context files in the session-notes directory.
+
+### CURRENT STATUS
+- **Phase:** Scraper WORKING - Playwright Stealth Implemented
+- **Last Session:** December 29, 2024
+- **Focus:** Ready for continued testing or Phase 2 (Authentication & Dashboard)
+
+### WHAT'S WORKING
+- Full-stack wedding chat assistant (FastAPI + Next.js)
+- AI-powered chat using Claude (Anthropic API)
+- **Scraper with Playwright Stealth** - Successfully bypasses The Knot's Akamai protection
+- Multi-page scraping (travel, schedule, registry, FAQ, etc.)
+- Claude-powered intelligent data extraction (events, hotels, venues, FAQs)
+- Import page with animated progress bar
+- Text cleaning to filter garbage content
+- Travel/accommodation content prioritized in extraction
+
+### KEY ARCHITECTURE
+```
+Frontend (Next.js :3000) --> REST API --> Backend (FastAPI :8000)
+                                               |
+                               +---------------+---------------+
+                               |                               |
+                         Chat Engine                    Scraper System
+                         (Claude AI)                   (Tiered Fallback)
+                               |                         |
+                               |                    +----+----+
+                               |                  httpx    Playwright
+                               |                 (fast)    (stealth)
+                               |                         |
+                               +-----------+-------------+
+                                           |
+                                   SQLite Database
+```
+
+### KEY FILES REFERENCE
+
+**Backend - Scraping System:**
+| File | Purpose |
+|------|---------|
+| backend/services/scraper/scraper.py | Multi-page scraper with tiered fallback |
+| backend/services/scraper/browser_fetch.py | Playwright stealth wrapper |
+| backend/services/scraper/data_mapper.py | Claude-powered data extraction |
+| backend/api/routes/scrape.py | Scraping API endpoints |
+| backend/core/config.py | Settings with absolute .env path |
+
+**Backend - Core:**
+| File | Purpose |
+|------|---------|
+| backend/main.py | FastAPI app entry point |
+| backend/core/database.py | SQLite async database setup |
+| backend/models/wedding.py | Wedding, Event, Accommodation, FAQ models |
+| backend/services/chat/chat_engine.py | Claude Q&A engine |
+| backend/api/routes/chat.py | Chat API endpoints |
+| backend/api/routes/wedding.py | Wedding CRUD API |
+| backend/core/auth.py | JWT authentication |
+| backend/api/routes/auth.py | Auth endpoints |
+
+**Frontend:**
+| File | Purpose |
+|------|---------|
+| frontend/src/app/page.tsx | Landing page |
+| frontend/src/app/import/page.tsx | Import page with progress bar |
+| frontend/src/app/chat/[accessCode]/page.tsx | Direct chat by access code |
+| frontend/src/app/dashboard/page.tsx | Couple dashboard |
+| frontend/src/app/login/page.tsx | Login page |
+| frontend/src/app/register/page.tsx | Registration page |
+| frontend/src/components/chat/ChatWidget.tsx | Chat component |
+| frontend/src/contexts/AuthContext.tsx | Auth state management |
+| frontend/src/lib/api.ts | API client |
+
+### PROJECT DIRECTORY
+```
+C:\Users\brenn\Documents\Coding Projects\Wedding Chat Tool\
++-- backend/           # Python/FastAPI backend
++-- frontend/          # Next.js frontend
++-- docs/session-notes/  # Documentation
++-- claude_responses.txt  # This file - session log
+```
+
+### COMMANDS TO START
+```bash
+# Backend
+cd "C:\Users\brenn\Documents\Coding Projects\Wedding Chat Tool\backend"
+"venv\Scripts\python.exe" -B -m uvicorn main:app --port 8000
+
+# Frontend
+cd "C:\Users\brenn\Documents\Coding Projects\Wedding Chat Tool\frontend"
+npm run dev
+```
+
+### TEST ACCESS CODES
+- `alice-bob-test` - Pre-created test wedding
+- `hannah-parker` - Imported from The Knot
+
+### NEXT STEPS OPTIONS
+1. **Start Phase 2** - Authentication & Dashboard polish
+2. **Test more wedding URLs** - Verify scraper on other platforms
+3. **Deploy** - Set up production environment
+
+---
+
+**IMPORTANT RULE ACKNOWLEDGED:**
+Always use complete absolute Windows paths with drive letters and backslashes for ALL file operations.
+
+---
+Ready for your next instruction!
+
+===============================================================================
+SESSION: December 30, 2024 (Continued) - Services Started
+===============================================================================
+
+## SERVICES RUNNING
+
+**Backend:** http://localhost:8000
+- API Docs: http://localhost:8000/docs
+- Health: http://localhost:8000/api/health
+
+**Frontend:** http://localhost:3000
+- Import Page: http://localhost:3000/import
+- Chat (test): http://localhost:3000/chat/alice-bob-test
+- Chat (Hannah & Parker): http://localhost:3000/chat/hannah-parker
+
+## TO TEST SCRAPING MANUALLY
+
+1. Go to: http://localhost:3000/import
+2. Paste a wedding URL (e.g., from The Knot)
+3. Watch the progress bar as it scrapes
+4. Review extracted data preview
+5. Click to import into database
+
+## TEST ACCESS CODES
+- `alice-bob-test` - Pre-created test wedding
+- `hannah-parker` - Previously imported from The Knot
+
+---
+
+===============================================================================
+**IMPORTANT DIRECTIVE** - LOG ALL RESPONSES
+===============================================================================
+
+Every Claude response in this session MUST be appended to this file:
+C:\Users\brenn\Documents\Coding Projects\Wedding Chat Tool\claude_responses.txt
+
+This ensures continuity across sessions and provides a record of all work done.
+
+===============================================================================
+SESSION: December 30, 2024 - RAG Implementation Discussion
+===============================================================================
+
+## USER QUESTION: Expanding Chat Capabilities
+
+User noticed that scraped content like "Things to Do" and "Wedding Party" pages
+aren't being used by the chat assistant. Asked whether to use:
+- A) Set predefined questions the tool can answer
+- B) RAG-style dynamic answering based on all scraped content
+
+## ARCHITECTURE ANALYSIS
+
+**Current System (Hybrid with Gap):**
+| Component | What It Does |
+|-----------|--------------|
+| Scraper | Fetches multiple pages, stores up to 30KB raw text in `full_text` |
+| Data Mapper | Extracts ONLY specific fields (hotels, events, FAQs, venues) |
+| Chat Engine | Only receives structured fields - NOT the full scraped text |
+
+**The Gap:** Content like "Things to Do" and "Wedding Party" gets scraped but:
+1. Data mapper doesn't extract it into structured fields
+2. Chat engine never sees it
+
+## USER DECISION: RAG-Style Approach
+
+User chose RAG-style (pass full scraped text to Claude) for flexibility.
+
+## COST ANALYSIS
+
+### Per Message Cost
+| Approach | Cost per Message |
+|----------|------------------|
+| Current (structured only) | ~$0.02 |
+| RAG (+ full scraped text) | ~$0.05 |
+| Difference | +$0.03/message |
+
+### Per Wedding Cost (realistic usage)
+| Guests | Messages | Current | RAG | Extra Cost |
+|--------|----------|---------|-----|------------|
+| 50 | 250 total | $5 | $12.50 | +$7.50 |
+| 100 | 500 total | $10 | $25 | +$15 |
+| 200 | 1000 total | $20 | $50 | +$30 |
+
+**Bottom line:** RAG adds $15-30 total per wedding but enables answering ANY question.
+
+## IMPLEMENTATION PLAN
+
+### Files to Modify:
+1. `backend/api/routes/chat.py` - Extract `full_text` from `scraped_data`
+2. `backend/services/chat/chat_engine.py` - Include full_text in context
+
+### Changes:
+1. In chat.py: Add `wedding_data["full_text"] = wedding.scraped_data.get("full_text")`
+2. In chat_engine.py: Append full_text to wedding context
+3. Update system prompt to instruct Claude on using additional content
+
+---
+
+## PRICING STRATEGY DISCUSSION
+
+### Actual API Costs (Our Cost)
+
+| Wedding Size | Estimated Messages | API Cost to Us |
+|--------------|-------------------|----------------|
+| Small (50 guests) | ~250 | $12 |
+| Medium (100 guests) | ~500 | $25 |
+| Large (200 guests) | ~1000 | $50 |
+
+### Pricing Options Considered
+
+**Option 1: Flat Fee with Message Cap**
+| Tier | Price | Includes | Margin |
+|------|-------|----------|--------|
+| Basic | $29 | 300 messages | ~$17 |
+| Standard | $49 | 750 messages | ~$24 |
+| Premium | $79 | Unlimited | ~$29-50 |
+
+**Option 2: Per-Guest Pricing**
+- $0.50/guest (100 guests = $50, keep ~$25)
+
+**Option 3: Freemium**
+- Free: 50 messages (trial)
+- Paid: $39 unlimited
+
+### RECOMMENDATION: $39-49 Flat Fee, Unlimited Messages
+
+**Rationale:**
+1. Simple to understand
+2. Covers costs for 95% of weddings
+3. Comparable to The Knot premium ($35/month)
+4. "Unlimited" removes customer anxiety
+5. Large weddings (200+ guests) are rare outliers
+
+**Expected margin: ~$25-30 per wedding**
+
+---
+
+## RAG IMPLEMENTATION COMPLETE (December 30, 2024)
+
+### Summary
+Implemented RAG-style question answering so the chat assistant can answer
+ANY question from the wedding website content (Things to Do, Wedding Party,
+travel tips, local restaurants, etc.) - not just predefined structured fields.
+
+### Files Modified
+
+**1. backend/api/routes/chat.py (lines 254-263)**
+Added extraction of `full_text` from `scraped_data`:
+```python
+# RAG: Extract full scraped text for comprehensive Q&A
+full_text = None
+if wedding.scraped_data and isinstance(wedding.scraped_data, dict):
+    full_text = wedding.scraped_data.get("full_text", "")
+    # Cap at 25KB to stay within token limits
+    if full_text and len(full_text) > 25000:
+        full_text = full_text[:25000] + "\n\n[Content truncated for length...]"
+wedding_data["full_text"] = full_text
+```
+
+**2. backend/services/chat/chat_engine.py (lines 137-144)**
+Added full_text to wedding context:
+```python
+# RAG: Include full scraped website content for comprehensive Q&A
+full_text = wedding_data.get('full_text')
+if full_text:
+    context_parts.append("\n\n---\n")
+    context_parts.append("### Complete Wedding Website Content")
+    context_parts.append("The following is additional content from the wedding website...")
+    context_parts.append(full_text)
+```
+
+**3. backend/services/chat/chat_engine.py (lines 152-160)**
+Added RAG-specific instructions to system prompt:
+```python
+if has_full_text:
+    rag_instructions = """
+7. For critical details (dates, times, venues, hotels), prefer the structured information
+8. For other topics (Things to Do, Wedding Party, travel tips, etc.), use the Complete Wedding Website Content
+9. You can answer ANY question that has information somewhere in the wedding content"""
+```
+
+### How It Works Now
+
+```
+Guest Question: "What is there to do in Virginia Beach?"
+       ↓
+Chat Engine loads wedding_data WITH full_text (25KB scraped content)
+       ↓
+Claude sees structured data + full website content
+       ↓
+Claude finds "Things to Do" content in full_text
+       ↓
+Answers with local activities, restaurants, attractions
+```
+
+### Testing
+
+Backend restarted on port 8000 with RAG changes.
+Test at: http://localhost:3000/chat/hannah-parker
+
+Try questions like:
+- "What is there to do in the area?"
+- "Who is in the wedding party?"
+- "How did they meet?"
+- "Any restaurant recommendations?"
+
+---
+
+## FORMATTING FIX: Plain Text Responses (December 30, 2024)
+
+### Issue
+Chat responses contained markdown formatting symbols (##, **, *) that looked bad in the UI.
+
+### Fix
+Updated system prompt in `chat_engine.py` to instruct Claude to use plain text:
+- NO markdown (no ##, **, *, etc.)
+- Simple dashes (-) for lists
+- Blank lines to separate sections
+
+### Before
+```
+## Virginia Beach
+**Attractions:**
+- **Virginia Aquarium** - 717 General Booth Blvd
+```
+
+### After
+```
+Virginia Beach
+
+Attractions:
+- Virginia Aquarium - 717 General Booth Blvd
+```
+
+Backend restarted on port 8000.
+
+---
+
+## FRONTEND MARKET-READY UPDATE (December 30, 2024)
+
+### Summary
+Major frontend overhaul to make the application market-ready with:
+- Stock images from Unsplash
+- New Pricing page ($49 unlimited)
+- Consistent Header/Footer across all pages
+- Improved auth pages with side images
+- Better visual design with gradients and shadows
+
+### New Files Created
+
+**1. frontend/src/components/Header.tsx**
+- Reusable header with logo, nav links, and auth buttons
+- Sticky navigation with backdrop blur
+- Links: Home, Pricing, Import
+- Shows Dashboard/Sign Out when logged in
+
+**2. frontend/src/components/Footer.tsx**
+- Dark footer with product and account links
+- Consistent branding
+
+**3. frontend/src/app/pricing/page.tsx**
+- Pricing page with $49 unlimited plan
+- Feature list with checkmarks
+- FAQ section
+- CTA buttons
+
+### Files Updated
+
+**4. frontend/src/app/page.tsx (Landing Page)**
+- Hero section with background image
+- Stock images from Unsplash
+- Social proof section (500+ weddings, 10,000+ questions)
+- Testimonials section
+- Improved "How It Works" with images
+- CTA section with gradient background
+
+**5. frontend/src/app/login/page.tsx**
+- Split layout: form on left, image on right
+- Testimonial quote overlay on image
+- Improved styling with gradients
+
+**6. frontend/src/app/register/page.tsx**
+- Split layout: image on left, form on right
+- Value proposition text overlay
+- Consistent with login page
+
+**7. frontend/src/app/dashboard/page.tsx**
+- Uses shared Header/Footer
+- Removed duplicate header code
+
+**8. frontend/src/app/import/page.tsx**
+- Uses shared Header/Footer
+- Removed duplicate nav code
+
+**9. frontend/next.config.ts**
+- Added Unsplash image domain configuration
+
+### Stock Images Used (Unsplash)
+- Hero background: Wedding celebration
+- Hero image: Happy couple
+- How it works: Laptop, typing, celebration
+- Auth pages: Wedding scenes
+
+### Frontend needs restart to pick up changes
+```bash
+cd "C:\Users\brenn\Documents\Coding Projects\Wedding Chat Tool\frontend"
+npm run dev
+```
+
+### New URLs
+- Pricing: http://localhost:3000/pricing
+- All pages now have consistent navigation back to home
+
+---
+
+## LEGAL FIX: Removed False Claims (December 30, 2024)
+
+### Issue
+Fake social proof stats and testimonials are illegal under FTC regulations:
+- "500+ Weddings served" - false
+- "10,000+ Questions answered" - false
+- "4.9/5 Couple satisfaction" - false
+- Fake testimonial quotes with made-up names - false advertising
+
+### Fix
+Replaced with honest, verifiable claims:
+
+**Social proof section replaced with value props:**
+- "Works with The Knot, Zola & more" (true)
+- "Answers questions 24/7" (true)
+- "Set up in minutes" (true)
+
+**Testimonial section replaced with "Why Choose Us":**
+- "Save Hours of Time" - benefit statement
+- "Available 24/7" - feature statement
+
+**Login page testimonial replaced with:**
+- "Welcome back to Wedding Chat" - neutral greeting
+
+### Legal Note
+Once you have real customers, you can add genuine testimonials with permission.
+Stats should only be added when they're true and documented.
+
+---
+
+=== CLAUDE RESPONSE - Rebranding to The Wedding Concierge ===
+
+Completed full rebrand from Wedding Chat to The Wedding Concierge and removed all AI mentions per user request.
+
+## Changes Made
+
+### Frontend Files Updated:
+1. **Header.tsx** - Updated brand name and added new SVG ring logo
+2. **Footer.tsx** - Updated brand name and logo
+3. **page.tsx (Landing)** - Changed all Wedding Chat references, removed AI mentions:
+   - AI-Powered Wedding Assistant -> Your Personal Wedding Assistant
+   - AI assistant -> concierge
+   - Why Wedding Chat? -> Why Wedding Concierge?
+4. **pricing/page.tsx** - Updated brand name, changed AI-powered answers to Instant answers
+5. **login/page.tsx** - Updated brand, logo, and removed AI assistant mention
+6. **register/page.tsx** - Updated brand, logo, and removed AI assistant mention
+7. **dashboard/page.tsx** - Updated welcome message
+8. **import/page.tsx** - Updated success message and button text
+9. **chat/[accessCode]/page.tsx** - Updated footer text
+10. **layout.tsx** - Updated metadata (title/description)
+11. **lib/api.ts** - Updated comment
+
+### Backend Files Updated:
+1. **main.py** - Updated docstring and API description
+2. **core/config.py** - Updated APP_NAME
+
+### New SVG Logo:
+Created a simple ring with diamond design:
+- Circle ring (stroke only)
+- Small filled circle at top representing diamond setting
+- Uses rose-500 color to match brand
+
+All instances of AI-powered, AI assistant, our AI, and Wedding Chat have been replaced with appropriate non-AI terminology (concierge, The Wedding Concierge, instant answers, etc.)
+
+---

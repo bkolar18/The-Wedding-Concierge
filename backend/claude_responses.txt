@@ -1,0 +1,115 @@
+===============================================
+WEDDING WEBSITE SCRAPER FEATURE - COMPLETE
+===============================================
+
+The wedding website scraper feature is now complete. Here's what was implemented:
+
+BACKEND:
+--------
+- backend/api/routes/scrape.py - API endpoints for scraping
+  - POST /api/scrape/ - Scrape and preview extracted data
+  - POST /api/scrape/import - Scrape and create wedding
+
+- backend/services/scraper/data_mapper.py - Maps scraped data to structured Wedding model using Claude AI for intelligent extraction
+
+- Enhanced scraper with platform-specific extraction for The Knot, Zola, WithJoy, and WeddingWire
+
+FRONTEND:
+---------
+- frontend/src/app/import/page.tsx - New import page with 3-step flow:
+  1. Enter wedding website URL
+  2. Preview extracted data (partner names, date, venues, events, hotels, registry)
+  3. Success screen with shareable chat link
+
+- Updated home page buttons from "Create Your Wedding" to "Upload Wedding Website" pointing to /import
+
+- Added API client functions in frontend/src/lib/api.ts for scraping
+
+HOW IT WORKS:
+-------------
+1. User goes to http://localhost:3000 and clicks "Upload Wedding Website"
+2. Pastes their wedding website URL (The Knot, Zola, WithJoy, etc.)
+3. Clicks "Scan Website" - the scraper extracts data using Claude AI
+4. User sees a preview of extracted data
+5. Clicks "Create My Wedding Chat" to import and get a chat link to share with guests
+
+SUPPORTED PLATFORMS:
+--------------------
+- The Knot (theknot.com)
+- Zola (zola.com)
+- WithJoy (withjoy.com)
+- WeddingWire (weddingwire.com)
+- Minted (minted.com)
+- Generic sites (uses Claude AI for intelligent extraction)
+
+STATUS:
+-------
+Backend server running on port 8000 with scrape endpoints ready.
+Frontend should be running on port 3000.
+
+TRY IT:
+-------
+1. Go to http://localhost:3000
+2. Click "Upload Wedding Website" or "Get Started"
+3. Enter a wedding website URL
+4. Click "Scan Website"
+
+===============================================
+
+
+===============================================
+MULTI-PAGE SCRAPING FIX - IN PROGRESS
+===============================================
+
+PROBLEM:
+--------
+The scraper was not detecting or scraping subpages (Travel, Q+A, Hotels, etc.)
+from The Knot. The chatbot had no hotel/accommodation information.
+
+ROOT CAUSE:
+-----------
+1. httpx returns 200 OK with incomplete HTML (The Knot uses React to render navigation)
+2. Playwright only triggered on 403 errors - not used when httpx gets 200
+3. Navigation links don't exist in static HTML
+4. _find_subpages() found zero links, so no subpages were scraped
+
+FIXES IMPLEMENTED:
+------------------
+1. Added `force_browser` parameter to `_fetch_page()`
+   - Forces Playwright for JS-heavy platforms (The Knot, Zola, etc.)
+
+2. Added `_get_known_subpages()` fallback method
+   - Generates URLs like /travel, /q-a, /schedule based on platform patterns
+   - Used when _find_subpages() can't detect navigation in HTML
+
+3. Updated `scrape()` method:
+   - Detects JS-heavy platforms and forces Playwright
+   - Fetches main page with Playwright
+   - Uses fallback URLs if no subpages detected
+   - Fetches all subpages with Playwright too
+
+4. Updated `browser_fetch.py`:
+   - Using domcontentloaded (networkidle was timing out)
+   - 5-second wait for React hydration
+   - Increased subprocess timeout to 120 seconds
+
+FILES MODIFIED:
+---------------
+- backend/services/scraper/scraper.py
+- backend/services/scraper/browser_fetch.py
+
+EXPECTED BEHAVIOR:
+------------------
+Server logs should show:
+- "Scraping ... (platform: the_knot, force_browser: True)"
+- "Using Playwright (forced) for: ..."
+- "Will scrape 7 subpages: [travel, q-a, schedule, ...]"
+- "Successfully scraped subpage: travel (XXXX chars)"
+
+Chatbot should now be able to answer "Where should I stay?" with hotel info.
+
+STATUS: Found additional bug - data_mapper.py was truncating full_text to 8000 chars,
+which cut off all subpage content before sending to Claude. Fixed by increasing
+max_chars from 8000 to 25000.
+
+===============================================
