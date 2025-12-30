@@ -20,9 +20,10 @@ playwright
 playwright-stealth
 
 # Validation & Settings
-pydantic
+pydantic[email]
 pydantic-settings
 python-dotenv
+email-validator
 
 # Auth
 python-jose[cryptography]
