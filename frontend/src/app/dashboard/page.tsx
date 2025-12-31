@@ -57,6 +57,9 @@ export default function DashboardPage() {
   const [formError, setFormError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  // Tab state
+  const [activeTab, setActiveTab] = useState<'details' | 'outreach'>('details');
+
   // Modal state for editing
   const [editingItem, setEditingItem] = useState<EditingItem | null>(null);
   const [modalError, setModalError] = useState<string | null>(null);
@@ -497,6 +500,49 @@ export default function DashboardPage() {
               </div>
             </div>
 
+            {/* Tab Navigation */}
+            <div className="flex border-b border-gray-200">
+              <button
+                onClick={() => setActiveTab('details')}
+                className={`flex-1 py-4 text-center font-medium transition-colors relative ${
+                  activeTab === 'details'
+                    ? 'text-rose-600'
+                    : 'text-gray-500 hover:text-gray-700'
+                }`}
+              >
+                <span className="flex items-center justify-center">
+                  <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                  </svg>
+                  Wedding Details
+                </span>
+                {activeTab === 'details' && (
+                  <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-rose-600" />
+                )}
+              </button>
+              <button
+                onClick={() => setActiveTab('outreach')}
+                className={`flex-1 py-4 text-center font-medium transition-colors relative ${
+                  activeTab === 'outreach'
+                    ? 'text-rose-600'
+                    : 'text-gray-500 hover:text-gray-700'
+                }`}
+              >
+                <span className="flex items-center justify-center">
+                  <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
+                  </svg>
+                  Guest Outreach
+                </span>
+                {activeTab === 'outreach' && (
+                  <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-rose-600" />
+                )}
+              </button>
+            </div>
+
+            {/* Tab Content */}
+            {activeTab === 'details' && (
+            <>
             {/* Wedding details */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {/* Ceremony */}
@@ -727,17 +773,15 @@ export default function DashboardPage() {
                 )}
               </div>
             </div>
+            </>
+            )}
 
-            {/* SMS & Guest Management */}
-            <div className="mt-8">
-              <h2 className="text-xl font-serif text-gray-800 mb-4 flex items-center">
-                <svg className="w-6 h-6 mr-2 text-rose-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
-                </svg>
-                Guest Messaging
-              </h2>
-              <SMSManager token={token!} weddingId={wedding.id} />
-            </div>
+            {/* Guest Outreach Tab */}
+            {activeTab === 'outreach' && (
+              <div className="space-y-6">
+                <SMSManager token={token!} weddingId={wedding.id} />
+              </div>
+            )}
           </div>
         ) : null}
       </main>

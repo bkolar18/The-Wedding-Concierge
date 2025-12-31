@@ -9,9 +9,11 @@ import {
   getGuests,
   createGuest,
   uploadGuests,
-  updateGuest,
   deleteGuest,
   getTemplates,
+  createTemplate,
+  updateTemplate,
+  deleteTemplate,
   sendSMSBlast,
   scheduleMessage,
   getScheduledMessages,
@@ -23,7 +25,7 @@ interface SMSManagerProps {
   weddingId: string;
 }
 
-type SMSModalType = 'addGuest' | 'uploadGuests' | 'sendBlast' | 'scheduleMessage' | null;
+type ModalType = 'addGuest' | 'uploadGuests' | 'sendBlast' | 'scheduleMessage' | 'editTemplate' | null;
 
 export default function SMSManager({ token, weddingId }: SMSManagerProps) {
   const [guests, setGuests] = useState<Guest[]>([]);
@@ -31,7 +33,7 @@ export default function SMSManager({ token, weddingId }: SMSManagerProps) {
   const [scheduledMessages, setScheduledMessages] = useState<ScheduledMessage[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [modalType, setModalType] = useState<SMSModalType>(null);
+  const [modalType, setModalType] = useState<ModalType>(null);
   const [modalError, setModalError] = useState<string | null>(null);
   const [isSaving, setIsSaving] = useState(false);
 
@@ -40,6 +42,24 @@ export default function SMSManager({ token, weddingId }: SMSManagerProps) {
   const [blastMessage, setBlastMessage] = useState('');
   const [selectedTemplate, setSelectedTemplate] = useState<string>('');
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // Schedule form state
+  const [scheduleForm, setScheduleForm] = useState({
+    name: '',
+    message: '',
+    scheduleType: 'fixed' as 'fixed' | 'relative',
+    scheduledAt: '',
+    relativeTo: 'wedding_date' as 'wedding_date' | 'rsvp_deadline',
+    relativeDays: -7,
+  });
+
+  // Template form state
+  const [templateForm, setTemplateForm] = useState({
+    id: null as string | null,
+    name: '',
+    content: '',
+    category: 'custom' as string,
+  });
 
   // Load data
   useEffect(() => {
@@ -64,11 +84,13 @@ export default function SMSManager({ token, weddingId }: SMSManagerProps) {
 
   const reloadData = async () => {
     try {
-      const [guestsData, scheduledData] = await Promise.all([
+      const [guestsData, templatesData, scheduledData] = await Promise.all([
         getGuests(token, weddingId),
+        getTemplates(token, weddingId),
         getScheduledMessages(token, weddingId),
       ]);
       setGuests(guestsData);
+      setTemplates(templatesData);
       setScheduledMessages(scheduledData);
     } catch {
       // Ignore
@@ -81,6 +103,15 @@ export default function SMSManager({ token, weddingId }: SMSManagerProps) {
     setGuestForm({ name: '', phone_number: '' });
     setBlastMessage('');
     setSelectedTemplate('');
+    setScheduleForm({
+      name: '',
+      message: '',
+      scheduleType: 'fixed',
+      scheduledAt: '',
+      relativeTo: 'wedding_date',
+      relativeDays: -7,
+    });
+    setTemplateForm({ id: null, name: '', content: '', category: 'custom' });
   };
 
   // Guest handlers
@@ -151,6 +182,31 @@ export default function SMSManager({ token, weddingId }: SMSManagerProps) {
     }
   };
 
+  // Schedule message handler
+  const handleScheduleMessage = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!scheduleForm.name.trim() || !scheduleForm.message.trim()) return;
+
+    setIsSaving(true);
+    setModalError(null);
+    try {
+      await scheduleMessage(token, weddingId, {
+        name: scheduleForm.name,
+        message: scheduleForm.message,
+        schedule_type: scheduleForm.scheduleType,
+        scheduled_at: scheduleForm.scheduleType === 'fixed' ? scheduleForm.scheduledAt : undefined,
+        relative_to: scheduleForm.scheduleType === 'relative' ? scheduleForm.relativeTo : undefined,
+        relative_days: scheduleForm.scheduleType === 'relative' ? scheduleForm.relativeDays : undefined,
+      });
+      await reloadData();
+      closeModal();
+    } catch (err) {
+      setModalError(err instanceof Error ? err.message : 'Failed to schedule message');
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
   const handleCancelScheduled = async (messageId: string) => {
     if (!confirm('Cancel this scheduled message?')) return;
     try {
@@ -161,8 +217,61 @@ export default function SMSManager({ token, weddingId }: SMSManagerProps) {
     }
   };
 
+  // Template handlers
+  const handleSaveTemplate = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!templateForm.name.trim() || !templateForm.content.trim()) return;
+
+    setIsSaving(true);
+    setModalError(null);
+    try {
+      if (templateForm.id) {
+        await updateTemplate(token, weddingId, templateForm.id, {
+          name: templateForm.name,
+          content: templateForm.content,
+          category: templateForm.category,
+        });
+      } else {
+        await createTemplate(token, weddingId, {
+          name: templateForm.name,
+          content: templateForm.content,
+          category: templateForm.category,
+        });
+      }
+      await reloadData();
+      closeModal();
+    } catch (err) {
+      setModalError(err instanceof Error ? err.message : 'Failed to save template');
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const handleDeleteTemplate = async (templateId: string) => {
+    if (!confirm('Delete this template?')) return;
+    try {
+      await deleteTemplate(token, weddingId, templateId);
+      await reloadData();
+    } catch (err) {
+      alert(err instanceof Error ? err.message : 'Failed to delete template');
+    }
+  };
+
+  const openEditTemplate = (template?: SMSTemplate) => {
+    if (template) {
+      setTemplateForm({
+        id: template.id,
+        name: template.name,
+        content: template.content,
+        category: template.category || 'custom',
+      });
+    } else {
+      setTemplateForm({ id: null, name: '', content: '', category: 'custom' });
+    }
+    setModalType('editTemplate');
+  };
+
   const formatPhone = (phone: string) => {
-    // Format +1XXXXXXXXXX to (XXX) XXX-XXXX
     const digits = phone.replace(/\D/g, '');
     if (digits.length === 11 && digits.startsWith('1')) {
       return `(${digits.slice(1, 4)}) ${digits.slice(4, 7)}-${digits.slice(7)}`;
@@ -277,16 +386,28 @@ export default function SMSManager({ token, weddingId }: SMSManagerProps) {
             </svg>
             SMS Campaigns
           </h2>
-          <button
-            onClick={() => setModalType('sendBlast')}
-            disabled={eligibleCount === 0}
-            className="text-sm bg-rose-600 text-white px-4 py-2 rounded-lg hover:bg-rose-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center"
-          >
-            <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
-            </svg>
-            Send Blast
-          </button>
+          <div className="flex gap-2">
+            <button
+              onClick={() => setModalType('scheduleMessage')}
+              disabled={eligibleCount === 0}
+              className="text-sm text-gray-600 hover:text-rose-600 flex items-center disabled:opacity-50"
+            >
+              <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              Schedule
+            </button>
+            <button
+              onClick={() => setModalType('sendBlast')}
+              disabled={eligibleCount === 0}
+              className="text-sm bg-rose-600 text-white px-4 py-2 rounded-lg hover:bg-rose-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center"
+            >
+              <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
+              </svg>
+              Send Now
+            </button>
+          </div>
         </div>
 
         <p className="text-gray-500 text-sm mb-4">
@@ -305,7 +426,11 @@ export default function SMSManager({ token, weddingId }: SMSManagerProps) {
                     {msg.status === 'sent' || msg.status === 'partially_sent' ? (
                       <>Sent: {msg.sent_count}/{msg.total_recipients}</>
                     ) : msg.status === 'scheduled' ? (
-                      <>Scheduled for {new Date(msg.scheduled_at!).toLocaleDateString()}</>
+                      msg.schedule_type === 'relative' ? (
+                        <>{msg.relative_days} days {msg.relative_days < 0 ? 'before' : 'after'} {msg.relative_to?.replace('_', ' ')}</>
+                      ) : (
+                        <>Scheduled for {new Date(msg.scheduled_at!).toLocaleDateString()}</>
+                      )
                     ) : (
                       msg.status
                     )}
@@ -337,21 +462,62 @@ export default function SMSManager({ token, weddingId }: SMSManagerProps) {
         )}
       </div>
 
-      {/* Templates Quick View */}
+      {/* Templates Section */}
       <div className="bg-white rounded-2xl shadow-lg p-6">
-        <h2 className="text-lg font-semibold text-gray-800 mb-4 flex items-center">
-          <svg className="w-5 h-5 mr-2 text-rose-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-          </svg>
-          SMS Templates ({templates.length})
-        </h2>
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="text-lg font-semibold text-gray-800 flex items-center">
+            <svg className="w-5 h-5 mr-2 text-rose-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+            </svg>
+            SMS Templates ({templates.length})
+          </h2>
+          <button
+            onClick={() => openEditTemplate()}
+            className="text-sm text-rose-600 hover:text-rose-700 flex items-center"
+          >
+            <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+            </svg>
+            Add
+          </button>
+        </div>
         <div className="space-y-2">
-          {templates.slice(0, 4).map((template) => (
-            <div key={template.id} className="p-3 bg-gray-50 rounded-lg">
-              <p className="font-medium text-gray-800">{template.name}</p>
-              <p className="text-sm text-gray-500 truncate">{template.content}</p>
+          {templates.map((template) => (
+            <div key={template.id} className="p-3 bg-gray-50 rounded-lg flex justify-between items-start">
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-2">
+                  <p className="font-medium text-gray-800">{template.name}</p>
+                  {template.is_default && (
+                    <span className="text-xs bg-gray-200 text-gray-600 px-2 py-0.5 rounded">Default</span>
+                  )}
+                </div>
+                <p className="text-sm text-gray-500 truncate">{template.content}</p>
+              </div>
+              {!template.is_default && (
+                <div className="flex gap-2 ml-2">
+                  <button
+                    onClick={() => openEditTemplate(template)}
+                    className="text-gray-400 hover:text-gray-600"
+                  >
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                    </svg>
+                  </button>
+                  <button
+                    onClick={() => handleDeleteTemplate(template.id)}
+                    className="text-gray-400 hover:text-red-600"
+                  >
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                    </svg>
+                  </button>
+                </div>
+              )}
             </div>
           ))}
+          {templates.length === 0 && (
+            <p className="text-gray-500 text-center py-4">No templates yet</p>
+          )}
         </div>
       </div>
 
@@ -397,18 +563,10 @@ export default function SMSManager({ token, weddingId }: SMSManagerProps) {
                   </div>
                   {modalError && <p className="text-red-600 text-sm">{modalError}</p>}
                   <div className="flex gap-3 pt-2">
-                    <button
-                      type="button"
-                      onClick={closeModal}
-                      className="flex-1 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50"
-                    >
+                    <button type="button" onClick={closeModal} className="flex-1 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50">
                       Cancel
                     </button>
-                    <button
-                      type="submit"
-                      disabled={isSaving}
-                      className="flex-1 py-2 bg-rose-600 text-white rounded-lg hover:bg-rose-700 disabled:opacity-50"
-                    >
+                    <button type="submit" disabled={isSaving} className="flex-1 py-2 bg-rose-600 text-white rounded-lg hover:bg-rose-700 disabled:opacity-50">
                       {isSaving ? 'Adding...' : 'Add Guest'}
                     </button>
                   </div>
@@ -436,11 +594,7 @@ export default function SMSManager({ token, weddingId }: SMSManagerProps) {
                   />
                   {modalError && <p className="text-red-600 text-sm">{modalError}</p>}
                   {isSaving && <p className="text-gray-600">Uploading...</p>}
-                  <button
-                    type="button"
-                    onClick={closeModal}
-                    className="w-full py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50"
-                  >
+                  <button type="button" onClick={closeModal} className="w-full py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50">
                     Cancel
                   </button>
                 </div>
@@ -488,19 +642,204 @@ export default function SMSManager({ token, weddingId }: SMSManagerProps) {
                   </p>
                   {modalError && <p className="text-red-600 text-sm">{modalError}</p>}
                   <div className="flex gap-3 pt-2">
-                    <button
-                      type="button"
-                      onClick={closeModal}
-                      className="flex-1 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50"
-                    >
+                    <button type="button" onClick={closeModal} className="flex-1 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50">
                       Cancel
                     </button>
-                    <button
-                      type="submit"
-                      disabled={isSaving || !blastMessage.trim()}
-                      className="flex-1 py-2 bg-rose-600 text-white rounded-lg hover:bg-rose-700 disabled:opacity-50"
-                    >
+                    <button type="submit" disabled={isSaving || !blastMessage.trim()} className="flex-1 py-2 bg-rose-600 text-white rounded-lg hover:bg-rose-700 disabled:opacity-50">
                       {isSaving ? 'Sending...' : 'Send Now'}
+                    </button>
+                  </div>
+                </form>
+              </>
+            )}
+
+            {/* Schedule Message Modal */}
+            {modalType === 'scheduleMessage' && (
+              <>
+                <h3 className="text-xl font-semibold text-gray-800 mb-4">Schedule Message</h3>
+                <form onSubmit={handleScheduleMessage} className="space-y-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Campaign Name *</label>
+                    <input
+                      type="text"
+                      value={scheduleForm.name}
+                      onChange={(e) => setScheduleForm({ ...scheduleForm, name: e.target.value })}
+                      placeholder="e.g., RSVP Reminder"
+                      className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-rose-500"
+                      required
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Use Template</label>
+                    <select
+                      value={selectedTemplate}
+                      onChange={(e) => {
+                        setSelectedTemplate(e.target.value);
+                        const template = templates.find(t => t.id === e.target.value);
+                        if (template) setScheduleForm({ ...scheduleForm, message: template.content });
+                      }}
+                      className="w-full px-4 py-2 border border-gray-200 rounded-lg"
+                    >
+                      <option value="">Custom message</option>
+                      {templates.map((t) => (
+                        <option key={t.id} value={t.id}>{t.name}</option>
+                      ))}
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Message *</label>
+                    <textarea
+                      value={scheduleForm.message}
+                      onChange={(e) => setScheduleForm({ ...scheduleForm, message: e.target.value })}
+                      rows={3}
+                      className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-rose-500"
+                      placeholder="Hi {{guest_name}}! ..."
+                      required
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Schedule Type</label>
+                    <div className="flex gap-4">
+                      <label className="flex items-center">
+                        <input
+                          type="radio"
+                          name="scheduleType"
+                          checked={scheduleForm.scheduleType === 'fixed'}
+                          onChange={() => setScheduleForm({ ...scheduleForm, scheduleType: 'fixed' })}
+                          className="mr-2 text-rose-600"
+                        />
+                        Specific Date
+                      </label>
+                      <label className="flex items-center">
+                        <input
+                          type="radio"
+                          name="scheduleType"
+                          checked={scheduleForm.scheduleType === 'relative'}
+                          onChange={() => setScheduleForm({ ...scheduleForm, scheduleType: 'relative' })}
+                          className="mr-2 text-rose-600"
+                        />
+                        Relative to Event
+                      </label>
+                    </div>
+                  </div>
+                  {scheduleForm.scheduleType === 'fixed' ? (
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Send Date & Time *</label>
+                      <input
+                        type="datetime-local"
+                        value={scheduleForm.scheduledAt}
+                        onChange={(e) => setScheduleForm({ ...scheduleForm, scheduledAt: e.target.value })}
+                        className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-rose-500"
+                        required
+                      />
+                    </div>
+                  ) : (
+                    <div className="space-y-3">
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">Relative To</label>
+                        <select
+                          value={scheduleForm.relativeTo}
+                          onChange={(e) => setScheduleForm({ ...scheduleForm, relativeTo: e.target.value as 'wedding_date' | 'rsvp_deadline' })}
+                          className="w-full px-4 py-2 border border-gray-200 rounded-lg"
+                        >
+                          <option value="wedding_date">Wedding Date</option>
+                          <option value="rsvp_deadline">RSVP Deadline</option>
+                        </select>
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">Days Before/After</label>
+                        <div className="flex items-center gap-2">
+                          <input
+                            type="number"
+                            value={Math.abs(scheduleForm.relativeDays)}
+                            onChange={(e) => {
+                              const days = parseInt(e.target.value) || 0;
+                              setScheduleForm({ ...scheduleForm, relativeDays: scheduleForm.relativeDays < 0 ? -days : days });
+                            }}
+                            className="w-20 px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-rose-500"
+                            min="0"
+                          />
+                          <span className="text-gray-600">days</span>
+                          <select
+                            value={scheduleForm.relativeDays < 0 ? 'before' : 'after'}
+                            onChange={(e) => {
+                              const days = Math.abs(scheduleForm.relativeDays);
+                              setScheduleForm({ ...scheduleForm, relativeDays: e.target.value === 'before' ? -days : days });
+                            }}
+                            className="px-4 py-2 border border-gray-200 rounded-lg"
+                          >
+                            <option value="before">before</option>
+                            <option value="after">after</option>
+                          </select>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                  {modalError && <p className="text-red-600 text-sm">{modalError}</p>}
+                  <div className="flex gap-3 pt-2">
+                    <button type="button" onClick={closeModal} className="flex-1 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50">
+                      Cancel
+                    </button>
+                    <button type="submit" disabled={isSaving} className="flex-1 py-2 bg-rose-600 text-white rounded-lg hover:bg-rose-700 disabled:opacity-50">
+                      {isSaving ? 'Scheduling...' : 'Schedule'}
+                    </button>
+                  </div>
+                </form>
+              </>
+            )}
+
+            {/* Edit Template Modal */}
+            {modalType === 'editTemplate' && (
+              <>
+                <h3 className="text-xl font-semibold text-gray-800 mb-4">
+                  {templateForm.id ? 'Edit Template' : 'Add Template'}
+                </h3>
+                <form onSubmit={handleSaveTemplate} className="space-y-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Template Name *</label>
+                    <input
+                      type="text"
+                      value={templateForm.name}
+                      onChange={(e) => setTemplateForm({ ...templateForm, name: e.target.value })}
+                      placeholder="e.g., Welcome Message"
+                      className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-rose-500"
+                      required
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Category</label>
+                    <select
+                      value={templateForm.category}
+                      onChange={(e) => setTemplateForm({ ...templateForm, category: e.target.value })}
+                      className="w-full px-4 py-2 border border-gray-200 rounded-lg"
+                    >
+                      <option value="welcome">Welcome</option>
+                      <option value="reminder">Reminder</option>
+                      <option value="update">Update</option>
+                      <option value="custom">Custom</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Message Content *</label>
+                    <textarea
+                      value={templateForm.content}
+                      onChange={(e) => setTemplateForm({ ...templateForm, content: e.target.value })}
+                      rows={4}
+                      className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-rose-500"
+                      placeholder="Hi {{guest_name}}! {{partner1}} & {{partner2}} are getting married..."
+                      required
+                    />
+                    <p className="text-gray-500 text-xs mt-1">
+                      Available variables: {'{{guest_name}}'}, {'{{partner1}}'}, {'{{partner2}}'}, {'{{wedding_date}}'}, {'{{chat_link}}'}, {'{{venue}}'}
+                    </p>
+                  </div>
+                  {modalError && <p className="text-red-600 text-sm">{modalError}</p>}
+                  <div className="flex gap-3 pt-2">
+                    <button type="button" onClick={closeModal} className="flex-1 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50">
+                      Cancel
+                    </button>
+                    <button type="submit" disabled={isSaving} className="flex-1 py-2 bg-rose-600 text-white rounded-lg hover:bg-rose-700 disabled:opacity-50">
+                      {isSaving ? 'Saving...' : templateForm.id ? 'Save Changes' : 'Add Template'}
                     </button>
                   </div>
                 </form>
