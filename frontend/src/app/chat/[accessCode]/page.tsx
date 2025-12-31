@@ -75,6 +75,24 @@ export default function WeddingChatPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-rose-50 via-white to-rose-50">
+      {/* Top navigation bar */}
+      <nav className="py-3 px-4 border-b border-rose-100 bg-white/80 backdrop-blur-sm">
+        <div className="max-w-4xl mx-auto flex items-center justify-between">
+          <a href="/" className="flex items-center space-x-2 text-gray-700 hover:text-rose-600 transition-colors">
+            <svg className="w-6 h-6 text-rose-500" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M6 22C6 14 10 10 16 10C22 10 26 14 26 22H6Z" fill="currentColor" opacity="0.9"/>
+              <circle cx="16" cy="8" r="3" fill="currentColor"/>
+              <rect x="15" y="8" width="2" height="3" fill="currentColor"/>
+              <rect x="4" y="22" width="24" height="3" rx="1" fill="currentColor"/>
+            </svg>
+            <span className="font-serif text-sm">The Wedding Concierge</span>
+          </a>
+          <a href="/" className="text-sm text-gray-500 hover:text-rose-600 transition-colors">
+            Create Your Own
+          </a>
+        </div>
+      </nav>
+
       {/* Header with wedding info */}
       <header className="py-8 px-4 text-center border-b border-rose-100">
         <p className="text-rose-600 text-sm font-medium tracking-wide uppercase mb-2">
@@ -117,8 +135,10 @@ export default function WeddingChatPage() {
       </main>
 
       {/* Footer */}
-      <footer className="py-6 text-center text-gray-400 text-sm border-t border-rose-100">
-        <p>Powered by The Wedding Concierge</p>
+      <footer className="py-6 text-center text-sm border-t border-rose-100">
+        <a href="/" className="text-gray-400 hover:text-rose-500 transition-colors">
+          Powered by The Wedding Concierge
+        </a>
       </footer>
     </div>
   );
