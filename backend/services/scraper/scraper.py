@@ -8,7 +8,7 @@ from datetime import datetime
 import httpx
 from bs4 import BeautifulSoup
 
-from .browser_fetch import StealthBrowser
+from .browser_fetch import StealthBrowser, PlaywrightNotAvailableError
 
 # Set up logging
 logger = logging.getLogger(__name__)
@@ -120,10 +120,14 @@ class WeddingScraper:
 
     async def _fetch_with_browser(self, url: str) -> Optional[str]:
         """Fetch a page using the stealth browser (slower, but bypasses bot protection)."""
-        if self._browser is None:
-            self._browser = StealthBrowser()
-            await self._browser.start()
-        return await self._browser.fetch_page(url)
+        try:
+            if self._browser is None:
+                self._browser = StealthBrowser()
+                await self._browser.start()
+            return await self._browser.fetch_page(url)
+        except PlaywrightNotAvailableError:
+            logger.warning("Playwright not available - cannot use browser-based scraping")
+            return None
 
     async def _fetch_page(self, url: str) -> Optional[str]:
         """Fetch a single page with tiered fallback strategy.
@@ -247,8 +251,15 @@ class WeddingScraper:
         logger.info(f"Scraping {url} (platform: {platform})")
         html = await self._fetch_page(url)
         if not html:
+            # Check if this is a bot-protected site
+            if platform in ["the_knot", "weddingwire"]:
+                return {
+                    "error": "This website has bot protection that requires a browser. Please try a different wedding website platform (Zola, Joy, or Minted work well), or enter your wedding details manually.",
+                    "url": url,
+                    "platform": platform
+                }
             return {
-                "error": "Failed to fetch wedding website",
+                "error": "Failed to fetch wedding website. The site may be unavailable or blocking our request.",
                 "url": url
             }
 

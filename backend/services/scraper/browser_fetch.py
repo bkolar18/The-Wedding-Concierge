@@ -9,6 +9,11 @@ from playwright_stealth import Stealth
 logger = logging.getLogger(__name__)
 
 
+class PlaywrightNotAvailableError(Exception):
+    """Raised when Playwright browsers are not installed."""
+    pass
+
+
 class StealthBrowser:
     """Playwright browser with anti-detection stealth techniques."""
 
@@ -38,38 +43,49 @@ class StealthBrowser:
             return
 
         logger.info("Starting stealth browser...")
-        self._playwright = await async_playwright().start()
 
-        # Randomize viewport for anti-detection
-        viewport_width = random.randint(1200, 1920)
-        viewport_height = random.randint(800, 1080)
+        try:
+            self._playwright = await async_playwright().start()
 
-        self._browser = await self._playwright.chromium.launch(
-            headless=True,
-            args=[
-                "--disable-blink-features=AutomationControlled",
-                "--disable-dev-shm-usage",
-                "--no-sandbox",
-                "--disable-setuid-sandbox",
-                "--disable-infobars",
-                "--window-position=0,0",
-                f"--window-size={viewport_width},{viewport_height}",
-            ]
-        )
+            # Randomize viewport for anti-detection
+            viewport_width = random.randint(1200, 1920)
+            viewport_height = random.randint(800, 1080)
 
-        self._context = await self._browser.new_context(
-            viewport={"width": viewport_width, "height": viewport_height},
-            user_agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
-            locale="en-US",
-            timezone_id="America/New_York",
-            java_script_enabled=True,
-            ignore_https_errors=True,
-        )
+            self._browser = await self._playwright.chromium.launch(
+                headless=True,
+                args=[
+                    "--disable-blink-features=AutomationControlled",
+                    "--disable-dev-shm-usage",
+                    "--no-sandbox",
+                    "--disable-setuid-sandbox",
+                    "--disable-infobars",
+                    "--window-position=0,0",
+                    f"--window-size={viewport_width},{viewport_height}",
+                ]
+            )
 
-        # Apply stealth to the context
-        await self._stealth.apply_stealth_async(self._context)
+            self._context = await self._browser.new_context(
+                viewport={"width": viewport_width, "height": viewport_height},
+                user_agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+                locale="en-US",
+                timezone_id="America/New_York",
+                java_script_enabled=True,
+                ignore_https_errors=True,
+            )
 
-        logger.info(f"Stealth browser started with viewport {viewport_width}x{viewport_height}")
+            # Apply stealth to the context
+            await self._stealth.apply_stealth_async(self._context)
+
+            logger.info(f"Stealth browser started with viewport {viewport_width}x{viewport_height}")
+
+        except Exception as e:
+            error_msg = str(e)
+            if "Executable doesn't exist" in error_msg or "playwright install" in error_msg.lower():
+                logger.warning("Playwright browser not installed - browser-based scraping disabled")
+                self._browser = None
+                self._playwright = None
+                raise PlaywrightNotAvailableError("Browser not available on this server")
+            raise
 
     async def close(self):
         """Close the browser and cleanup."""
