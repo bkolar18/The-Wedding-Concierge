@@ -25,6 +25,7 @@ import {
 } from '@/lib/api';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
+import SMSManager from '@/components/SMSManager';
 
 // Modal types
 type ModalType = 'wedding' | 'event' | 'accommodation' | 'faq' | null;
@@ -725,6 +726,17 @@ export default function DashboardPage() {
                   <p className="text-gray-400 text-sm">No FAQs added yet. Add common questions your guests might ask.</p>
                 )}
               </div>
+            </div>
+
+            {/* SMS & Guest Management */}
+            <div className="mt-8">
+              <h2 className="text-xl font-serif text-gray-800 mb-4 flex items-center">
+                <svg className="w-6 h-6 mr-2 text-rose-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
+                </svg>
+                Guest Messaging
+              </h2>
+              <SMSManager token={token!} weddingId={wedding.id} />
             </div>
           </div>
         ) : null}
