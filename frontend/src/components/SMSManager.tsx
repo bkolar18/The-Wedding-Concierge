@@ -426,8 +426,8 @@ export default function SMSManager({ token, weddingId }: SMSManagerProps) {
                     {msg.status === 'sent' || msg.status === 'partially_sent' ? (
                       <>Sent: {msg.sent_count}/{msg.total_recipients}</>
                     ) : msg.status === 'scheduled' ? (
-                      msg.schedule_type === 'relative' ? (
-                        <>{msg.relative_days} days {msg.relative_days < 0 ? 'before' : 'after'} {msg.relative_to?.replace('_', ' ')}</>
+                      msg.schedule_type === 'relative' && msg.relative_days != null ? (
+                        <>{Math.abs(msg.relative_days)} days {msg.relative_days < 0 ? 'before' : 'after'} {msg.relative_to?.replace('_', ' ')}</>
                       ) : (
                         <>Scheduled for {new Date(msg.scheduled_at!).toLocaleDateString()}</>
                       )
