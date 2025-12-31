@@ -4,9 +4,35 @@ import { useState, useEffect, FormEvent } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useAuth } from '@/contexts/AuthContext';
-import { getMyWedding, createMyWedding, WeddingData, WeddingCreateData } from '@/lib/api';
+import {
+  getMyWedding,
+  createMyWedding,
+  updateMyWedding,
+  createEvent,
+  updateEvent,
+  deleteEvent,
+  createAccommodation,
+  updateAccommodation,
+  deleteAccommodation,
+  createFAQ,
+  updateFAQ,
+  deleteFAQ,
+  WeddingData,
+  WeddingCreateData,
+  EventCreateData,
+  AccommodationCreateData,
+  FAQCreateData,
+} from '@/lib/api';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
+
+// Modal types
+type ModalType = 'wedding' | 'event' | 'accommodation' | 'faq' | null;
+
+interface EditingItem {
+  type: ModalType;
+  data: Record<string, unknown> | null; // null for new items
+}
 
 export default function DashboardPage() {
   const router = useRouter();
@@ -29,6 +55,11 @@ export default function DashboardPage() {
   });
   const [formError, setFormError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // Modal state for editing
+  const [editingItem, setEditingItem] = useState<EditingItem | null>(null);
+  const [modalError, setModalError] = useState<string | null>(null);
+  const [isSaving, setIsSaving] = useState(false);
 
   // Redirect if not logged in
   useEffect(() => {
@@ -90,6 +121,141 @@ export default function DashboardPage() {
   const handleLogout = () => {
     logout();
     router.push('/');
+  };
+
+  // Reload wedding data
+  const reloadWedding = async () => {
+    if (!token) return;
+    try {
+      const data = await getMyWedding(token);
+      setWedding(data);
+    } catch {
+      // Ignore errors
+    }
+  };
+
+  // Open edit modal
+  const openModal = (type: ModalType, data: Record<string, unknown> | null = null) => {
+    setEditingItem({ type, data });
+    setModalError(null);
+  };
+
+  // Close modal
+  const closeModal = () => {
+    setEditingItem(null);
+    setModalError(null);
+  };
+
+  // Save wedding info
+  const handleSaveWedding = async (data: Partial<WeddingCreateData>) => {
+    if (!token || !wedding) return;
+    setIsSaving(true);
+    setModalError(null);
+    try {
+      await updateMyWedding(token, data);
+      await reloadWedding();
+      closeModal();
+    } catch (err) {
+      setModalError(err instanceof Error ? err.message : 'Failed to save');
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  // Save event
+  const handleSaveEvent = async (data: EventCreateData, eventId?: string) => {
+    if (!token || !wedding) return;
+    setIsSaving(true);
+    setModalError(null);
+    try {
+      if (eventId) {
+        await updateEvent(token, wedding.id, eventId, data);
+      } else {
+        await createEvent(token, wedding.id, data);
+      }
+      await reloadWedding();
+      closeModal();
+    } catch (err) {
+      setModalError(err instanceof Error ? err.message : 'Failed to save');
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  // Delete event
+  const handleDeleteEvent = async (eventId: string) => {
+    if (!token || !wedding) return;
+    if (!confirm('Are you sure you want to delete this event?')) return;
+    try {
+      await deleteEvent(token, wedding.id, eventId);
+      await reloadWedding();
+    } catch (err) {
+      alert(err instanceof Error ? err.message : 'Failed to delete');
+    }
+  };
+
+  // Save accommodation
+  const handleSaveAccommodation = async (data: AccommodationCreateData, accId?: string) => {
+    if (!token || !wedding) return;
+    setIsSaving(true);
+    setModalError(null);
+    try {
+      if (accId) {
+        await updateAccommodation(token, wedding.id, accId, data);
+      } else {
+        await createAccommodation(token, wedding.id, data);
+      }
+      await reloadWedding();
+      closeModal();
+    } catch (err) {
+      setModalError(err instanceof Error ? err.message : 'Failed to save');
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  // Delete accommodation
+  const handleDeleteAccommodation = async (accId: string) => {
+    if (!token || !wedding) return;
+    if (!confirm('Are you sure you want to delete this accommodation?')) return;
+    try {
+      await deleteAccommodation(token, wedding.id, accId);
+      await reloadWedding();
+    } catch (err) {
+      alert(err instanceof Error ? err.message : 'Failed to delete');
+    }
+  };
+
+  // Save FAQ
+  const handleSaveFAQ = async (data: FAQCreateData, faqId?: string) => {
+    if (!token || !wedding) return;
+    setIsSaving(true);
+    setModalError(null);
+    try {
+      if (faqId) {
+        await updateFAQ(token, wedding.id, faqId, data);
+      } else {
+        await createFAQ(token, wedding.id, data);
+      }
+      await reloadWedding();
+      closeModal();
+    } catch (err) {
+      setModalError(err instanceof Error ? err.message : 'Failed to save');
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  // Delete FAQ
+  const handleDeleteFAQ = async (faqId: string) => {
+    if (!token || !wedding) return;
+    if (!confirm('Are you sure you want to delete this FAQ?')) return;
+    try {
+      await deleteFAQ(token, wedding.id, faqId);
+      await reloadWedding();
+    } catch (err) {
+      alert(err instanceof Error ? err.message : 'Failed to delete');
+    }
   };
 
   if (authLoading || isLoading) {
@@ -281,7 +447,25 @@ export default function DashboardPage() {
                     </p>
                   )}
                 </div>
-                <div className="mt-4 md:mt-0">
+                <div className="mt-4 md:mt-0 flex items-center gap-4">
+                  <button
+                    onClick={() => openModal('wedding', {
+                      partner1_name: wedding.partner1_name,
+                      partner2_name: wedding.partner2_name,
+                      wedding_date: wedding.wedding_date,
+                      dress_code: wedding.dress_code,
+                      ceremony_venue_name: wedding.ceremony?.venue_name,
+                      ceremony_venue_address: wedding.ceremony?.address,
+                      reception_venue_name: wedding.reception?.venue_name,
+                      reception_venue_address: wedding.reception?.address,
+                    })}
+                    className="text-gray-500 hover:text-gray-700 text-sm font-medium flex items-center"
+                  >
+                    <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                    </svg>
+                    Edit Details
+                  </button>
                   <Link
                     href={`/chat/${wedding.access_code}`}
                     target="_blank"
@@ -347,24 +531,107 @@ export default function DashboardPage() {
                 )}
               </div>
 
+              {/* Events */}
+              <div className="bg-white rounded-2xl shadow-lg p-6">
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="text-lg font-medium text-gray-800 flex items-center">
+                    <svg className="w-5 h-5 mr-2 text-rose-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                    </svg>
+                    Events ({wedding.events.length})
+                  </h3>
+                  <button
+                    onClick={() => openModal('event', null)}
+                    className="text-rose-600 hover:text-rose-700 text-sm font-medium"
+                  >
+                    + Add
+                  </button>
+                </div>
+                {wedding.events.length > 0 ? (
+                  <ul className="space-y-3">
+                    {wedding.events.map((event) => (
+                      <li key={event.id} className="flex items-start justify-between group">
+                        <div className="flex-1">
+                          <p className="font-medium text-gray-800">{event.name}</p>
+                          {event.date && (
+                            <p className="text-sm text-gray-500">
+                              {new Date(event.date).toLocaleDateString()}
+                              {event.time && ` at ${event.time}`}
+                            </p>
+                          )}
+                        </div>
+                        <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                          <button
+                            onClick={() => openModal('event', event)}
+                            className="text-gray-400 hover:text-gray-600"
+                          >
+                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                            </svg>
+                          </button>
+                          <button
+                            onClick={() => handleDeleteEvent(event.id)}
+                            className="text-gray-400 hover:text-red-600"
+                          >
+                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                            </svg>
+                          </button>
+                        </div>
+                      </li>
+                    ))}
+                  </ul>
+                ) : (
+                  <p className="text-gray-400 text-sm">No events added yet</p>
+                )}
+              </div>
+
               {/* Accommodations */}
               <div className="bg-white rounded-2xl shadow-lg p-6">
-                <h3 className="text-lg font-medium text-gray-800 mb-4 flex items-center">
-                  <svg className="w-5 h-5 mr-2 text-rose-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
-                  </svg>
-                  Accommodations ({wedding.accommodations.length})
-                </h3>
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="text-lg font-medium text-gray-800 flex items-center">
+                    <svg className="w-5 h-5 mr-2 text-rose-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                    </svg>
+                    Accommodations ({wedding.accommodations.length})
+                  </h3>
+                  <button
+                    onClick={() => openModal('accommodation', null)}
+                    className="text-rose-600 hover:text-rose-700 text-sm font-medium"
+                  >
+                    + Add
+                  </button>
+                </div>
                 {wedding.accommodations.length > 0 ? (
-                  <ul className="space-y-2">
+                  <ul className="space-y-3">
                     {wedding.accommodations.map((acc) => (
-                      <li key={acc.id} className="text-gray-600 text-sm">
-                        <span className="font-medium text-gray-800">{acc.hotel_name}</span>
-                        {acc.has_room_block && (
-                          <span className="ml-2 text-xs bg-rose-100 text-rose-600 px-2 py-0.5 rounded-full">
-                            Room Block
-                          </span>
-                        )}
+                      <li key={acc.id} className="flex items-start justify-between group">
+                        <div className="flex-1">
+                          <p className="font-medium text-gray-800">{acc.hotel_name}</p>
+                          {acc.has_room_block && (
+                            <span className="text-xs bg-rose-100 text-rose-600 px-2 py-0.5 rounded-full">
+                              Room Block
+                            </span>
+                          )}
+                        </div>
+                        <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                          <button
+                            onClick={() => openModal('accommodation', acc)}
+                            className="text-gray-400 hover:text-gray-600"
+                          >
+                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                            </svg>
+                          </button>
+                          <button
+                            onClick={() => handleDeleteAccommodation(acc.id)}
+                            className="text-gray-400 hover:text-red-600"
+                          >
+                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                            </svg>
+                          </button>
+                        </div>
                       </li>
                     ))}
                   </ul>
@@ -374,43 +641,513 @@ export default function DashboardPage() {
               </div>
 
               {/* FAQs */}
-              <div className="bg-white rounded-2xl shadow-lg p-6">
-                <h3 className="text-lg font-medium text-gray-800 mb-4 flex items-center">
-                  <svg className="w-5 h-5 mr-2 text-rose-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                  </svg>
-                  FAQs ({wedding.faqs.length})
-                </h3>
+              <div className="bg-white rounded-2xl shadow-lg p-6 md:col-span-2">
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="text-lg font-medium text-gray-800 flex items-center">
+                    <svg className="w-5 h-5 mr-2 text-rose-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    FAQs ({wedding.faqs.length})
+                  </h3>
+                  <button
+                    onClick={() => openModal('faq', null)}
+                    className="text-rose-600 hover:text-rose-700 text-sm font-medium"
+                  >
+                    + Add FAQ
+                  </button>
+                </div>
                 {wedding.faqs.length > 0 ? (
-                  <ul className="space-y-2">
-                    {wedding.faqs.slice(0, 3).map((faq) => (
-                      <li key={faq.id} className="text-gray-600 text-sm truncate">
-                        {faq.question}
+                  <ul className="space-y-4">
+                    {wedding.faqs.map((faq) => (
+                      <li key={faq.id} className="border-b border-gray-100 pb-4 last:border-0 last:pb-0 group">
+                        <div className="flex justify-between">
+                          <div className="flex-1">
+                            <p className="font-medium text-gray-800">{faq.question}</p>
+                            <p className="text-sm text-gray-600 mt-1">{faq.answer}</p>
+                          </div>
+                          <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity ml-4">
+                            <button
+                              onClick={() => openModal('faq', faq)}
+                              className="text-gray-400 hover:text-gray-600"
+                            >
+                              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                              </svg>
+                            </button>
+                            <button
+                              onClick={() => handleDeleteFAQ(faq.id)}
+                              className="text-gray-400 hover:text-red-600"
+                            >
+                              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                              </svg>
+                            </button>
+                          </div>
+                        </div>
                       </li>
                     ))}
-                    {wedding.faqs.length > 3 && (
-                      <li className="text-rose-500 text-sm">
-                        +{wedding.faqs.length - 3} more
-                      </li>
-                    )}
                   </ul>
                 ) : (
-                  <p className="text-gray-400 text-sm">No FAQs added yet</p>
+                  <p className="text-gray-400 text-sm">No FAQs added yet. Add common questions your guests might ask.</p>
                 )}
               </div>
-            </div>
-
-            {/* Coming soon note */}
-            <div className="bg-gray-50 rounded-xl p-6 text-center">
-              <p className="text-gray-500 text-sm">
-                More editing features coming soon! For now, you can manage your wedding details via our API.
-              </p>
             </div>
           </div>
         ) : null}
       </main>
 
       <Footer />
+
+      {/* Edit Wedding Modal */}
+      {editingItem?.type === 'wedding' && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl p-6 max-w-lg w-full max-h-[90vh] overflow-y-auto">
+            <h2 className="text-xl font-serif text-gray-800 mb-6">Edit Wedding Details</h2>
+            <form
+              onSubmit={(e) => {
+                e.preventDefault();
+                const form = e.target as HTMLFormElement;
+                const formData = new FormData(form);
+                handleSaveWedding({
+                  partner1_name: formData.get('partner1_name') as string,
+                  partner2_name: formData.get('partner2_name') as string,
+                  wedding_date: formData.get('wedding_date') as string || undefined,
+                  dress_code: formData.get('dress_code') as string || undefined,
+                  ceremony_venue_name: formData.get('ceremony_venue_name') as string || undefined,
+                  ceremony_venue_address: formData.get('ceremony_venue_address') as string || undefined,
+                  reception_venue_name: formData.get('reception_venue_name') as string || undefined,
+                  reception_venue_address: formData.get('reception_venue_address') as string || undefined,
+                });
+              }}
+              className="space-y-4"
+            >
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Partner 1 Name</label>
+                  <input
+                    name="partner1_name"
+                    defaultValue={editingItem.data?.partner1_name as string || ''}
+                    className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-rose-500 focus:border-rose-500"
+                    required
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Partner 2 Name</label>
+                  <input
+                    name="partner2_name"
+                    defaultValue={editingItem.data?.partner2_name as string || ''}
+                    className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-rose-500 focus:border-rose-500"
+                    required
+                  />
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Wedding Date</label>
+                  <input
+                    type="date"
+                    name="wedding_date"
+                    defaultValue={editingItem.data?.wedding_date as string || ''}
+                    className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-rose-500 focus:border-rose-500"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Dress Code</label>
+                  <input
+                    name="dress_code"
+                    defaultValue={editingItem.data?.dress_code as string || ''}
+                    placeholder="e.g., Black Tie"
+                    className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-rose-500 focus:border-rose-500"
+                  />
+                </div>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Ceremony Venue</label>
+                <input
+                  name="ceremony_venue_name"
+                  defaultValue={editingItem.data?.ceremony_venue_name as string || ''}
+                  placeholder="Venue name"
+                  className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-rose-500 focus:border-rose-500"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Ceremony Address</label>
+                <input
+                  name="ceremony_venue_address"
+                  defaultValue={editingItem.data?.ceremony_venue_address as string || ''}
+                  placeholder="Full address"
+                  className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-rose-500 focus:border-rose-500"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Reception Venue</label>
+                <input
+                  name="reception_venue_name"
+                  defaultValue={editingItem.data?.reception_venue_name as string || ''}
+                  placeholder="Venue name (if different)"
+                  className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-rose-500 focus:border-rose-500"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Reception Address</label>
+                <input
+                  name="reception_venue_address"
+                  defaultValue={editingItem.data?.reception_venue_address as string || ''}
+                  placeholder="Full address"
+                  className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-rose-500 focus:border-rose-500"
+                />
+              </div>
+              {modalError && <p className="text-red-600 text-sm">{modalError}</p>}
+              <div className="flex gap-3 pt-4">
+                <button
+                  type="button"
+                  onClick={closeModal}
+                  className="flex-1 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={isSaving}
+                  className="flex-1 py-2 bg-rose-600 text-white rounded-lg hover:bg-rose-700 disabled:opacity-50"
+                >
+                  {isSaving ? 'Saving...' : 'Save Changes'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Edit Event Modal */}
+      {editingItem?.type === 'event' && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl p-6 max-w-lg w-full max-h-[90vh] overflow-y-auto">
+            <h2 className="text-xl font-serif text-gray-800 mb-6">
+              {editingItem.data ? 'Edit Event' : 'Add Event'}
+            </h2>
+            <form
+              onSubmit={(e) => {
+                e.preventDefault();
+                const form = e.target as HTMLFormElement;
+                const formData = new FormData(form);
+                handleSaveEvent(
+                  {
+                    event_name: formData.get('event_name') as string,
+                    event_date: formData.get('event_date') as string || undefined,
+                    event_time: formData.get('event_time') as string || undefined,
+                    venue_name: formData.get('venue_name') as string || undefined,
+                    venue_address: formData.get('venue_address') as string || undefined,
+                    description: formData.get('description') as string || undefined,
+                    dress_code: formData.get('dress_code') as string || undefined,
+                  },
+                  editingItem.data?.id as string | undefined
+                );
+              }}
+              className="space-y-4"
+            >
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Event Name *</label>
+                <input
+                  name="event_name"
+                  defaultValue={editingItem.data?.name as string || ''}
+                  placeholder="e.g., Welcome Dinner"
+                  className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-rose-500 focus:border-rose-500"
+                  required
+                />
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Date</label>
+                  <input
+                    type="date"
+                    name="event_date"
+                    defaultValue={editingItem.data?.date as string || ''}
+                    className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-rose-500 focus:border-rose-500"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Time</label>
+                  <input
+                    name="event_time"
+                    defaultValue={editingItem.data?.time as string || ''}
+                    placeholder="e.g., 6:00 PM"
+                    className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-rose-500 focus:border-rose-500"
+                  />
+                </div>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Venue</label>
+                <input
+                  name="venue_name"
+                  defaultValue={editingItem.data?.venue_name as string || ''}
+                  placeholder="Venue name"
+                  className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-rose-500 focus:border-rose-500"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Address</label>
+                <input
+                  name="venue_address"
+                  defaultValue={editingItem.data?.venue_address as string || ''}
+                  placeholder="Full address"
+                  className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-rose-500 focus:border-rose-500"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
+                <textarea
+                  name="description"
+                  defaultValue={editingItem.data?.description as string || ''}
+                  placeholder="Event details..."
+                  rows={2}
+                  className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-rose-500 focus:border-rose-500"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Dress Code</label>
+                <input
+                  name="dress_code"
+                  defaultValue={editingItem.data?.dress_code as string || ''}
+                  placeholder="e.g., Casual"
+                  className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-rose-500 focus:border-rose-500"
+                />
+              </div>
+              {modalError && <p className="text-red-600 text-sm">{modalError}</p>}
+              <div className="flex gap-3 pt-4">
+                <button
+                  type="button"
+                  onClick={closeModal}
+                  className="flex-1 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={isSaving}
+                  className="flex-1 py-2 bg-rose-600 text-white rounded-lg hover:bg-rose-700 disabled:opacity-50"
+                >
+                  {isSaving ? 'Saving...' : editingItem.data ? 'Save Changes' : 'Add Event'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Edit Accommodation Modal */}
+      {editingItem?.type === 'accommodation' && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl p-6 max-w-lg w-full max-h-[90vh] overflow-y-auto">
+            <h2 className="text-xl font-serif text-gray-800 mb-6">
+              {editingItem.data ? 'Edit Accommodation' : 'Add Accommodation'}
+            </h2>
+            <form
+              onSubmit={(e) => {
+                e.preventDefault();
+                const form = e.target as HTMLFormElement;
+                const formData = new FormData(form);
+                handleSaveAccommodation(
+                  {
+                    hotel_name: formData.get('hotel_name') as string,
+                    address: formData.get('address') as string || undefined,
+                    phone: formData.get('phone') as string || undefined,
+                    booking_url: formData.get('booking_url') as string || undefined,
+                    has_room_block: formData.get('has_room_block') === 'on',
+                    room_block_name: formData.get('room_block_name') as string || undefined,
+                    room_block_code: formData.get('room_block_code') as string || undefined,
+                    room_block_rate: formData.get('room_block_rate') as string || undefined,
+                    notes: formData.get('notes') as string || undefined,
+                  },
+                  editingItem.data?.id as string | undefined
+                );
+              }}
+              className="space-y-4"
+            >
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Hotel Name *</label>
+                <input
+                  name="hotel_name"
+                  defaultValue={editingItem.data?.hotel_name as string || ''}
+                  placeholder="e.g., Marriott Downtown"
+                  className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-rose-500 focus:border-rose-500"
+                  required
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Address</label>
+                <input
+                  name="address"
+                  defaultValue={editingItem.data?.address as string || ''}
+                  placeholder="Full address"
+                  className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-rose-500 focus:border-rose-500"
+                />
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Phone</label>
+                  <input
+                    name="phone"
+                    defaultValue={editingItem.data?.phone as string || ''}
+                    placeholder="(555) 123-4567"
+                    className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-rose-500 focus:border-rose-500"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Booking URL</label>
+                  <input
+                    name="booking_url"
+                    defaultValue={editingItem.data?.booking_url as string || ''}
+                    placeholder="https://..."
+                    className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-rose-500 focus:border-rose-500"
+                  />
+                </div>
+              </div>
+              <div className="flex items-center gap-2">
+                <input
+                  type="checkbox"
+                  name="has_room_block"
+                  id="has_room_block"
+                  defaultChecked={editingItem.data?.has_room_block as boolean || false}
+                  className="w-4 h-4 text-rose-600 rounded focus:ring-rose-500"
+                />
+                <label htmlFor="has_room_block" className="text-sm text-gray-700">Has room block</label>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Block Name</label>
+                  <input
+                    name="room_block_name"
+                    defaultValue={editingItem.data?.room_block_name as string || ''}
+                    placeholder="Smith-Jones Wedding"
+                    className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-rose-500 focus:border-rose-500"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Block Code</label>
+                  <input
+                    name="room_block_code"
+                    defaultValue={editingItem.data?.room_block_code as string || ''}
+                    placeholder="SMITHJONES2024"
+                    className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-rose-500 focus:border-rose-500"
+                  />
+                </div>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Special Rate</label>
+                <input
+                  name="room_block_rate"
+                  defaultValue={editingItem.data?.room_block_rate as string || ''}
+                  placeholder="e.g., $149/night"
+                  className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-rose-500 focus:border-rose-500"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Notes</label>
+                <textarea
+                  name="notes"
+                  defaultValue={editingItem.data?.notes as string || ''}
+                  placeholder="Additional info for guests..."
+                  rows={2}
+                  className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-rose-500 focus:border-rose-500"
+                />
+              </div>
+              {modalError && <p className="text-red-600 text-sm">{modalError}</p>}
+              <div className="flex gap-3 pt-4">
+                <button
+                  type="button"
+                  onClick={closeModal}
+                  className="flex-1 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={isSaving}
+                  className="flex-1 py-2 bg-rose-600 text-white rounded-lg hover:bg-rose-700 disabled:opacity-50"
+                >
+                  {isSaving ? 'Saving...' : editingItem.data ? 'Save Changes' : 'Add Accommodation'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Edit FAQ Modal */}
+      {editingItem?.type === 'faq' && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl p-6 max-w-lg w-full max-h-[90vh] overflow-y-auto">
+            <h2 className="text-xl font-serif text-gray-800 mb-6">
+              {editingItem.data ? 'Edit FAQ' : 'Add FAQ'}
+            </h2>
+            <form
+              onSubmit={(e) => {
+                e.preventDefault();
+                const form = e.target as HTMLFormElement;
+                const formData = new FormData(form);
+                handleSaveFAQ(
+                  {
+                    question: formData.get('question') as string,
+                    answer: formData.get('answer') as string,
+                    category: formData.get('category') as string || undefined,
+                  },
+                  editingItem.data?.id as string | undefined
+                );
+              }}
+              className="space-y-4"
+            >
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Question *</label>
+                <input
+                  name="question"
+                  defaultValue={editingItem.data?.question as string || ''}
+                  placeholder="e.g., What time should I arrive?"
+                  className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-rose-500 focus:border-rose-500"
+                  required
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Answer *</label>
+                <textarea
+                  name="answer"
+                  defaultValue={editingItem.data?.answer as string || ''}
+                  placeholder="Your answer..."
+                  rows={4}
+                  className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-rose-500 focus:border-rose-500"
+                  required
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Category</label>
+                <input
+                  name="category"
+                  defaultValue={editingItem.data?.category as string || ''}
+                  placeholder="e.g., Logistics, Dress Code"
+                  className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-rose-500 focus:border-rose-500"
+                />
+              </div>
+              {modalError && <p className="text-red-600 text-sm">{modalError}</p>}
+              <div className="flex gap-3 pt-4">
+                <button
+                  type="button"
+                  onClick={closeModal}
+                  className="flex-1 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={isSaving}
+                  className="flex-1 py-2 bg-rose-600 text-white rounded-lg hover:bg-rose-700 disabled:opacity-50"
+                >
+                  {isSaving ? 'Saving...' : editingItem.data ? 'Save Changes' : 'Add FAQ'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

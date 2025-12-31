@@ -325,6 +325,192 @@ export async function updateMyWedding(token: string, data: Partial<WeddingCreate
   return response.json();
 }
 
+// ============ EVENT API ============
+
+export interface EventCreateData {
+  event_name: string;
+  event_date?: string;
+  event_time?: string;
+  venue_name?: string;
+  venue_address?: string;
+  description?: string;
+  dress_code?: string;
+}
+
+export async function createEvent(token: string, weddingId: string, data: EventCreateData): Promise<{ id: string; message: string }> {
+  const response = await fetch(`${API_URL}/api/wedding/${weddingId}/events`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify(data),
+  });
+
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(error.detail || 'Failed to create event');
+  }
+
+  return response.json();
+}
+
+export async function updateEvent(token: string, weddingId: string, eventId: string, data: Partial<EventCreateData>): Promise<{ id: string; message: string }> {
+  const response = await fetch(`${API_URL}/api/wedding/${weddingId}/events/${eventId}`, {
+    method: 'PATCH',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify(data),
+  });
+
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(error.detail || 'Failed to update event');
+  }
+
+  return response.json();
+}
+
+export async function deleteEvent(token: string, weddingId: string, eventId: string): Promise<{ message: string }> {
+  const response = await fetch(`${API_URL}/api/wedding/${weddingId}/events/${eventId}`, {
+    method: 'DELETE',
+    headers: { Authorization: `Bearer ${token}` },
+  });
+
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(error.detail || 'Failed to delete event');
+  }
+
+  return response.json();
+}
+
+// ============ ACCOMMODATION API ============
+
+export interface AccommodationCreateData {
+  hotel_name: string;
+  address?: string;
+  phone?: string;
+  booking_url?: string;
+  has_room_block?: boolean;
+  room_block_name?: string;
+  room_block_code?: string;
+  room_block_rate?: string;
+  room_block_deadline?: string;
+  distance_to_venue?: string;
+  notes?: string;
+}
+
+export async function createAccommodation(token: string, weddingId: string, data: AccommodationCreateData): Promise<{ id: string; message: string }> {
+  const response = await fetch(`${API_URL}/api/wedding/${weddingId}/accommodations`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify(data),
+  });
+
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(error.detail || 'Failed to create accommodation');
+  }
+
+  return response.json();
+}
+
+export async function updateAccommodation(token: string, weddingId: string, accId: string, data: Partial<AccommodationCreateData>): Promise<{ id: string; message: string }> {
+  const response = await fetch(`${API_URL}/api/wedding/${weddingId}/accommodations/${accId}`, {
+    method: 'PATCH',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify(data),
+  });
+
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(error.detail || 'Failed to update accommodation');
+  }
+
+  return response.json();
+}
+
+export async function deleteAccommodation(token: string, weddingId: string, accId: string): Promise<{ message: string }> {
+  const response = await fetch(`${API_URL}/api/wedding/${weddingId}/accommodations/${accId}`, {
+    method: 'DELETE',
+    headers: { Authorization: `Bearer ${token}` },
+  });
+
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(error.detail || 'Failed to delete accommodation');
+  }
+
+  return response.json();
+}
+
+// ============ FAQ API ============
+
+export interface FAQCreateData {
+  question: string;
+  answer: string;
+  category?: string;
+}
+
+export async function createFAQ(token: string, weddingId: string, data: FAQCreateData): Promise<{ id: string; message: string }> {
+  const response = await fetch(`${API_URL}/api/wedding/${weddingId}/faqs`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify(data),
+  });
+
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(error.detail || 'Failed to create FAQ');
+  }
+
+  return response.json();
+}
+
+export async function updateFAQ(token: string, weddingId: string, faqId: string, data: Partial<FAQCreateData>): Promise<{ id: string; message: string }> {
+  const response = await fetch(`${API_URL}/api/wedding/${weddingId}/faqs/${faqId}`, {
+    method: 'PATCH',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify(data),
+  });
+
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(error.detail || 'Failed to update FAQ');
+  }
+
+  return response.json();
+}
+
+export async function deleteFAQ(token: string, weddingId: string, faqId: string): Promise<{ message: string }> {
+  const response = await fetch(`${API_URL}/api/wedding/${weddingId}/faqs/${faqId}`, {
+    method: 'DELETE',
+    headers: { Authorization: `Bearer ${token}` },
+  });
+
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(error.detail || 'Failed to delete FAQ');
+  }
+
+  return response.json();
+}
+
 // ============ SCRAPE API ============
 
 export interface ScrapePreview {

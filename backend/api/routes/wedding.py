@@ -49,6 +49,38 @@ class FAQCreate(BaseModel):
     category: Optional[str] = None
 
 
+class EventUpdate(BaseModel):
+    event_name: Optional[str] = None
+    event_date: Optional[date] = None
+    event_time: Optional[str] = None
+    venue_name: Optional[str] = None
+    venue_address: Optional[str] = None
+    venue_url: Optional[str] = None
+    description: Optional[str] = None
+    dress_code: Optional[str] = None
+
+
+class AccommodationUpdate(BaseModel):
+    hotel_name: Optional[str] = None
+    address: Optional[str] = None
+    phone: Optional[str] = None
+    website_url: Optional[str] = None
+    booking_url: Optional[str] = None
+    has_room_block: Optional[bool] = None
+    room_block_name: Optional[str] = None
+    room_block_code: Optional[str] = None
+    room_block_deadline: Optional[date] = None
+    room_block_rate: Optional[str] = None
+    distance_to_venue: Optional[str] = None
+    notes: Optional[str] = None
+
+
+class FAQUpdate(BaseModel):
+    question: Optional[str] = None
+    answer: Optional[str] = None
+    category: Optional[str] = None
+
+
 class WeddingCreate(BaseModel):
     partner1_name: str
     partner2_name: str
@@ -499,6 +531,35 @@ async def delete_accommodation(
     return {"message": "Accommodation deleted"}
 
 
+@router.patch("/{wedding_id}/accommodations/{accommodation_id}")
+async def update_accommodation(
+    wedding_id: str,
+    accommodation_id: str,
+    update_data: AccommodationUpdate,
+    db: AsyncSession = Depends(get_db)
+):
+    """Update an accommodation."""
+    result = await db.execute(
+        select(WeddingAccommodation).where(
+            WeddingAccommodation.id == accommodation_id,
+            WeddingAccommodation.wedding_id == wedding_id
+        )
+    )
+    acc = result.scalar_one_or_none()
+
+    if not acc:
+        raise HTTPException(status_code=404, detail="Accommodation not found")
+
+    update_dict = update_data.model_dump(exclude_unset=True)
+    for field, value in update_dict.items():
+        setattr(acc, field, value)
+
+    await db.commit()
+    await db.refresh(acc)
+
+    return {"id": str(acc.id), "message": "Accommodation updated"}
+
+
 # --- Events ---
 
 @router.post("/{wedding_id}/events")
@@ -549,6 +610,35 @@ async def delete_event(
     return {"message": "Event deleted"}
 
 
+@router.patch("/{wedding_id}/events/{event_id}")
+async def update_event(
+    wedding_id: str,
+    event_id: str,
+    update_data: EventUpdate,
+    db: AsyncSession = Depends(get_db)
+):
+    """Update an event."""
+    result = await db.execute(
+        select(WeddingEvent).where(
+            WeddingEvent.id == event_id,
+            WeddingEvent.wedding_id == wedding_id
+        )
+    )
+    event = result.scalar_one_or_none()
+
+    if not event:
+        raise HTTPException(status_code=404, detail="Event not found")
+
+    update_dict = update_data.model_dump(exclude_unset=True)
+    for field, value in update_dict.items():
+        setattr(event, field, value)
+
+    await db.commit()
+    await db.refresh(event)
+
+    return {"id": str(event.id), "message": "Event updated"}
+
+
 # --- FAQs ---
 
 @router.post("/{wedding_id}/faqs")
@@ -597,3 +687,32 @@ async def delete_faq(
     await db.commit()
 
     return {"message": "FAQ deleted"}
+
+
+@router.patch("/{wedding_id}/faqs/{faq_id}")
+async def update_faq(
+    wedding_id: str,
+    faq_id: str,
+    update_data: FAQUpdate,
+    db: AsyncSession = Depends(get_db)
+):
+    """Update a FAQ."""
+    result = await db.execute(
+        select(WeddingFAQ).where(
+            WeddingFAQ.id == faq_id,
+            WeddingFAQ.wedding_id == wedding_id
+        )
+    )
+    faq = result.scalar_one_or_none()
+
+    if not faq:
+        raise HTTPException(status_code=404, detail="FAQ not found")
+
+    update_dict = update_data.model_dump(exclude_unset=True)
+    for field, value in update_dict.items():
+        setattr(faq, field, value)
+
+    await db.commit()
+    await db.refresh(faq)
+
+    return {"id": str(faq.id), "message": "FAQ updated"}
