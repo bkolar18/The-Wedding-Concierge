@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { scrapeWeddingWebsite, importWeddingFromUrl, ScrapePreview, ImportResponse } from '@/lib/api';
+import { useAuth } from '@/contexts/AuthContext';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 
@@ -21,6 +22,7 @@ const SCAN_STAGES = [
 
 export default function ImportPage() {
   const router = useRouter();
+  const { user, token } = useAuth();
   const [step, setStep] = useState<Step>('input');
   const [url, setUrl] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -30,13 +32,9 @@ export default function ImportPage() {
   const [importResult, setImportResult] = useState<ImportResponse | null>(null);
   const [scanProgress, setScanProgress] = useState(0);
   const [scanMessage, setScanMessage] = useState('');
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
 
-  // Check if user is logged in
-  useEffect(() => {
-    const token = localStorage.getItem('token');
-    setIsLoggedIn(!!token);
-  }, []);
+  // User is logged in if we have a token from AuthContext
+  const isLoggedIn = !!token;
 
   // Progress animation during scanning
   useEffect(() => {
@@ -91,8 +89,7 @@ export default function ImportPage() {
 
     try {
       // Pass token if logged in to link wedding to user account
-      const token = localStorage.getItem('token') || undefined;
-      const result = await importWeddingFromUrl(url, token);
+      const result = await importWeddingFromUrl(url, token || undefined);
       setImportResult(result);
       setStep('success');
     } catch (err) {
