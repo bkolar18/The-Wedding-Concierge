@@ -6,6 +6,5 @@ set -o errexit
 # Install Python dependencies
 pip install -r requirements.txt
 
-# Install Playwright browsers
+# Install Playwright Chromium browser only (no system deps - Render handles those)
 playwright install chromium
-playwright install-deps chromium
