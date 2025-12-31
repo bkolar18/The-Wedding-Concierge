@@ -500,12 +500,29 @@ export default function DashboardPage() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {/* Ceremony */}
               <div className="bg-white rounded-2xl shadow-lg p-6">
-                <h3 className="text-lg font-medium text-gray-800 mb-4 flex items-center">
-                  <svg className="w-5 h-5 mr-2 text-rose-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
-                  </svg>
-                  Ceremony
-                </h3>
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="text-lg font-medium text-gray-800 flex items-center">
+                    <svg className="w-5 h-5 mr-2 text-rose-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                    </svg>
+                    Ceremony
+                  </h3>
+                  <button
+                    onClick={() => openModal('wedding', {
+                      partner1_name: wedding.partner1_name,
+                      partner2_name: wedding.partner2_name,
+                      wedding_date: wedding.wedding_date,
+                      dress_code: wedding.dress_code,
+                      ceremony_venue_name: wedding.ceremony?.venue_name,
+                      ceremony_venue_address: wedding.ceremony?.address,
+                      reception_venue_name: wedding.reception?.venue_name,
+                      reception_venue_address: wedding.reception?.address,
+                    })}
+                    className="text-rose-600 hover:text-rose-700 text-sm font-medium"
+                  >
+                    + Edit
+                  </button>
+                </div>
                 {wedding.ceremony ? (
                   <div className="space-y-2 text-gray-600">
                     <p className="font-medium text-gray-800">{wedding.ceremony.venue_name}</p>
@@ -518,12 +535,29 @@ export default function DashboardPage() {
 
               {/* Dress Code */}
               <div className="bg-white rounded-2xl shadow-lg p-6">
-                <h3 className="text-lg font-medium text-gray-800 mb-4 flex items-center">
-                  <svg className="w-5 h-5 mr-2 text-rose-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01" />
-                  </svg>
-                  Dress Code
-                </h3>
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="text-lg font-medium text-gray-800 flex items-center">
+                    <svg className="w-5 h-5 mr-2 text-rose-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01" />
+                    </svg>
+                    Dress Code
+                  </h3>
+                  <button
+                    onClick={() => openModal('wedding', {
+                      partner1_name: wedding.partner1_name,
+                      partner2_name: wedding.partner2_name,
+                      wedding_date: wedding.wedding_date,
+                      dress_code: wedding.dress_code,
+                      ceremony_venue_name: wedding.ceremony?.venue_name,
+                      ceremony_venue_address: wedding.ceremony?.address,
+                      reception_venue_name: wedding.reception?.venue_name,
+                      reception_venue_address: wedding.reception?.address,
+                    })}
+                    className="text-rose-600 hover:text-rose-700 text-sm font-medium"
+                  >
+                    + Edit
+                  </button>
+                </div>
                 {wedding.dress_code ? (
                   <p className="text-gray-800 font-medium">{wedding.dress_code}</p>
                 ) : (
@@ -560,7 +594,7 @@ export default function DashboardPage() {
                             </p>
                           )}
                         </div>
-                        <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                        <div className="flex gap-2">
                           <button
                             onClick={() => openModal('event', event)}
                             className="text-gray-400 hover:text-gray-600"
@@ -614,7 +648,7 @@ export default function DashboardPage() {
                             </span>
                           )}
                         </div>
-                        <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                        <div className="flex gap-2">
                           <button
                             onClick={() => openModal('accommodation', acc)}
                             className="text-gray-400 hover:text-gray-600"
@@ -653,7 +687,7 @@ export default function DashboardPage() {
                     onClick={() => openModal('faq', null)}
                     className="text-rose-600 hover:text-rose-700 text-sm font-medium"
                   >
-                    + Add FAQ
+                    + Add
                   </button>
                 </div>
                 {wedding.faqs.length > 0 ? (
@@ -665,7 +699,7 @@ export default function DashboardPage() {
                             <p className="font-medium text-gray-800">{faq.question}</p>
                             <p className="text-sm text-gray-600 mt-1">{faq.answer}</p>
                           </div>
-                          <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity ml-4">
+                          <div className="flex gap-2 ml-4">
                             <button
                               onClick={() => openModal('faq', faq)}
                               className="text-gray-400 hover:text-gray-600"
