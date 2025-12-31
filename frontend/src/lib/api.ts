@@ -34,6 +34,7 @@ export interface WeddingPreview {
   ceremony_venue_address: string | null;
   dress_code: string | null;
   access_code: string;
+  wedding_website_url: string | null;
 }
 
 /**

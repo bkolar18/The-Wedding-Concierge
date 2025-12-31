@@ -87,9 +87,19 @@ export default function WeddingChatPage() {
             </svg>
             <span className="font-serif text-sm">The Wedding Concierge</span>
           </a>
-          <a href="/" className="text-sm text-gray-500 hover:text-rose-600 transition-colors">
-            Create Your Own
-          </a>
+          {wedding.wedding_website_url && (
+            <a
+              href={wedding.wedding_website_url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center space-x-1.5 text-sm text-gray-500 hover:text-rose-600 transition-colors"
+            >
+              <span>Visit Wedding Website</span>
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+              </svg>
+            </a>
+          )}
         </div>
       </nav>
 
