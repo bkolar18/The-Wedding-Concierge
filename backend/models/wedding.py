@@ -9,6 +9,7 @@ from core.database import Base
 
 if TYPE_CHECKING:
     from .chat import ChatSession
+    from .sms import Guest, SMSTemplate, ScheduledMessage
 
 
 def generate_uuid() -> str:
@@ -48,6 +49,7 @@ class Wedding(Base):
     # External links
     wedding_website_url: Mapped[Optional[str]] = mapped_column(String(500), nullable=True)
     rsvp_url: Mapped[Optional[str]] = mapped_column(String(500), nullable=True)
+    rsvp_deadline: Mapped[Optional[date]] = mapped_column(Date, nullable=True)  # For relative SMS scheduling
 
     # Additional info
     additional_notes: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
@@ -78,6 +80,17 @@ class Wedding(Base):
     )
     chat_sessions: Mapped[List["ChatSession"]] = relationship(
         "ChatSession", back_populates="wedding", cascade="all, delete-orphan"
+    )
+
+    # SMS-related relationships
+    guests: Mapped[List["Guest"]] = relationship(
+        "Guest", back_populates="wedding", cascade="all, delete-orphan"
+    )
+    sms_templates: Mapped[List["SMSTemplate"]] = relationship(
+        "SMSTemplate", back_populates="wedding", cascade="all, delete-orphan"
+    )
+    scheduled_messages: Mapped[List["ScheduledMessage"]] = relationship(
+        "ScheduledMessage", back_populates="wedding", cascade="all, delete-orphan"
     )
 
     def __repr__(self):

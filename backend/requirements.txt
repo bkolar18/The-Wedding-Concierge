@@ -32,3 +32,14 @@ bcrypt>=4.0.1
 
 # Utilities
 python-dateutil
+
+# SMS (Twilio)
+twilio
+phonenumbers
+
+# Background Jobs
+apscheduler
+
+# File Processing (CSV/Excel upload)
+openpyxl
+python-multipart

@@ -582,3 +582,319 @@ export async function importWeddingFromUrl(url: string, token?: string): Promise
 
   return response.json();
 }
+
+// ============ GUEST API ============
+
+export interface Guest {
+  id: string;
+  name: string;
+  phone_number: string;
+  email: string | null;
+  group_name: string | null;
+  rsvp_status: string;
+  sms_consent: boolean;
+  opted_out: boolean;
+  created_at: string;
+}
+
+export interface GuestCreateData {
+  name: string;
+  phone_number: string;
+  email?: string;
+  group_name?: string;
+  rsvp_status?: string;
+}
+
+export async function getGuests(token: string, weddingId: string): Promise<Guest[]> {
+  const response = await fetch(`${API_URL}/api/wedding/${weddingId}/guests`, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(error.detail || 'Failed to get guests');
+  }
+
+  return response.json();
+}
+
+export async function createGuest(token: string, weddingId: string, data: GuestCreateData): Promise<{ id: string; message: string }> {
+  const response = await fetch(`${API_URL}/api/wedding/${weddingId}/guests`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify(data),
+  });
+
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(error.detail || 'Failed to create guest');
+  }
+
+  return response.json();
+}
+
+export async function uploadGuests(token: string, weddingId: string, file: File): Promise<{ message: string; added: number; skipped: number; errors: string[] }> {
+  const formData = new FormData();
+  formData.append('file', file);
+
+  const response = await fetch(`${API_URL}/api/wedding/${weddingId}/guests/upload`, {
+    method: 'POST',
+    headers: { Authorization: `Bearer ${token}` },
+    body: formData,
+  });
+
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(error.detail || 'Failed to upload guests');
+  }
+
+  return response.json();
+}
+
+export async function updateGuest(token: string, weddingId: string, guestId: string, data: Partial<GuestCreateData>): Promise<{ id: string; message: string }> {
+  const response = await fetch(`${API_URL}/api/wedding/${weddingId}/guests/${guestId}`, {
+    method: 'PATCH',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify(data),
+  });
+
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(error.detail || 'Failed to update guest');
+  }
+
+  return response.json();
+}
+
+export async function deleteGuest(token: string, weddingId: string, guestId: string): Promise<{ message: string }> {
+  const response = await fetch(`${API_URL}/api/wedding/${weddingId}/guests/${guestId}`, {
+    method: 'DELETE',
+    headers: { Authorization: `Bearer ${token}` },
+  });
+
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(error.detail || 'Failed to delete guest');
+  }
+
+  return response.json();
+}
+
+// ============ SMS TEMPLATE API ============
+
+export interface SMSTemplate {
+  id: string;
+  name: string;
+  content: string;
+  category: string;
+  is_default: boolean;
+  created_at: string;
+}
+
+export interface TemplateCreateData {
+  name: string;
+  content: string;
+  category?: string;
+}
+
+export async function getTemplates(token: string, weddingId: string): Promise<SMSTemplate[]> {
+  const response = await fetch(`${API_URL}/api/wedding/${weddingId}/templates`, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(error.detail || 'Failed to get templates');
+  }
+
+  return response.json();
+}
+
+export async function getTemplateVariables(): Promise<Array<{ name: string; description: string }>> {
+  const response = await fetch(`${API_URL}/api/wedding/templates/variables`);
+
+  if (!response.ok) {
+    throw new Error('Failed to get template variables');
+  }
+
+  return response.json();
+}
+
+export async function createTemplate(token: string, weddingId: string, data: TemplateCreateData): Promise<{ id: string; message: string }> {
+  const response = await fetch(`${API_URL}/api/wedding/${weddingId}/templates`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify(data),
+  });
+
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(error.detail || 'Failed to create template');
+  }
+
+  return response.json();
+}
+
+export async function updateTemplate(token: string, weddingId: string, templateId: string, data: Partial<TemplateCreateData>): Promise<{ id: string; message: string }> {
+  const response = await fetch(`${API_URL}/api/wedding/${weddingId}/templates/${templateId}`, {
+    method: 'PATCH',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify(data),
+  });
+
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(error.detail || 'Failed to update template');
+  }
+
+  return response.json();
+}
+
+export async function deleteTemplate(token: string, weddingId: string, templateId: string): Promise<{ message: string }> {
+  const response = await fetch(`${API_URL}/api/wedding/${weddingId}/templates/${templateId}`, {
+    method: 'DELETE',
+    headers: { Authorization: `Bearer ${token}` },
+  });
+
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(error.detail || 'Failed to delete template');
+  }
+
+  return response.json();
+}
+
+// ============ SMS CAMPAIGN API ============
+
+export interface ScheduledMessage {
+  id: string;
+  name: string;
+  message_content: string;
+  recipient_type: string;
+  schedule_type: string;
+  scheduled_at: string | null;
+  relative_to: string | null;
+  relative_days: number | null;
+  status: string;
+  sent_count: number;
+  failed_count: number;
+  total_recipients: number;
+  created_at: string;
+}
+
+export interface SMSBlastData {
+  message: string;
+  recipient_type?: string;
+  recipient_filter?: Record<string, unknown>;
+}
+
+export interface ScheduleMessageData {
+  name: string;
+  message: string;
+  recipient_type?: string;
+  recipient_filter?: Record<string, unknown>;
+  schedule_type: string;
+  scheduled_at?: string;
+  relative_to?: string;
+  relative_days?: number;
+}
+
+export async function sendSMSBlast(token: string, weddingId: string, data: SMSBlastData): Promise<{ message: string; sent: number; failed: number; scheduled_message_id: string }> {
+  const response = await fetch(`${API_URL}/api/wedding/${weddingId}/sms/send`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify(data),
+  });
+
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(error.detail || 'Failed to send SMS blast');
+  }
+
+  return response.json();
+}
+
+export async function scheduleMessage(token: string, weddingId: string, data: ScheduleMessageData): Promise<{ id: string; message: string }> {
+  const response = await fetch(`${API_URL}/api/wedding/${weddingId}/sms/schedule`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify(data),
+  });
+
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(error.detail || 'Failed to schedule message');
+  }
+
+  return response.json();
+}
+
+export async function getScheduledMessages(token: string, weddingId: string): Promise<ScheduledMessage[]> {
+  const response = await fetch(`${API_URL}/api/wedding/${weddingId}/sms/scheduled`, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(error.detail || 'Failed to get scheduled messages');
+  }
+
+  return response.json();
+}
+
+export async function cancelScheduledMessage(token: string, weddingId: string, messageId: string): Promise<{ message: string }> {
+  const response = await fetch(`${API_URL}/api/wedding/${weddingId}/sms/scheduled/${messageId}`, {
+    method: 'DELETE',
+    headers: { Authorization: `Bearer ${token}` },
+  });
+
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(error.detail || 'Failed to cancel scheduled message');
+  }
+
+  return response.json();
+}
+
+export interface MessageLog {
+  id: string;
+  guest_id: string;
+  phone_number: string;
+  message_content: string;
+  status: string;
+  error_code: string | null;
+  error_message: string | null;
+  sent_at: string | null;
+  delivered_at: string | null;
+}
+
+export async function getSMSHistory(token: string, weddingId: string, limit: number = 100): Promise<MessageLog[]> {
+  const response = await fetch(`${API_URL}/api/wedding/${weddingId}/sms/history?limit=${limit}`, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(error.detail || 'Failed to get SMS history');
+  }
+
+  return response.json();
+}

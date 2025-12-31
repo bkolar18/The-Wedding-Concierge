@@ -26,10 +26,11 @@ class Settings(BaseSettings):
     ANTHROPIC_API_KEY: Optional[str] = None
     LLM_MODEL: str = "claude-3-5-haiku-20241022"  # Haiku for chat (cheaper), Sonnet hardcoded in data_mapper for scraping
 
-    # Twilio (Phase 2)
+    # Twilio SMS
     TWILIO_ACCOUNT_SID: Optional[str] = None
     TWILIO_AUTH_TOKEN: Optional[str] = None
     TWILIO_PHONE_NUMBER: Optional[str] = None
+    TWILIO_MESSAGING_SERVICE_SID: Optional[str] = None  # For A2P 10DLC compliance
 
     class Config:
         env_file = str(ENV_FILE)
