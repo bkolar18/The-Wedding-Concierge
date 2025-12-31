@@ -30,7 +30,7 @@ class Wedding(Base):
     # Wedding basics
     wedding_date: Mapped[Optional[date]] = mapped_column(Date, nullable=True)
     wedding_time: Mapped[Optional[str]] = mapped_column(String(50), nullable=True)
-    dress_code: Mapped[Optional[str]] = mapped_column(String(100), nullable=True)
+    dress_code: Mapped[Optional[str]] = mapped_column(Text, nullable=True)  # Can be long descriptions
 
     # Venue info
     ceremony_venue_name: Mapped[Optional[str]] = mapped_column(String(200), nullable=True)
@@ -100,7 +100,7 @@ class WeddingEvent(Base):
     venue_address: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
     venue_url: Mapped[Optional[str]] = mapped_column(String(500), nullable=True)
     description: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
-    dress_code: Mapped[Optional[str]] = mapped_column(String(100), nullable=True)
+    dress_code: Mapped[Optional[str]] = mapped_column(Text, nullable=True)  # Can be long descriptions
 
     # Relationships
     wedding: Mapped["Wedding"] = relationship("Wedding", back_populates="events")

@@ -52,3 +52,48 @@ async def init_db():
 
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
+
+    # Run any needed migrations for existing tables
+    await run_migrations()
+
+
+async def run_migrations():
+    """Run database migrations for schema changes."""
+    from sqlalchemy import text
+
+    migrations = [
+        # Expand dress_code from VARCHAR(100) to TEXT
+        """
+        DO $$
+        BEGIN
+            IF EXISTS (
+                SELECT 1 FROM information_schema.columns
+                WHERE table_name = 'weddings' AND column_name = 'dress_code'
+                AND data_type = 'character varying'
+            ) THEN
+                ALTER TABLE weddings ALTER COLUMN dress_code TYPE TEXT;
+            END IF;
+        END $$;
+        """,
+        """
+        DO $$
+        BEGIN
+            IF EXISTS (
+                SELECT 1 FROM information_schema.columns
+                WHERE table_name = 'wedding_events' AND column_name = 'dress_code'
+                AND data_type = 'character varying'
+            ) THEN
+                ALTER TABLE wedding_events ALTER COLUMN dress_code TYPE TEXT;
+            END IF;
+        END $$;
+        """,
+    ]
+
+    async with engine.begin() as conn:
+        for migration in migrations:
+            try:
+                await conn.execute(text(migration))
+            except Exception as e:
+                # Log but don't fail - migration might not apply to this DB type
+                import logging
+                logging.getLogger(__name__).debug(f"Migration skipped: {e}")
