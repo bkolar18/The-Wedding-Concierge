@@ -3,12 +3,43 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import { useAuth } from '@/contexts/AuthContext';
+import { useEffect, useRef, useState } from 'react';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import ChatWidget from '@/components/chat/ChatWidget';
 
+// Hook for scroll-triggered animations
+function useScrollAnimation() {
+  const ref = useRef<HTMLElement>(null);
+  const [isVisible, setIsVisible] = useState(false);
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setIsVisible(true);
+          observer.disconnect(); // Only animate once
+        }
+      },
+      { threshold: 0.1, rootMargin: '0px 0px -50px 0px' }
+    );
+
+    if (ref.current) {
+      observer.observe(ref.current);
+    }
+
+    return () => observer.disconnect();
+  }, []);
+
+  return { ref, isVisible };
+}
+
 export default function Home() {
   const { user, isLoading } = useAuth();
+  const howItWorks = useScrollAnimation();
+  const demo = useScrollAnimation();
+  const whyUs = useScrollAnimation();
+  const cta = useScrollAnimation();
 
   return (
     <div className="min-h-screen bg-white flex flex-col">
@@ -128,20 +159,20 @@ export default function Home() {
       </section>
 
       {/* Features Section with Images */}
-      <section className="py-20 px-4">
+      <section ref={howItWorks.ref as React.RefObject<HTMLElement>} className="py-20 px-4">
         <div className="max-w-6xl mx-auto">
           <div className="text-center mb-16">
-            <h2 className="text-3xl md:text-4xl font-serif text-gray-800 mb-4 animate-fade-in-up">
+            <h2 className={`text-3xl md:text-4xl font-serif text-gray-800 mb-4 ${howItWorks.isVisible ? 'animate-fade-in-up' : 'opacity-0'}`}>
               How It Works
             </h2>
-            <p className="text-gray-600 max-w-md mx-auto animate-fade-in-up animate-delay-100">
+            <p className={`text-gray-600 max-w-md mx-auto ${howItWorks.isVisible ? 'animate-fade-in-up animate-delay-100' : 'opacity-0'}`}>
               Get your wedding concierge up and running in minutes
             </p>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {/* Step 1 */}
-            <div className="bg-white rounded-2xl p-6 shadow-lg hover:shadow-xl transition-all hover:-translate-y-1 animate-fade-in-up animate-delay-200">
+            <div className={`bg-white rounded-2xl p-6 shadow-lg hover:shadow-xl transition-all hover:-translate-y-1 ${howItWorks.isVisible ? 'animate-fade-in-up animate-delay-200' : 'opacity-0'}`}>
               <div className="relative w-full aspect-video rounded-xl overflow-hidden mb-6">
                 <Image
                   src="https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=600&q=80"
@@ -162,7 +193,7 @@ export default function Home() {
             </div>
 
             {/* Step 2 */}
-            <div className="bg-white rounded-2xl p-6 shadow-lg hover:shadow-xl transition-all hover:-translate-y-1 animate-fade-in-up animate-delay-300">
+            <div className={`bg-white rounded-2xl p-6 shadow-lg hover:shadow-xl transition-all hover:-translate-y-1 ${howItWorks.isVisible ? 'animate-fade-in-up animate-delay-300' : 'opacity-0'}`}>
               <div className="relative w-full aspect-video rounded-xl overflow-hidden mb-6">
                 <Image
                   src="https://images.unsplash.com/photo-1434030216411-0b793f4b4173?w=600&q=80"
@@ -183,7 +214,7 @@ export default function Home() {
             </div>
 
             {/* Step 3 */}
-            <div className="bg-white rounded-2xl p-6 shadow-lg hover:shadow-xl transition-all hover:-translate-y-1 animate-fade-in-up animate-delay-400">
+            <div className={`bg-white rounded-2xl p-6 shadow-lg hover:shadow-xl transition-all hover:-translate-y-1 ${howItWorks.isVisible ? 'animate-fade-in-up animate-delay-400' : 'opacity-0'}`}>
               <div className="relative w-full aspect-video rounded-xl overflow-hidden mb-6">
                 <Image
                   src="https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?w=600&q=80"
@@ -207,10 +238,10 @@ export default function Home() {
       </section>
 
       {/* Demo Section */}
-      <section className="py-20 px-4 bg-gradient-to-b from-rose-50 to-white">
+      <section ref={demo.ref as React.RefObject<HTMLElement>} className="py-20 px-4 bg-gradient-to-b from-rose-50 to-white">
         <div className="max-w-6xl mx-auto">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-            <div className="animate-slide-in-left">
+            <div className={demo.isVisible ? 'animate-slide-in-left' : 'opacity-0'}>
               <h2 className="text-3xl font-serif text-gray-800 mb-4">
                 Try it yourself
               </h2>
@@ -223,7 +254,7 @@ export default function Home() {
                 <code className="text-rose-600 font-mono font-medium">alice-bob-test</code>
               </div>
             </div>
-            <div className="animate-slide-in-right animate-delay-200">
+            <div className={demo.isVisible ? 'animate-slide-in-right animate-delay-200' : 'opacity-0'}>
               <ChatWidget />
             </div>
           </div>
@@ -231,16 +262,16 @@ export default function Home() {
       </section>
 
       {/* Why Choose Us Section */}
-      <section className="py-20 px-4 bg-white">
+      <section ref={whyUs.ref as React.RefObject<HTMLElement>} className="py-20 px-4 bg-white">
         <div className="max-w-5xl mx-auto">
           <div className="text-center mb-12">
-            <h2 className="text-3xl font-serif text-gray-800 mb-4 animate-fade-in-up">
+            <h2 className={`text-3xl font-serif text-gray-800 mb-4 ${whyUs.isVisible ? 'animate-fade-in-up' : 'opacity-0'}`}>
               Why Wedding Concierge?
             </h2>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            <div className="bg-gray-50 rounded-2xl p-6 hover:shadow-lg transition-all hover:-translate-y-1 animate-fade-in-up animate-delay-100">
+            <div className={`bg-gray-50 rounded-2xl p-6 hover:shadow-lg transition-all hover:-translate-y-1 ${whyUs.isVisible ? 'animate-fade-in-up animate-delay-100' : 'opacity-0'}`}>
               <div className="w-12 h-12 bg-rose-100 rounded-full flex items-center justify-center mb-4">
                 <svg className="w-6 h-6 text-rose-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -252,7 +283,7 @@ export default function Home() {
               </p>
             </div>
 
-            <div className="bg-gray-50 rounded-2xl p-6 hover:shadow-lg transition-all hover:-translate-y-1 animate-fade-in-up animate-delay-200">
+            <div className={`bg-gray-50 rounded-2xl p-6 hover:shadow-lg transition-all hover:-translate-y-1 ${whyUs.isVisible ? 'animate-fade-in-up animate-delay-200' : 'opacity-0'}`}>
               <div className="w-12 h-12 bg-rose-100 rounded-full flex items-center justify-center mb-4">
                 <svg className="w-6 h-6 text-rose-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
@@ -264,7 +295,7 @@ export default function Home() {
               </p>
             </div>
 
-            <div className="bg-gray-50 rounded-2xl p-6 hover:shadow-lg transition-all hover:-translate-y-1 animate-fade-in-up animate-delay-300">
+            <div className={`bg-gray-50 rounded-2xl p-6 hover:shadow-lg transition-all hover:-translate-y-1 ${whyUs.isVisible ? 'animate-fade-in-up animate-delay-300' : 'opacity-0'}`}>
               <div className="w-12 h-12 bg-rose-100 rounded-full flex items-center justify-center mb-4">
                 <svg className="w-6 h-6 text-rose-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
@@ -276,7 +307,7 @@ export default function Home() {
               </p>
             </div>
 
-            <div className="bg-gray-50 rounded-2xl p-6 hover:shadow-lg transition-all hover:-translate-y-1 animate-fade-in-up animate-delay-400">
+            <div className={`bg-gray-50 rounded-2xl p-6 hover:shadow-lg transition-all hover:-translate-y-1 ${whyUs.isVisible ? 'animate-fade-in-up animate-delay-400' : 'opacity-0'}`}>
               <div className="w-12 h-12 bg-rose-100 rounded-full flex items-center justify-center mb-4">
                 <svg className="w-6 h-6 text-rose-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
@@ -293,17 +324,17 @@ export default function Home() {
 
       {/* CTA Section */}
       {!user && !isLoading && (
-        <section className="py-20 px-4 bg-gradient-to-r from-rose-500 to-rose-600">
+        <section ref={cta.ref as React.RefObject<HTMLElement>} className="py-20 px-4 bg-gradient-to-r from-rose-500 to-rose-600">
           <div className="max-w-2xl mx-auto text-center text-white">
-            <h2 className="text-3xl md:text-4xl font-serif mb-4 animate-fade-in-up">
+            <h2 className={`text-3xl md:text-4xl font-serif mb-4 ${cta.isVisible ? 'animate-fade-in-up' : 'opacity-0'}`}>
               Ready to simplify your wedding?
             </h2>
-            <p className="text-rose-100 mb-8 text-lg animate-fade-in-up animate-delay-100">
+            <p className={`text-rose-100 mb-8 text-lg ${cta.isVisible ? 'animate-fade-in-up animate-delay-100' : 'opacity-0'}`}>
               Stop answering the same questions over and over. Let your concierge handle it for just $49.
             </p>
             <Link
               href="/register"
-              className="inline-block px-8 py-4 bg-white text-rose-600 rounded-full font-medium hover:bg-rose-50 hover:-translate-y-1 transition-all shadow-lg animate-fade-in-up animate-delay-200"
+              className={`inline-block px-8 py-4 bg-white text-rose-600 rounded-full font-medium hover:bg-rose-50 hover:-translate-y-1 transition-all shadow-lg ${cta.isVisible ? 'animate-fade-in-up animate-delay-200' : 'opacity-0'}`}
             >
               Get Started Now
             </Link>
