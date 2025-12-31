@@ -68,8 +68,9 @@ app.include_router(scrape.router, prefix="/api/scrape", tags=["scrape"])
 @app.on_event("startup")
 async def startup():
     """Initialize services on startup."""
-    # Database tables will be managed by Alembic migrations
-    pass
+    from core.database import init_db
+    await init_db()
+    logger.info("Database tables initialized")
 
 
 @app.on_event("shutdown")
