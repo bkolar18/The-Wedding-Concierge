@@ -375,11 +375,17 @@ export async function scrapeWeddingWebsite(url: string): Promise<ScrapeResponse>
 
 /**
  * Import a wedding from a website URL (scrape and create wedding).
+ * If token is provided, links the wedding to the user's account.
  */
-export async function importWeddingFromUrl(url: string): Promise<ImportResponse> {
+export async function importWeddingFromUrl(url: string, token?: string): Promise<ImportResponse> {
+  const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+  if (token) {
+    headers['Authorization'] = `Bearer ${token}`;
+  }
+
   const response = await fetch(`${API_URL}/api/scrape/import`, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers,
     body: JSON.stringify({ url }),
   });
 

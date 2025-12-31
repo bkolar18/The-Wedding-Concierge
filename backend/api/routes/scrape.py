@@ -1,11 +1,16 @@
 """Wedding website scraping API endpoints."""
 from typing import Optional
 from datetime import date, datetime
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Depends
+from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from pydantic import BaseModel, HttpUrl
 
 from services.scraper import WeddingScraper
 from services.scraper.data_mapper import WeddingDataMapper
+from core.auth import get_current_user_optional
+
+# Optional auth - doesn't require login but accepts token if provided
+security = HTTPBearer(auto_error=False)
 
 
 def parse_date(date_str: Optional[str]) -> Optional[date]:
@@ -111,16 +116,28 @@ async def scrape_wedding_website(request: ScrapeRequest):
 
 
 @router.post("/import", response_model=ImportResponse)
-async def import_wedding_from_url(request: ImportRequest):
+async def import_wedding_from_url(
+    request: ImportRequest,
+    credentials: Optional[HTTPAuthorizationCredentials] = Depends(security)
+):
     """
     Scrape a wedding website and create a new wedding from the data.
 
-    This creates the wedding without requiring authentication -
-    the user can claim it later by signing up.
+    If authenticated, links the wedding to the user's account.
     """
     from sqlalchemy.ext.asyncio import AsyncSession
+    from sqlalchemy import select
     from core.database import async_session_maker
+    from core.auth import decode_token
     from models.wedding import Wedding, WeddingEvent, WeddingAccommodation, WeddingFAQ
+    from models.user import User
+
+    # Check if user is authenticated
+    user_id = None
+    if credentials:
+        payload = decode_token(credentials.credentials)
+        if payload:
+            user_id = payload.get("sub")
 
     scraper = WeddingScraper()
 
@@ -186,6 +203,13 @@ async def import_wedding_from_url(request: ImportRequest):
             )
             db.add(wedding)
             await db.flush()
+
+            # If user is authenticated, link wedding to their account
+            if user_id:
+                user_result = await db.execute(select(User).where(User.id == user_id))
+                user = user_result.scalar_one_or_none()
+                if user:
+                    user.wedding_id = wedding.id
 
             # Add events
             for event_data in structured_data.get("events", []):

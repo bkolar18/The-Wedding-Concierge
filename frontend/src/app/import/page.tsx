@@ -30,6 +30,13 @@ export default function ImportPage() {
   const [importResult, setImportResult] = useState<ImportResponse | null>(null);
   const [scanProgress, setScanProgress] = useState(0);
   const [scanMessage, setScanMessage] = useState('');
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+
+  // Check if user is logged in
+  useEffect(() => {
+    const token = localStorage.getItem('token');
+    setIsLoggedIn(!!token);
+  }, []);
 
   // Progress animation during scanning
   useEffect(() => {
@@ -83,7 +90,9 @@ export default function ImportPage() {
     setIsLoading(true);
 
     try {
-      const result = await importWeddingFromUrl(url);
+      // Pass token if logged in to link wedding to user account
+      const token = localStorage.getItem('token') || undefined;
+      const result = await importWeddingFromUrl(url, token);
       setImportResult(result);
       setStep('success');
     } catch (err) {
@@ -343,13 +352,23 @@ export default function ImportPage() {
                 </button>
               </div>
 
-              <p className="mt-8 text-sm text-gray-500">
-                Want to edit your wedding details?{' '}
-                <Link href="/register" className="text-rose-600 hover:text-rose-700">
-                  Create an account
-                </Link>{' '}
-                to access the dashboard.
-              </p>
+              {isLoggedIn ? (
+                <p className="mt-8 text-sm text-gray-500">
+                  Your wedding has been linked to your account.{' '}
+                  <Link href="/dashboard" className="text-rose-600 hover:text-rose-700">
+                    Go to Dashboard
+                  </Link>{' '}
+                  to edit details and manage your concierge.
+                </p>
+              ) : (
+                <p className="mt-8 text-sm text-gray-500">
+                  Want to edit your wedding details?{' '}
+                  <Link href="/register" className="text-rose-600 hover:text-rose-700">
+                    Create an account
+                  </Link>{' '}
+                  to access the dashboard.
+                </p>
+              )}
             </div>
           )}
         </div>
