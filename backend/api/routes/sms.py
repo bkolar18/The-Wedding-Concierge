@@ -385,23 +385,91 @@ async def list_templates(
     db: AsyncSession = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
-    """List all templates (default + custom) for a wedding."""
+    """List all templates for a wedding, seeding defaults if none exist."""
     if current_user.wedding_id != wedding_id:
         raise HTTPException(status_code=403, detail="Not authorized")
 
-    # Get custom templates for this wedding
+    # Get templates for this wedding
     result = await db.execute(
         select(SMSTemplate).where(SMSTemplate.wedding_id == wedding_id)
     )
-    custom_templates = list(result.scalars().all())
+    templates = list(result.scalars().all())
 
-    # Get default templates (wedding_id is NULL)
-    result = await db.execute(
-        select(SMSTemplate).where(SMSTemplate.wedding_id == None, SMSTemplate.is_default == True)
-    )
-    default_templates = list(result.scalars().all())
+    # If no templates exist, seed the default templates for this wedding
+    if not templates:
+        default_templates = [
+            {
+                "name": "Welcome Message",
+                "category": "welcome",
+                "content": (
+                    "Hi {{guest_name}}! {{partner1}} & {{partner2}} are getting married! "
+                    "Get all the details and ask questions here: {{chat_link}}"
+                ),
+            },
+            {
+                "name": "RSVP Reminder",
+                "category": "reminder",
+                "content": (
+                    "Hi {{guest_name}}, friendly reminder to RSVP for {{couple_names}}'s wedding by {{rsvp_deadline}}! "
+                    "RSVP here: {{chat_link}}"
+                ),
+            },
+            {
+                "name": "One Week Countdown",
+                "category": "reminder",
+                "content": (
+                    "{{guest_name}}, just ONE WEEK until {{couple_names}}'s wedding! "
+                    "Date: {{wedding_date}}. Dress code: {{dress_code}}. "
+                    "Questions? {{chat_link}}"
+                ),
+            },
+            {
+                "name": "Day Before Reminder",
+                "category": "reminder",
+                "content": (
+                    "{{guest_name}}, the big day is TOMORROW! "
+                    "{{couple_names}}'s ceremony starts at {{wedding_time}}. "
+                    "Venue: {{ceremony_venue}}. See you there!"
+                ),
+            },
+            {
+                "name": "Day Of Logistics",
+                "category": "update",
+                "content": (
+                    "Good morning {{guest_name}}! Today's the day! "
+                    "Ceremony at {{wedding_time}} at {{ceremony_venue}}. "
+                    "Dress code: {{dress_code}}. Can't wait to celebrate!"
+                ),
+            },
+            {
+                "name": "Thank You",
+                "category": "update",
+                "content": (
+                    "Thank you for celebrating with us, {{guest_name}}! "
+                    "Your presence made our day extra special. - {{partner1}} & {{partner2}}"
+                ),
+            },
+        ]
 
-    return default_templates + custom_templates
+        for tmpl_data in default_templates:
+            template = SMSTemplate(
+                wedding_id=wedding_id,
+                name=tmpl_data["name"],
+                content=tmpl_data["content"],
+                category=tmpl_data["category"],
+                is_default=False  # Not a system default, so editable
+            )
+            db.add(template)
+
+        await db.commit()
+
+        # Reload templates after seeding
+        result = await db.execute(
+            select(SMSTemplate).where(SMSTemplate.wedding_id == wedding_id)
+        )
+        templates = list(result.scalars().all())
+
+    return templates
 
 
 @router.get("/templates/variables", response_model=List[dict])
@@ -451,7 +519,7 @@ async def update_template(
     db: AsyncSession = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
-    """Update a custom template."""
+    """Update a template."""
     if current_user.wedding_id != wedding_id:
         raise HTTPException(status_code=403, detail="Not authorized")
 
@@ -464,9 +532,6 @@ async def update_template(
     template = result.scalar_one_or_none()
     if not template:
         raise HTTPException(status_code=404, detail="Template not found")
-
-    if template.is_default:
-        raise HTTPException(status_code=400, detail="Cannot edit default templates")
 
     update_data = data.model_dump(exclude_unset=True)
 
@@ -493,7 +558,7 @@ async def delete_template(
     db: AsyncSession = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
-    """Delete a custom template."""
+    """Delete a template."""
     if current_user.wedding_id != wedding_id:
         raise HTTPException(status_code=403, detail="Not authorized")
 
@@ -506,9 +571,6 @@ async def delete_template(
     template = result.scalar_one_or_none()
     if not template:
         raise HTTPException(status_code=404, detail="Template not found")
-
-    if template.is_default:
-        raise HTTPException(status_code=400, detail="Cannot delete default templates")
 
     await db.delete(template)
     await db.commit()

@@ -1,0 +1,139 @@
+# Computer Performance Analysis
+Date: December 30, 2025
+
+## SUMMARY
+Your computer is running slowly primarily due to:
+1. **CRITICAL: Disk is 91% full** - only 21 GB free out of 237 GB
+2. **Duplicate antivirus software** - Both McAfee AND Windows Defender running
+3. **Heavy background software load** - Many unnecessary programs consuming resources
+
+---
+
+## SYSTEM SPECS
+- CPU: Intel Core i7-9750H @ 2.60GHz (6 cores, 12 threads)
+- RAM: 32 GB total, ~16.5 GB free (48% usage - acceptable)
+- Disk: 237 GB total, only 21 GB free (91% full - CRITICAL)
+- Current CPU load: 4% (low)
+
+---
+
+## TOP ISSUES (in order of impact)
+
+### 1. DISK NEARLY FULL (91% used)
+This is likely your biggest problem. Windows needs free disk space for:
+- Virtual memory / page file
+- System updates
+- Temporary files
+- Search indexing
+
+**RECOMMENDATION:** Free up at least 30-50 GB of space. Target having 15-20% free.
+- Run Disk Cleanup (search "Disk Cleanup" in Start menu)
+- Uninstall games/programs you don't use
+- Move large files to external storage
+- Clear Downloads folder
+
+### 2. DUPLICATE ANTIVIRUS SOFTWARE
+You have BOTH McAfee AND Windows Defender running simultaneously:
+
+**McAfee processes (using ~95 MB combined):**
+- McAMTaskAgent.exe
+- McCSPServiceHost.exe
+- mcshield.exe
+- McSmtFwk.exe
+- McUICnt.exe
+- MfeAVSvc.exe
+- mfefire.exe
+- mfemms.exe
+- mfevtps.exe
+
+**Windows Defender processes (using ~420 MB combined):**
+- MsMpEng.exe (398 MB alone!)
+- MpDefenderCoreService.exe
+- NisSrv.exe
+- SecurityHealthService.exe
+
+**RECOMMENDATION:** Uninstall McAfee. Windows Defender is sufficient and less resource-intensive.
+
+### 3. HP BLOATWARE
+Multiple HP utilities running that you likely don't need:
+- HPAudioSwitch.exe (60 MB)
+- HPCommRecovery.exe (13 MB)
+- HPDisplayCenter.exe (87 MB)
+- HPMediaNetwork.exe (64 MB)
+- HPSystemEventUtilityBackground.exe (60 MB)
+- HPSystemEventUtilityHost.exe (40 MB)
+- HPPrintScanDoctorService.exe (9 MB)
+- OmenCommandCenterBackground.exe (64 MB)
+- OmenInstallMonitor.exe (45 MB)
+- Various SR*.exe services (~160 MB combined)
+
+Total: ~600+ MB of HP bloatware
+
+**RECOMMENDATION:** Uninstall HP programs you don't use from "Add or Remove Programs"
+
+### 4. LOGITECH TUNE EXCESSIVE PROCESSES
+LogiTune is running 7+ separate processes using ~660 MB combined:
+- LogiTune.exe (multiple instances)
+- LogiTuneAgent.exe
+- LogiTuneUpdater.exe
+
+**RECOMMENDATION:** Close LogiTune when not adjusting webcam/headset settings, or set it not to start automatically
+
+### 5. ADOBE CREATIVE CLOUD OVERHEAD
+Multiple Adobe background processes even when not using Adobe apps:
+- Adobe Desktop Service.exe (133 MB)
+- Creative Cloud.exe (120 MB)
+- Creative Cloud UI Helper.exe (multiple instances, ~485 MB combined)
+- CoreSync.exe (56 MB)
+- CCXProcess.exe
+- AdobeIPCBroker.exe
+
+Total: ~800+ MB
+
+**RECOMMENDATION:** If not actively using Adobe apps, close Creative Cloud from the system tray
+
+### 6. EPIC GAMES LAUNCHER (215 MB)
+Running in background even when not gaming.
+
+**RECOMMENDATION:** Close when not gaming, or disable "Run when my computer starts" in Epic settings
+
+---
+
+## STARTUP PROGRAMS TO DISABLE
+Go to Task Manager > Startup tab and disable:
+- Epic Games Launcher (unless you need auto-updates)
+- Steam (can launch manually)
+- Docker Desktop (if not using Docker)
+- Logitech Download Assistant
+- HP System Event Utility (unless using HP-specific features)
+
+---
+
+## QUICK WINS (do these first)
+1. Run Disk Cleanup with "Clean up system files" option
+2. Uninstall McAfee (Windows Defender is enough)
+3. Close Adobe Creative Cloud from system tray
+4. Close Epic Games Launcher
+5. Disable unnecessary startup programs
+6. Restart computer
+
+---
+
+## WHAT'S ACTUALLY FINE
+- RAM usage (48%) is acceptable for 32 GB
+- CPU usage (4%) is very low
+- Node.js processes are normal for development work
+- Windows core processes are normal
+
+---
+
+## ESTIMATED MEMORY SAVINGS
+If you follow recommendations:
+- Uninstall McAfee: ~100 MB
+- Close HP bloatware: ~600 MB
+- Close LogiTune: ~660 MB
+- Close Adobe CC: ~800 MB
+- Close Epic: ~215 MB
+- **Total potential savings: ~2.4 GB RAM**
+
+More importantly, freeing disk space will have the biggest impact on overall system responsiveness.

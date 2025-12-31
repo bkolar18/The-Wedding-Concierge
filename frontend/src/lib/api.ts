@@ -218,6 +218,7 @@ export interface WeddingData {
   registry_urls: Record<string, string> | null;
   wedding_website_url: string | null;
   rsvp_url: string | null;
+  rsvp_deadline: string | null;
   additional_notes: string | null;
   access_code: string;
   chat_url: string;
@@ -265,6 +266,7 @@ export interface WeddingCreateData {
   reception_venue_name?: string;
   reception_venue_address?: string;
   reception_time?: string;
+  rsvp_deadline?: string;
 }
 
 /**

@@ -1,0 +1,38 @@
+15:31:48.888 Running build in Washington, D.C., USA (East) – iad1
+15:31:48.889 Build machine configuration: 2 cores, 8 GB
+15:31:49.080 Cloning github.com/bkolar18/The-Wedding-Concierge (Branch: main, Commit: 57b3929)
+15:31:49.375 Cloning completed: 295.000ms
+15:31:49.972 Restored build cache from previous deployment (BKa2e4j9BvgFg528YBLKC3hw5YF2)
+15:31:50.608 Running "vercel build"
+15:31:51.032 Vercel CLI 50.1.3
+15:31:51.354 Installing dependencies...
+15:31:58.612 
+15:31:58.613 up to date in 7s
+15:31:58.613 
+15:31:58.613 142 packages are looking for funding
+15:31:58.613   run `npm fund` for details
+15:31:58.644 Detected Next.js version: 16.1.1
+15:31:58.649 Running "npm run build"
+15:31:58.753 
+15:31:58.754 > frontend@0.1.0 build
+15:31:58.754 > next build
+15:31:58.754 
+15:31:59.845 ▲ Next.js 16.1.1 (Turbopack)
+15:31:59.846 
+15:31:59.884   Creating an optimized production build ...
+15:32:06.544 ✓ Compiled successfully in 6.0s
+15:32:06.546   Running TypeScript ...
+15:32:11.203 Failed to compile.
+15:32:11.203 
+15:32:11.205 ./src/components/SMSManager.tsx:430:53
+15:32:11.205 Type error: 'msg.relative_days' is possibly 'null'.
+15:32:11.206 
+15:32:11.206 [0m [90m 428 |[39m                     ) [33m:[39m msg[33m.[39mstatus [33m===[39m [32m'scheduled'[39m [33m?[39m (
+15:32:11.206  [90m 429 |[39m                       msg[33m.[39mschedule_type [33m===[39m [32m'relative'[39m [33m?[39m (
+15:32:11.206 [31m[1m>[22m[39m[90m 430 |[39m                         [33m<[39m[33m>[39m{msg[33m.[39mrelative_days} days {msg[33m.[39mrelative_days [33m<[39m [35m0[39m [33m?[39m [32m'before'[39m [33m:[39m [32m'after'[39m} {msg[33m.[39mrelative_to[33m?[39m[33m.[39mreplace([32m'_'[39m[33m,[39m [32m' '[39m)}[33m<[39m[33m/[39m[33m>[39m
+15:32:11.206  [90m     |[39m                                                     [31m[1m^[22m[39m
+15:32:11.206  [90m 431 |[39m                       ) [33m:[39m (
+15:32:11.206  [90m 432 |[39m                         [33m<[39m[33m>[39m[33mScheduled[39m [36mfor[39m {[36mnew[39m [33mDate[39m(msg[33m.[39mscheduled_at[33m![39m)[33m.[39mtoLocaleDateString()}[33m<[39m[33m/[39m[33m>[39m
+15:32:11.206  [90m 433 |[39m                       )[0m
+15:32:11.236 Next.js build worker exited with code: 1 and signal: null
+15:32:11.268 Error: Command "npm run build" exited with 1

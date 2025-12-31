@@ -457,6 +457,7 @@ export default function DashboardPage() {
                       partner1_name: wedding.partner1_name,
                       partner2_name: wedding.partner2_name,
                       wedding_date: wedding.wedding_date,
+                      rsvp_deadline: wedding.rsvp_deadline,
                       dress_code: wedding.dress_code,
                       ceremony_venue_name: wedding.ceremony?.venue_name,
                       ceremony_venue_address: wedding.ceremony?.address,
@@ -559,6 +560,7 @@ export default function DashboardPage() {
                       partner1_name: wedding.partner1_name,
                       partner2_name: wedding.partner2_name,
                       wedding_date: wedding.wedding_date,
+                      rsvp_deadline: wedding.rsvp_deadline,
                       dress_code: wedding.dress_code,
                       ceremony_venue_name: wedding.ceremony?.venue_name,
                       ceremony_venue_address: wedding.ceremony?.address,
@@ -594,6 +596,7 @@ export default function DashboardPage() {
                       partner1_name: wedding.partner1_name,
                       partner2_name: wedding.partner2_name,
                       wedding_date: wedding.wedding_date,
+                      rsvp_deadline: wedding.rsvp_deadline,
                       dress_code: wedding.dress_code,
                       ceremony_venue_name: wedding.ceremony?.venue_name,
                       ceremony_venue_address: wedding.ceremony?.address,
@@ -802,6 +805,7 @@ export default function DashboardPage() {
                   partner1_name: formData.get('partner1_name') as string,
                   partner2_name: formData.get('partner2_name') as string,
                   wedding_date: formData.get('wedding_date') as string || undefined,
+                  rsvp_deadline: formData.get('rsvp_deadline') as string || undefined,
                   dress_code: formData.get('dress_code') as string || undefined,
                   ceremony_venue_name: formData.get('ceremony_venue_name') as string || undefined,
                   ceremony_venue_address: formData.get('ceremony_venue_address') as string || undefined,
@@ -842,14 +846,23 @@ export default function DashboardPage() {
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Dress Code</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">RSVP Deadline</label>
                   <input
-                    name="dress_code"
-                    defaultValue={editingItem.data?.dress_code as string || ''}
-                    placeholder="e.g., Black Tie"
+                    type="date"
+                    name="rsvp_deadline"
+                    defaultValue={editingItem.data?.rsvp_deadline as string || ''}
                     className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-rose-500 focus:border-rose-500"
                   />
                 </div>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Dress Code</label>
+                <input
+                  name="dress_code"
+                  defaultValue={editingItem.data?.dress_code as string || ''}
+                  placeholder="e.g., Black Tie"
+                  className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-rose-500 focus:border-rose-500"
+                />
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Ceremony Venue</label>
