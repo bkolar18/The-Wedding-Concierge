@@ -4,6 +4,11 @@
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
 
+// Debug: Log the API URL being used (remove after debugging)
+if (typeof window !== 'undefined') {
+  console.log('[API] Using API_URL:', API_URL);
+}
+
 interface StartChatResponse {
   session_id: string;
   greeting: string;
@@ -135,14 +140,20 @@ export interface User {
  * Register a new user account.
  */
 export async function register(email: string, password: string, name?: string): Promise<AuthToken> {
-  const response = await fetch(`${API_URL}/api/auth/register`, {
+  const url = `${API_URL}/api/auth/register`;
+  console.log('[API] Register request to:', url);
+
+  const response = await fetch(url, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ email, password, name }),
   });
 
+  console.log('[API] Register response status:', response.status);
+
   if (!response.ok) {
     const error = await response.json();
+    console.log('[API] Register error:', error);
     throw new Error(error.detail || 'Registration failed');
   }
 
