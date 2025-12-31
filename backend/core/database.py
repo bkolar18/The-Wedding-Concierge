@@ -48,7 +48,7 @@ async def get_db() -> AsyncSession:
 async def init_db():
     """Initialize database tables."""
     # Import models to ensure they're registered
-    from models import wedding, user, chat  # noqa
+    from models import wedding, user, chat, sms  # noqa
 
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
@@ -84,6 +84,18 @@ async def run_migrations():
                 AND data_type = 'character varying'
             ) THEN
                 ALTER TABLE wedding_events ALTER COLUMN dress_code TYPE TEXT;
+            END IF;
+        END $$;
+        """,
+        # Add rsvp_deadline column for SMS scheduling
+        """
+        DO $$
+        BEGIN
+            IF NOT EXISTS (
+                SELECT 1 FROM information_schema.columns
+                WHERE table_name = 'weddings' AND column_name = 'rsvp_deadline'
+            ) THEN
+                ALTER TABLE weddings ADD COLUMN rsvp_deadline DATE;
             END IF;
         END $$;
         """,
