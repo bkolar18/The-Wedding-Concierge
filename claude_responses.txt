@@ -3162,3 +3162,150 @@ User asked about:
 **Files Changed:**
 - frontend/src/app/dashboard/page.tsx - Added tab state and navigation
 - frontend/src/components/SMSManager.tsx - Added scheduleMessage modal, editTemplate modal, template CRUD
+
+=== CLAUDE RESPONSE - RSVP Deadline & Editable Templates ===
+
+User requested:
+1. Add RSVP Deadline field to Wedding Details for SMS scheduling reference
+2. Provide pre-created templates that couples can edit
+
+**Implementation (commit db2d135):**
+
+1. **RSVP Deadline Field:**
+   - Added to WeddingData and WeddingCreateData types in api.ts
+   - Added date input field in Wedding edit modal
+   - Passed to all openModal calls
+
+2. **Pre-Created Editable Templates:**
+   - Templates auto-seed when a wedding first loads the Guest Outreach tab
+   - 6 default templates created as editable (not locked):
+     - Welcome Message
+     - RSVP Reminder
+     - One Week Countdown
+     - Day Before Reminder
+     - Day Of Logistics
+     - Thank You
+   - All templates have edit/delete buttons (removed is_default checks)
+
+3. **Backend Changes:**
+   - list_templates now seeds defaults if no templates exist
+   - Removed is_default checks from update_template and delete_template
+   - Templates belong to wedding, not system-level
+
+**Files Changed:**
+- frontend/src/lib/api.ts - Added rsvp_deadline to types
+- frontend/src/app/dashboard/page.tsx - Added RSVP deadline field to modal
+- frontend/src/components/SMSManager.tsx - Removed is_default UI checks
+- backend/api/routes/sms.py - Auto-seed templates, removed edit restrictions
+
+=== CLAUDE RESPONSE - Template Placeholders Explanation ===
+
+User asked: Will the placeholders in templates be automatically filled when texts are sent out?
+
+**Answer: Yes!**
+
+The placeholders like `{{guest_name}}`, `{{partner1}}`, `{{wedding_date}}` are automatically replaced when SMS messages are sent.
+
+**Available Variables:**
+- `{{guest_name}}` → Each guest's name (personalized per recipient)
+- `{{partner1}}` → First partner's name
+- `{{partner2}}` → Second partner's name
+- `{{couple_names}}` → "Partner1 & Partner2"
+- `{{wedding_date}}` → Formatted date (e.g., "June 15, 2025")
+- `{{wedding_time}}` → Ceremony time
+- `{{ceremony_venue}}` → Venue name
+- `{{dress_code}}` → Dress code
+- `{{rsvp_deadline}}` → RSVP deadline date
+- `{{chat_link}}` → Link to the wedding chatbot
+
+**Example:**
+Template: `"Hi {{guest_name}}! {{partner1}} & {{partner2}} are getting married on {{wedding_date}}!"`
+
+Sent to John Smith: `"Hi John Smith! Alice & Bob are getting married on June 15, 2025!"`
+
+The backend's `TemplateService` (in services/sms/template_service.py) handles this substitution automatically when sending via Twilio.
+
+=== CLAUDE RESPONSE - Added Placeholder Info Note ===
+
+User suggested adding a note so users aren't confused about placeholders.
+
+**Added (commit 33f5d26):**
+Info note in Templates section:
+"Placeholders like {{guest_name}} are automatically replaced with real info when sent."
+
+Shows with a blue info icon for visibility.
+
+=== CLAUDE RESPONSE - RSVP via Chatbot Discussion ===
+
+User noticed: RSVP Reminder template directs guests to RSVP at chat link, but chatbot can't process RSVPs.
+
+**Two Options Proposed:**
+
+Option 1: Add RSVP via Chatbot (Recommended)
+- Guest texts "I want to RSVP"
+- Chatbot asks for name and response (Yes/No/Maybe)
+- Updates guest RSVP status in database
+- Couples see RSVP counts in dashboard
+
+Option 2: Link to External RSVP
+- Use {{rsvp_url}} placeholder instead
+- Couples set external RSVP link (The Knot, Zola)
+- Less integrated
+
+Recommended Option 1 for better integration. Asked user if they want this implemented.
+
+=== CLAUDE RESPONSE - RSVP Approach Revised ===
+
+User concern: If couples use The Knot/Zola for RSVPs, having separate RSVP tracking in our system would create confusion.
+
+**Revised Approach:**
+Instead of processing RSVPs internally, chatbot should direct to their existing RSVP page.
+
+Implementation:
+1. Add `rsvp_url` field to Wedding Details (may already exist from website import)
+2. Update RSVP Reminder template to use `{{rsvp_url}}` instead of `{{chat_link}}`
+3. Chatbot recognizes RSVP questions and provides the couple's RSVP link
+
+Benefits:
+- All RSVPs stay in one place (their wedding website)
+- No duplicate tracking confusion
+- Chatbot still helpful by directing to right place
+
+---
+
+## Frontend Styling Update - December 31, 2024
+
+**User Request:** Update frontend styling inspired by wedloop.io with smooth fade-in transitions and update functionality descriptions to include SMS abilities.
+
+**Changes Made:**
+
+### 1. CSS Animations Added (`globals.css`)
+- `fadeInUp` - Elements fade in while sliding up
+- `fadeIn` - Simple opacity fade
+- `slideInLeft` / `slideInRight` - Horizontal slide animations
+- `scaleIn` - Scale up effect for floating cards
+- Staggered delay utilities (`.animate-delay-100` through `.animate-delay-600`)
+- `.hover-lift` - Cards lift on hover with shadow
+
+### 2. Landing Page Animations (`page.tsx`)
+- Hero section: Badge fades in, title slides up, CTA buttons staggered
+- Hero image slides in from right with floating card scale animation
+- Value props bar: Each item fades in with staggered delays
+- "How It Works" cards: Staggered fade-in with hover lift effect
+- Demo section: Left content slides in from left, chat widget slides from right
+- "Why Wedding Concierge" cards: 4-column grid with staggered animations
+- CTA section: Text and button fade up with delays
+
+### 3. SMS Features Added to Marketing Copy
+- Value props bar: Added "SMS blasts & reminders" checkmark
+- Step 2 "How It Works": Changed from "Share Your Link" to "Reach Your Guests" with description: "Share your chat link on invitations, send SMS blasts to all guests, or schedule automated reminders for RSVP deadlines."
+- "Why Wedding Concierge" section: Expanded from 2 to 4 cards:
+  1. Save Hours of Time
+  2. Available 24/7
+  3. SMS Blasts - "Send text messages to all your guests at once"
+  4. Scheduled Reminders - "Automate RSVP deadline reminders and day-before logistics texts"
+
+### 4. Hover Effects
+- All cards have `hover:-translate-y-1` for subtle lift
+- Buttons have hover state with slight lift
+- Shadow transitions on hover for depth
