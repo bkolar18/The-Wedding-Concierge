@@ -24,7 +24,7 @@ class Settings(BaseSettings):
 
     # LLM
     ANTHROPIC_API_KEY: Optional[str] = None
-    LLM_MODEL: str = "claude-haiku-3-5-20241022"  # Haiku for chat (cheaper), Sonnet hardcoded in data_mapper for scraping
+    LLM_MODEL: str = "claude-3-5-haiku-20241022"  # Haiku for chat (cheaper), Sonnet hardcoded in data_mapper for scraping
 
     # Twilio (Phase 2)
     TWILIO_ACCOUNT_SID: Optional[str] = None
