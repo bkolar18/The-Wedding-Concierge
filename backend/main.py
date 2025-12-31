@@ -49,6 +49,8 @@ app.add_middleware(
         "http://127.0.0.1:3000",
         "http://localhost:3001",  # Next.js dev (alternate port)
         "http://127.0.0.1:3001",
+        "https://the-wedding-concierge.vercel.app",  # Production frontend
+        "https://the-wedding-concierge-*.vercel.app",  # Vercel preview deployments
     ],
     allow_credentials=True,
     allow_methods=["*"],
