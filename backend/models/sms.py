@@ -167,6 +167,9 @@ class MessageLog(Base):
     error_code: Mapped[Optional[str]] = mapped_column(String(20), nullable=True)
     error_message: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
 
+    # Retry tracking
+    retry_count: Mapped[int] = mapped_column(Integer, default=0)
+
     # Timestamps
     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
     sent_at: Mapped[Optional[datetime]] = mapped_column(DateTime, nullable=True)

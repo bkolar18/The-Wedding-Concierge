@@ -73,11 +73,55 @@ async def startup():
     await init_db()
     logger.info("Database tables initialized")
 
+    # Initialize APScheduler for SMS background jobs
+    try:
+        from apscheduler.schedulers.asyncio import AsyncIOScheduler
+        from apscheduler.triggers.cron import CronTrigger
+        from apscheduler.triggers.interval import IntervalTrigger
+        from services.sms import jobs
+
+        scheduler = AsyncIOScheduler()
+
+        # Process relative schedules daily at 8 AM
+        scheduler.add_job(
+            jobs.process_relative_schedules,
+            CronTrigger(hour=8, minute=0),
+            id="process_relative_schedules",
+            replace_existing=True
+        )
+
+        # Process fixed schedules every 5 minutes
+        scheduler.add_job(
+            jobs.process_fixed_schedules,
+            IntervalTrigger(minutes=5),
+            id="process_fixed_schedules",
+            replace_existing=True
+        )
+
+        # Retry failed messages every 15 minutes
+        scheduler.add_job(
+            jobs.retry_failed_messages,
+            IntervalTrigger(minutes=15),
+            id="retry_failed_messages",
+            replace_existing=True
+        )
+
+        scheduler.start()
+        app.state.scheduler = scheduler
+        logger.info("SMS scheduler initialized with 3 background jobs")
+    except ImportError:
+        logger.warning("APScheduler not installed, SMS scheduling disabled")
+    except Exception as e:
+        logger.error(f"Failed to initialize scheduler: {e}")
+
 
 @app.on_event("shutdown")
 async def shutdown():
     """Cleanup on shutdown."""
-    pass
+    # Shutdown the scheduler gracefully
+    if hasattr(app.state, 'scheduler'):
+        app.state.scheduler.shutdown(wait=False)
+        logger.info("SMS scheduler shut down")
 
 
 if __name__ == "__main__":
