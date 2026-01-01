@@ -3309,3 +3309,81 @@ Benefits:
 - All cards have `hover:-translate-y-1` for subtle lift
 - Buttons have hover state with slight lift
 - Shadow transitions on hover for depth
+
+---
+
+## Scroll-Triggered Animations - January 1, 2026
+
+**User Request:** Make the "How It Works" section fade in when scrolled to.
+
+**Changes Made:**
+
+### 1. Created `useScrollAnimation` Hook (`page.tsx`)
+```typescript
+function useScrollAnimation() {
+  const ref = useRef<HTMLElement>(null);
+  const [isVisible, setIsVisible] = useState(false);
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setIsVisible(true);
+          observer.disconnect(); // Only animate once
+        }
+      },
+      { threshold: 0.1, rootMargin: '0px 0px -50px 0px' }
+    );
+    // ...
+  }, []);
+
+  return { ref, isVisible };
+}
+```
+
+### 2. Applied to Multiple Sections
+- **How It Works** - All 3 step cards fade in with staggered delays
+- **Demo Section** - Left content slides from left, chat widget slides from right
+- **Why Wedding Concierge** - All 4 benefit cards fade in
+- **CTA Section** - Title, description, and button fade in
+
+### 3. Animation Behavior
+- Uses IntersectionObserver with 10% threshold
+- Animations only trigger once (observer disconnects after first trigger)
+- Elements start with `opacity-0` until visible
+- Staggered delays create cascading effect
+
+---
+
+## Demo Wedding Fix - January 1, 2026
+
+**Issue:** Demo chat showing "Wedding not found. Please check your access code." - the demo wedding "alice-bob-test" didn't exist in the production database.
+
+**Root Cause:** The demo wedding was only created by local test scripts, not in production.
+
+**Fix:** Added automatic seeding in `backend/main.py` startup event:
+
+```python
+@app.on_event("startup")
+async def startup():
+    # ... init_db() ...
+
+    # Seed demo wedding if it doesn't exist
+    from models.wedding import Wedding, WeddingAccommodation
+    async with async_session_maker() as session:
+        result = await session.execute(
+            select(Wedding).where(Wedding.access_code == "alice-bob-test")
+        )
+        existing = result.scalar_one_or_none()
+
+        if not existing:
+            wedding = Wedding(
+                partner1_name="Alice Smith",
+                partner2_name="Bob Jones",
+                # ... demo data ...
+                access_code="alice-bob-test"
+            )
+            # Also adds demo accommodation with hotel room block
+```
+
+**Result:** Demo wedding is automatically created when the backend starts if it doesn't exist.
