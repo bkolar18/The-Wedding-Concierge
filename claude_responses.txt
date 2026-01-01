@@ -3488,3 +3488,95 @@ if wedding_data.get('rsvp_url') or wedding_data.get('rsvp_deadline'):
 ```
 
 **Result:** Chat can now answer RSVP deadline questions.
+
+---
+
+## Feature Implementation Plan - January 1, 2026
+
+**User Requests:**
+1. Add SMS details to pricing page
+2. Add standard password requirements (1 uppercase, 1 special character)
+3. Add forgot password with email verification and safeguards
+4. Add SMS FAQ to pricing page
+5. Add "Get in Touch" contact form on home page
+
+---
+
+### 1. SMS Details on Pricing Page
+**Files:** `frontend/src/app/pricing/page.tsx`
+
+**Steps:**
+- Add "SMS Guest Communication" feature to the pricing card features list
+- Add new FAQ about SMS messaging (costs, what's included, how it works)
+
+---
+
+### 2. Password Requirements
+**Files:**
+- `backend/api/routes/auth.py` - Add validation
+- `frontend/src/app/register/page.tsx` - Add UI requirements display
+
+**Steps:**
+- Backend: Add regex validation for 1 uppercase + 1 special character
+- Frontend: Show password requirements below input
+- Frontend: Real-time validation feedback
+
+---
+
+### 3. Forgot Password with Email Verification
+**Files:**
+- `backend/models/user.py` - Add reset_token fields
+- `backend/api/routes/auth.py` - Add reset endpoints
+- `backend/services/email/` - New email service (placeholder for now)
+- `frontend/src/app/forgot-password/page.tsx` - New page
+- `frontend/src/app/reset-password/[token]/page.tsx` - New page
+- `frontend/src/app/login/page.tsx` - Add forgot password link
+
+**Steps:**
+1. Add `reset_token` and `reset_token_expires` to User model
+2. Create `/auth/forgot-password` endpoint:
+   - Accepts email, generates secure token (UUID)
+   - Token expires in 1 hour
+   - Rate limit: max 3 requests per email per hour (safeguard)
+   - Always return success (don't reveal if email exists)
+3. Create `/auth/reset-password` endpoint:
+   - Validates token exists and not expired
+   - Requires new password meeting requirements
+   - Clears token after use
+4. Create email service (placeholder - log to console for now)
+5. Frontend pages for request and reset
+
+**Safeguards:**
+- Rate limiting per email
+- Token expiration (1 hour)
+- One-time use tokens
+- Don't reveal if email exists in system
+
+---
+
+### 4. SMS FAQ on Pricing Page
+**Files:** `frontend/src/app/pricing/page.tsx`
+
+**Steps:**
+- Add FAQ: "How does SMS messaging work?"
+- Explain: guest management, SMS blasts, scheduled reminders, costs (~$0.01/text)
+
+---
+
+### 5. Contact Form on Home Page
+**Files:**
+- `frontend/src/app/page.tsx` - Add contact section
+- `backend/api/routes/contact.py` - New contact endpoint
+- `backend/core/config.py` - Add ADMIN_EMAIL placeholder
+
+**Steps:**
+1. Add contact form section before footer (name, email, message)
+2. Create `/api/contact` endpoint that:
+   - Validates input
+   - Logs message (placeholder until email service)
+   - Returns success
+3. Add ADMIN_EMAIL to config (placeholder value)
+
+---
+
+**Status:** Awaiting user approval before implementation.
