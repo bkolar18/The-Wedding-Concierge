@@ -115,9 +115,12 @@ class ChatEngine:
                 context_parts.append(f"- **{store.title()}**: {url}")
 
         # RSVP
-        if wedding_data.get('rsvp_url'):
+        if wedding_data.get('rsvp_url') or wedding_data.get('rsvp_deadline'):
             context_parts.append(f"\n### RSVP")
-            context_parts.append(f"RSVP link: {wedding_data['rsvp_url']}")
+            if wedding_data.get('rsvp_deadline'):
+                context_parts.append(f"**RSVP Deadline**: {self._format_date(wedding_data['rsvp_deadline'])}")
+            if wedding_data.get('rsvp_url'):
+                context_parts.append(f"RSVP link: {wedding_data['rsvp_url']}")
 
         # Wedding website
         if wedding_data.get('wedding_website_url'):

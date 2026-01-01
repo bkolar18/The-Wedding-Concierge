@@ -215,6 +215,7 @@ async def send_message(
         "registry_urls": wedding.registry_urls,
         "wedding_website_url": wedding.wedding_website_url,
         "rsvp_url": wedding.rsvp_url,
+        "rsvp_deadline": wedding.rsvp_deadline,
         "additional_notes": wedding.additional_notes,
         "accommodations": [
             {
