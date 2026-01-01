@@ -3458,3 +3458,33 @@ Added "My Dashboard" link to chat page navigation (only shows when user is logge
 ```
 
 This allows couples to quickly navigate back to manage their wedding, and guests (if they have accounts) to access their dashboard.
+
+---
+
+## RSVP Deadline Chat Fix - January 1, 2026
+
+**Issue:** Chat couldn't answer "when do I need to RSVP by?" even though the data existed.
+
+**Root Cause:** Two places were missing the RSVP deadline:
+
+1. `chat_engine.py` - The `build_wedding_context()` method only included `rsvp_url`, not `rsvp_deadline`
+2. `chat.py` - The `wedding_data` dict passed to chat engine didn't include `rsvp_deadline`
+
+**Fixes:**
+
+1. **chat_engine.py** - Added RSVP deadline to context:
+```python
+if wedding_data.get('rsvp_url') or wedding_data.get('rsvp_deadline'):
+    context_parts.append(f"\n### RSVP")
+    if wedding_data.get('rsvp_deadline'):
+        context_parts.append(f"**RSVP Deadline**: {self._format_date(wedding_data['rsvp_deadline'])}")
+    if wedding_data.get('rsvp_url'):
+        context_parts.append(f"RSVP link: {wedding_data['rsvp_url']}")
+```
+
+2. **chat.py** - Added `rsvp_deadline` to wedding_data dict:
+```python
+"rsvp_deadline": wedding.rsvp_deadline,
+```
+
+**Result:** Chat can now answer RSVP deadline questions.
