@@ -25,11 +25,14 @@ export default function ChatWidget({ accessCode: initialAccessCode, weddingPrevi
   const [showNamePrompt, setShowNamePrompt] = useState(!!weddingPreview);
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const messagesContainerRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
-  // Scroll to bottom when messages change
+  // Scroll to bottom of chat container only (not the whole page)
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    if (messagesContainerRef.current) {
+      messagesContainerRef.current.scrollTop = messagesContainerRef.current.scrollHeight;
+    }
   }, [messages]);
 
   // Focus input when chat starts
@@ -246,7 +249,7 @@ export default function ChatWidget({ accessCode: initialAccessCode, weddingPrevi
       </div>
 
       {/* Messages */}
-      <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-gray-50">
+      <div ref={messagesContainerRef} className="flex-1 overflow-y-auto p-4 space-y-4 bg-gray-50">
         {messages.map((message, index) => (
           <div
             key={index}

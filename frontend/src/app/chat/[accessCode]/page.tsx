@@ -3,11 +3,13 @@
 import { useEffect, useState } from 'react';
 import { useParams } from 'next/navigation';
 import { getWeddingPreview, WeddingPreview } from '@/lib/api';
+import { useAuth } from '@/contexts/AuthContext';
 import ChatWidget from '@/components/chat/ChatWidget';
 
 export default function WeddingChatPage() {
   const params = useParams();
   const accessCode = params.accessCode as string;
+  const { user } = useAuth();
 
   const [wedding, setWedding] = useState<WeddingPreview | null>(null);
   const [loading, setLoading] = useState(true);
@@ -87,19 +89,32 @@ export default function WeddingChatPage() {
             </svg>
             <span className="font-serif text-sm">The Wedding Concierge</span>
           </a>
-          {wedding.wedding_website_url && (
-            <a
-              href={wedding.wedding_website_url}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex items-center space-x-1.5 text-sm text-gray-500 hover:text-rose-600 transition-colors"
-            >
-              <span>Visit Wedding Website</span>
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
-              </svg>
-            </a>
-          )}
+          <div className="flex items-center space-x-4">
+            {wedding.wedding_website_url && (
+              <a
+                href={wedding.wedding_website_url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center space-x-1.5 text-sm text-gray-500 hover:text-rose-600 transition-colors"
+              >
+                <span>Wedding Website</span>
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                </svg>
+              </a>
+            )}
+            {user && (
+              <a
+                href="/dashboard"
+                className="flex items-center space-x-1.5 text-sm text-gray-500 hover:text-rose-600 transition-colors"
+              >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
+                </svg>
+                <span>My Dashboard</span>
+              </a>
+            )}
+          </div>
         </div>
       </nav>
 
