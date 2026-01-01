@@ -69,9 +69,57 @@ app.include_router(sms.router, prefix="/api/wedding", tags=["sms"])  # SMS route
 @app.on_event("startup")
 async def startup():
     """Initialize services on startup."""
-    from core.database import init_db
+    from core.database import init_db, async_session_maker
+    from sqlalchemy import select
     await init_db()
     logger.info("Database tables initialized")
+
+    # Seed demo wedding if it doesn't exist
+    try:
+        from models.wedding import Wedding, WeddingAccommodation
+        async with async_session_maker() as session:
+            result = await session.execute(
+                select(Wedding).where(Wedding.access_code == "alice-bob-test")
+            )
+            existing = result.scalar_one_or_none()
+
+            if not existing:
+                wedding = Wedding(
+                    partner1_name="Alice Smith",
+                    partner2_name="Bob Jones",
+                    couple_email="demo@weddingconcierge.com",
+                    wedding_date=None,
+                    wedding_time="4:00 PM",
+                    dress_code="Formal Attire",
+                    ceremony_venue_name="The Grand Chapel",
+                    ceremony_venue_address="123 Wedding Lane, Love City, CA 90210",
+                    reception_venue_name="The Grand Ballroom",
+                    reception_venue_address="123 Wedding Lane, Love City, CA 90210",
+                    reception_time="6:00 PM",
+                    access_code="alice-bob-test"
+                )
+                session.add(wedding)
+                await session.commit()
+                await session.refresh(wedding)
+
+                # Add demo accommodation
+                accommodation = WeddingAccommodation(
+                    wedding_id=wedding.id,
+                    hotel_name="The Grand Hotel",
+                    address="456 Hotel Blvd, Love City, CA 90210",
+                    phone="(555) 123-4567",
+                    has_room_block=True,
+                    room_block_name="Smith-Jones Wedding",
+                    room_block_code="SMITHJONES2025",
+                    room_block_rate="$149/night"
+                )
+                session.add(accommodation)
+                await session.commit()
+                logger.info("Demo wedding 'alice-bob-test' created")
+            else:
+                logger.info("Demo wedding already exists")
+    except Exception as e:
+        logger.error(f"Failed to seed demo wedding: {e}")
 
     # Initialize APScheduler for SMS background jobs
     try:
