@@ -3387,3 +3387,74 @@ async def startup():
 ```
 
 **Result:** Demo wedding is automatically created when the backend starts if it doesn't exist.
+
+---
+
+## Chat & Demo Improvements - January 1, 2026
+
+**User Requests:**
+1. Fix chat scroll moving the whole screen down
+2. Enhance demo wedding with more questions (RSVP deadline, nearby activities, food options)
+3. Add dashboard link to chat page
+
+### 1. Chat Scroll Fix (`ChatWidget.tsx`)
+
+**Problem:** When messages were sent/received, `scrollIntoView` was scrolling the entire page.
+
+**Fix:** Changed to scroll only within the chat container:
+```typescript
+const messagesContainerRef = useRef<HTMLDivElement>(null);
+
+useEffect(() => {
+  if (messagesContainerRef.current) {
+    messagesContainerRef.current.scrollTop = messagesContainerRef.current.scrollHeight;
+  }
+}, [messages]);
+```
+
+### 2. Enhanced Demo Wedding (`main.py`)
+
+Demo wedding now set at The Plaza Hotel, NYC with comprehensive details:
+
+**Basic Info:**
+- Wedding date: 3 months from today
+- RSVP deadline: 30 days before wedding
+- Location: The Plaza Hotel, 768 5th Avenue, New York, NY 10019
+- Dress code: Black Tie Optional with detailed description
+
+**Accommodations (3):**
+1. The Plaza Hotel - Room block with code SMITHJONES2025, $450/night
+2. The Peninsula New York - 2 minute walk
+3. Park Lane Hotel - 5 minute walk, budget-friendly
+
+**Events (6):**
+1. Welcome Drinks - The Campbell (day before)
+2. Ceremony - 4:00 PM
+3. Cocktail Hour - 5:00 PM
+4. Reception & Dinner - 6:00 PM - 11:00 PM
+5. After Party - 11:00 PM - 2:00 AM
+6. Farewell Brunch - Next day at Sarabeth's
+
+**FAQs (9):**
+- Food options (Filet Mignon, Salmon, Risotto + open bar)
+- NYC activities (Central Park, Museum Mile, Broadway, Times Square)
+- Restaurant recommendations (Carbone, Le Bernardin, Joe's Pizza, etc.)
+- Parking and transportation from airports
+- Plus one and children policies
+- Weather expectations
+
+**Auto-Recreation:** If existing demo has no FAQs, it's deleted and recreated with full data.
+
+### 3. Dashboard Link on Chat Page
+
+Added "My Dashboard" link to chat page navigation (only shows when user is logged in):
+```tsx
+{user && (
+  <a href="/dashboard" className="...">
+    <svg>...</svg>
+    <span>My Dashboard</span>
+  </a>
+)}
+```
+
+This allows couples to quickly navigate back to manage their wedding, and guests (if they have accounts) to access their dashboard.
