@@ -292,8 +292,8 @@ class WeddingScraper:
                 is_critical = any(critical in page_name.lower() for critical in critical_pages)
                 needs_extra_wait = any(slow in page_name.lower() for slow in slow_render_pages)
                 max_attempts = 3 if is_critical else 1
-                # Use 8 seconds wait for travel/hotel pages to ensure content loads
-                wait_time = 8.0 if needs_extra_wait else 3.0
+                # Use 8 seconds for travel/hotel pages, 5 seconds for other pages
+                wait_time = 8.0 if needs_extra_wait else 5.0
 
                 for attempt in range(max_attempts):
                     logger.info(f"Fetching subpage: {subpage_url} (attempt {attempt + 1}/{max_attempts}, wait={wait_time}s)")
