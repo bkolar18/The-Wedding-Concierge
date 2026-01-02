@@ -991,3 +991,16 @@ Continued from previous session. All scraping optimization work was completed:
 - CLAUDE.md created for persistent logging
 
 Mobile optimization plan exists in plans folder for dashboard and chat page navigation improvements.
+
+=== CLAUDE RESPONSE - True Parallel Scraping Fix ===
+User noticed batch 1 and batch 2 were taking same time as sequential (1.5 min each).
+
+**Root cause:** Single shared browser instance. Playwright queues operations through one DevTools Protocol connection, so asyncio.gather was running sequentially.
+
+**Fix:** Each subpage now gets its own browser instance, enabling true parallelism.
+
+**Expected improvement:**
+- Before: ~3.75 min (main page + batch1 + batch2 + Claude API)
+- After: ~1.5 min (main page + all subpages parallel + Claude API)
+
+Committed and pushed to trigger Render deploy.
