@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { scrapeWeddingWebsite, importWeddingFromUrl, ScrapePreview, ImportResponse } from '@/lib/api';
+import { scrapeWeddingWebsite, importWeddingFromUrl, ScrapePreview, ScrapeEvent, ScrapeAccommodation, ScrapeFAQ, ImportResponse } from '@/lib/api';
 import { useAuth } from '@/contexts/AuthContext';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
@@ -33,6 +33,7 @@ export default function ImportPage() {
   const [importResult, setImportResult] = useState<ImportResponse | null>(null);
   const [scanProgress, setScanProgress] = useState(0);
   const [scanMessage, setScanMessage] = useState('');
+  const [showLongWaitMessage, setShowLongWaitMessage] = useState(false);
 
   // User is logged in if we have a token from AuthContext
   const isLoggedIn = !!token;
@@ -42,6 +43,7 @@ export default function ImportPage() {
     if (step !== 'scanning') {
       setScanProgress(0);
       setScanMessage('');
+      setShowLongWaitMessage(false);
       return;
     }
 
@@ -58,7 +60,15 @@ export default function ImportPage() {
     setScanProgress(SCAN_STAGES[0].progress);
     setScanMessage(SCAN_STAGES[0].message);
 
-    return () => clearInterval(interval);
+    // Show long wait message after 50 seconds
+    const longWaitTimeout = setTimeout(() => {
+      setShowLongWaitMessage(true);
+    }, 50000);
+
+    return () => {
+      clearInterval(interval);
+      clearTimeout(longWaitTimeout);
+    };
   }, [step]);
 
   const handleScan = async (e: React.FormEvent) => {
@@ -169,6 +179,13 @@ export default function ImportPage() {
                     <p className="text-xs text-gray-500 text-center">
                       This may take up to 2 minutes while we scan all pages...
                     </p>
+                    {showLongWaitMessage && (
+                      <div className="mt-3 p-3 bg-amber-50 border border-amber-200 rounded-lg">
+                        <p className="text-sm text-amber-800 text-center">
+                          <span className="font-medium">Taking a bit longer?</span> Some wedding sites like The Knot and WeddingWire require more time to navigate. Hang tight — we&apos;re working on it!
+                        </p>
+                      </div>
+                    )}
                   </div>
                 )}
 
@@ -204,8 +221,8 @@ export default function ImportPage() {
 
           {/* Step 2: Preview */}
           {step === 'preview' && preview && (
-            <div className="bg-white rounded-2xl shadow-lg p-8">
-              <div className="flex items-center justify-between mb-6">
+            <div className="bg-white rounded-2xl shadow-lg p-4 sm:p-8 overflow-hidden">
+              <div className="flex items-center justify-between mb-6 flex-wrap gap-2">
                 <h1 className="text-2xl font-serif text-gray-800">
                   Preview Extracted Data
                 </h1>
@@ -217,7 +234,7 @@ export default function ImportPage() {
               </div>
 
               <div className="space-y-6">
-                {/* Partner Names */}
+                {/* Partner Names & Date */}
                 <div className="p-4 bg-gray-50 rounded-lg">
                   <h2 className="text-lg font-medium text-gray-800 mb-2">
                     {preview.partner1_name} & {preview.partner2_name}
@@ -234,31 +251,21 @@ export default function ImportPage() {
                   )}
                 </div>
 
-                {/* Venues */}
+                {/* Venues with Addresses */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="p-4 border border-gray-200 rounded-lg">
                     <h3 className="text-sm font-medium text-gray-500 mb-1">Ceremony Venue</h3>
-                    <p className="text-gray-800">{preview.ceremony_venue || 'Not specified'}</p>
+                    <p className="text-gray-800 font-medium">{preview.ceremony_venue || 'Not specified'}</p>
+                    {preview.ceremony_venue_address && (
+                      <p className="text-gray-600 text-sm mt-1">{preview.ceremony_venue_address}</p>
+                    )}
                   </div>
                   <div className="p-4 border border-gray-200 rounded-lg">
                     <h3 className="text-sm font-medium text-gray-500 mb-1">Reception Venue</h3>
-                    <p className="text-gray-800">{preview.reception_venue || 'Same as ceremony'}</p>
-                  </div>
-                </div>
-
-                {/* Additional Info */}
-                <div className="grid grid-cols-3 gap-4 text-center">
-                  <div className="p-3 bg-gray-50 rounded-lg">
-                    <p className="text-2xl font-bold text-rose-600">{preview.events_count}</p>
-                    <p className="text-sm text-gray-500">Events</p>
-                  </div>
-                  <div className="p-3 bg-gray-50 rounded-lg">
-                    <p className="text-2xl font-bold text-rose-600">{preview.accommodations_count}</p>
-                    <p className="text-sm text-gray-500">Hotels</p>
-                  </div>
-                  <div className="p-3 bg-gray-50 rounded-lg">
-                    <p className="text-2xl font-bold text-rose-600">{preview.has_registry ? 'Yes' : 'No'}</p>
-                    <p className="text-sm text-gray-500">Registry</p>
+                    <p className="text-gray-800 font-medium">{preview.reception_venue || 'Same as ceremony'}</p>
+                    {preview.reception_venue_address && (
+                      <p className="text-gray-600 text-sm mt-1">{preview.reception_venue_address}</p>
+                    )}
                   </div>
                 </div>
 
@@ -266,6 +273,86 @@ export default function ImportPage() {
                   <div className="p-4 border border-gray-200 rounded-lg">
                     <h3 className="text-sm font-medium text-gray-500 mb-1">Dress Code</h3>
                     <p className="text-gray-800">{preview.dress_code}</p>
+                  </div>
+                )}
+
+                {/* Summary Stats */}
+                <div className="grid grid-cols-4 gap-3 text-center">
+                  <div className="p-3 bg-gray-50 rounded-lg">
+                    <p className="text-xl font-bold text-rose-600">{preview.events_count}</p>
+                    <p className="text-xs text-gray-500">Events</p>
+                  </div>
+                  <div className="p-3 bg-gray-50 rounded-lg">
+                    <p className="text-xl font-bold text-rose-600">{preview.accommodations_count}</p>
+                    <p className="text-xs text-gray-500">Hotels</p>
+                  </div>
+                  <div className="p-3 bg-gray-50 rounded-lg">
+                    <p className="text-xl font-bold text-rose-600">{preview.faqs_count || 0}</p>
+                    <p className="text-xs text-gray-500">FAQs</p>
+                  </div>
+                  <div className="p-3 bg-gray-50 rounded-lg">
+                    <p className="text-xl font-bold text-rose-600">{preview.has_registry ? 'Yes' : 'No'}</p>
+                    <p className="text-xs text-gray-500">Registry</p>
+                  </div>
+                </div>
+
+                {/* Events List */}
+                {preview.events && preview.events.length > 0 && (
+                  <div className="border border-gray-200 rounded-lg overflow-hidden">
+                    <div className="bg-gray-50 px-4 py-2 border-b border-gray-200">
+                      <h3 className="font-medium text-gray-800">Events ({preview.events.length})</h3>
+                    </div>
+                    <div className="divide-y divide-gray-100">
+                      {preview.events.map((event: ScrapeEvent, idx: number) => (
+                        <div key={idx} className="p-4">
+                          <p className="font-medium text-gray-800">{event.name}</p>
+                          <div className="text-sm text-gray-600 mt-1 space-y-0.5">
+                            {event.date && <p>{event.date}{event.time ? ` at ${event.time}` : ''}</p>}
+                            {event.venue_name && <p>{event.venue_name}</p>}
+                            {event.venue_address && <p className="text-gray-500">{event.venue_address}</p>}
+                            {event.dress_code && <p className="text-gray-500">Dress code: {event.dress_code}</p>}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Accommodations List */}
+                {preview.accommodations && preview.accommodations.length > 0 && (
+                  <div className="border border-gray-200 rounded-lg overflow-hidden">
+                    <div className="bg-gray-50 px-4 py-2 border-b border-gray-200">
+                      <h3 className="font-medium text-gray-800">Accommodations ({preview.accommodations.length})</h3>
+                    </div>
+                    <div className="divide-y divide-gray-100">
+                      {preview.accommodations.map((acc: ScrapeAccommodation, idx: number) => (
+                        <div key={idx} className="p-4">
+                          <p className="font-medium text-gray-800">{acc.name}</p>
+                          <div className="text-sm text-gray-600 mt-1 space-y-0.5">
+                            {acc.address && <p>{acc.address}</p>}
+                            {acc.room_block_name && <p>Room block: {acc.room_block_name}</p>}
+                            {acc.room_block_code && <p className="text-gray-500">Code: {acc.room_block_code}</p>}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* FAQs List */}
+                {preview.faqs && preview.faqs.length > 0 && (
+                  <div className="border border-gray-200 rounded-lg overflow-hidden">
+                    <div className="bg-gray-50 px-4 py-2 border-b border-gray-200">
+                      <h3 className="font-medium text-gray-800">FAQs ({preview.faqs.length})</h3>
+                    </div>
+                    <div className="divide-y divide-gray-100">
+                      {preview.faqs.map((faq: ScrapeFAQ, idx: number) => (
+                        <div key={idx} className="p-4">
+                          <p className="font-medium text-gray-800">{faq.question}</p>
+                          <p className="text-sm text-gray-600 mt-1">{faq.answer}</p>
+                        </div>
+                      ))}
+                    </div>
                   </div>
                 )}
 

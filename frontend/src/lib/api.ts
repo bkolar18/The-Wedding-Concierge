@@ -551,16 +551,46 @@ export async function deleteFAQ(token: string, weddingId: string, faqId: string)
 
 // ============ SCRAPE API ============
 
+export interface ScrapeEvent {
+  name: string;
+  date: string | null;
+  time: string | null;
+  description: string | null;
+  venue_name: string | null;
+  venue_address: string | null;
+  dress_code: string | null;
+}
+
+export interface ScrapeAccommodation {
+  name: string;
+  address: string | null;
+  phone: string | null;
+  booking_url: string | null;
+  room_block_name: string | null;
+  room_block_code: string | null;
+}
+
+export interface ScrapeFAQ {
+  question: string;
+  answer: string;
+}
+
 export interface ScrapePreview {
   partner1_name: string;
   partner2_name: string;
   wedding_date: string | null;
   ceremony_venue: string | null;
+  ceremony_venue_address: string | null;
   reception_venue: string | null;
+  reception_venue_address: string | null;
   dress_code: string | null;
   events_count: number;
   accommodations_count: number;
+  faqs_count: number;
   has_registry: boolean;
+  events: ScrapeEvent[];
+  accommodations: ScrapeAccommodation[];
+  faqs: ScrapeFAQ[];
 }
 
 export interface ScrapeResponse {

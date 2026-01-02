@@ -84,17 +84,28 @@ async def scrape_wedding_website(request: ScrapeRequest):
         mapper = WeddingDataMapper()
         structured_data = await mapper.extract_structured_data(raw_data)
 
+        # Get lists for preview
+        events = structured_data.get("events", [])
+        accommodations = structured_data.get("accommodations", [])
+        faqs = structured_data.get("faqs", [])
+
         # Create preview for user confirmation
         preview = {
             "partner1_name": structured_data.get("partner1_name", ""),
             "partner2_name": structured_data.get("partner2_name", ""),
             "wedding_date": structured_data.get("wedding_date"),
             "ceremony_venue": structured_data.get("ceremony_venue_name"),
+            "ceremony_venue_address": structured_data.get("ceremony_venue_address"),
             "reception_venue": structured_data.get("reception_venue_name"),
+            "reception_venue_address": structured_data.get("reception_venue_address"),
             "dress_code": structured_data.get("dress_code"),
-            "events_count": len(structured_data.get("events", [])),
-            "accommodations_count": len(structured_data.get("accommodations", [])),
+            "events_count": len(events),
+            "accommodations_count": len(accommodations),
+            "faqs_count": len(faqs),
             "has_registry": bool(structured_data.get("registry_urls")),
+            "events": events,
+            "accommodations": accommodations,
+            "faqs": faqs,
         }
 
         return ScrapeResponse(
