@@ -14,6 +14,7 @@ export default function WeddingChatPage() {
   const [wedding, setWedding] = useState<WeddingPreview | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   useEffect(() => {
     async function fetchWedding() {
@@ -78,7 +79,7 @@ export default function WeddingChatPage() {
   return (
     <div className="min-h-screen bg-gradient-to-b from-rose-50 via-white to-rose-50">
       {/* Top navigation bar */}
-      <nav className="py-3 px-4 border-b border-rose-100 bg-white/80 backdrop-blur-sm">
+      <nav className="relative py-3 px-4 border-b border-rose-100 bg-white/80 backdrop-blur-sm">
         <div className="max-w-4xl mx-auto flex items-center justify-between">
           <a href="/" className="flex items-center space-x-2 text-gray-700 hover:text-rose-600 transition-colors">
             <svg className="w-6 h-6 text-rose-500" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -89,7 +90,9 @@ export default function WeddingChatPage() {
             </svg>
             <span className="font-serif text-sm">The Wedding Concierge</span>
           </a>
-          <div className="flex items-center space-x-4">
+
+          {/* Desktop navigation */}
+          <div className="hidden md:flex items-center space-x-4">
             {wedding.wedding_website_url && (
               <a
                 href={wedding.wedding_website_url}
@@ -115,7 +118,58 @@ export default function WeddingChatPage() {
               </a>
             )}
           </div>
+
+          {/* Mobile hamburger button - only show if there are links to display */}
+          {(wedding.wedding_website_url || user) && (
+            <button
+              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+              className="md:hidden p-2 text-gray-500 hover:text-rose-600 transition-colors"
+              aria-label="Toggle menu"
+            >
+              {mobileMenuOpen ? (
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              ) : (
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+                </svg>
+              )}
+            </button>
+          )}
         </div>
+
+        {/* Mobile dropdown menu */}
+        {mobileMenuOpen && (
+          <div className="absolute top-full right-4 mt-2 bg-white rounded-lg shadow-lg py-2 min-w-[180px] md:hidden z-50 border border-gray-100">
+            {wedding.wedding_website_url && (
+              <a
+                href={wedding.wedding_website_url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center px-4 py-2.5 text-gray-700 hover:bg-rose-50 hover:text-rose-600 transition-colors"
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                </svg>
+                Wedding Website
+              </a>
+            )}
+            {user && (
+              <a
+                href="/dashboard"
+                className="flex items-center px-4 py-2.5 text-gray-700 hover:bg-rose-50 hover:text-rose-600 transition-colors"
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
+                </svg>
+                My Dashboard
+              </a>
+            )}
+          </div>
+        )}
       </nav>
 
       {/* Header with wedding info */}

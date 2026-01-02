@@ -4059,3 +4059,11 @@ Changes made:
 === CLAUDE RESPONSE ===
 
 Done. Updated "up to a minute" to "up to 2 minutes" in the scan progress message.
+
+=== CLAUDE RESPONSE ===
+
+Done. Changes pushed:
+
+1. **File upload button** - Styled "Choose File:" button with spacing before filename
+2. **Edit guests** - Added pencil icon button on each row, opens edit modal
+3. **Expandable list** - "Show 25 more" button instead of "...and x more", plus "Show less" to collapse

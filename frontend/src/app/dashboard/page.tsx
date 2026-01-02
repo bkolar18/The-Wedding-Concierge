@@ -483,7 +483,7 @@ export default function DashboardPage() {
             </div>
 
             {/* Share link section */}
-            <div className="bg-gradient-to-r from-rose-500 to-rose-600 rounded-2xl shadow-lg p-8 text-white">
+            <div className="bg-gradient-to-r from-rose-500 to-rose-600 rounded-2xl shadow-lg p-4 sm:p-8 text-white">
               <h2 className="text-xl font-medium mb-2">Share with Your Guests</h2>
               <p className="text-rose-100 mb-4">
                 Give your guests this link so they can ask questions about your wedding.
@@ -794,7 +794,7 @@ export default function DashboardPage() {
       {/* Edit Wedding Modal */}
       {editingItem?.type === 'wedding' && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-2xl p-6 max-w-lg w-full max-h-[90vh] overflow-y-auto">
+          <div className="bg-white rounded-2xl p-4 sm:p-6 max-w-lg w-full max-h-[90vh] overflow-y-auto">
             <h2 className="text-xl font-serif text-gray-800 mb-6">Edit Wedding Details</h2>
             <form
               onSubmit={(e) => {
@@ -815,7 +815,7 @@ export default function DashboardPage() {
               }}
               className="space-y-4"
             >
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">Partner 1 Name</label>
                   <input
@@ -835,7 +835,7 @@ export default function DashboardPage() {
                   />
                 </div>
               </div>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">Wedding Date</label>
                   <input
@@ -925,7 +925,7 @@ export default function DashboardPage() {
       {/* Edit Event Modal */}
       {editingItem?.type === 'event' && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-2xl p-6 max-w-lg w-full max-h-[90vh] overflow-y-auto">
+          <div className="bg-white rounded-2xl p-4 sm:p-6 max-w-lg w-full max-h-[90vh] overflow-y-auto">
             <h2 className="text-xl font-serif text-gray-800 mb-6">
               {editingItem.data ? 'Edit Event' : 'Add Event'}
             </h2>
@@ -959,7 +959,7 @@ export default function DashboardPage() {
                   required
                 />
               </div>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">Date</label>
                   <input
@@ -1041,7 +1041,7 @@ export default function DashboardPage() {
       {/* Edit Accommodation Modal */}
       {editingItem?.type === 'accommodation' && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-2xl p-6 max-w-lg w-full max-h-[90vh] overflow-y-auto">
+          <div className="bg-white rounded-2xl p-4 sm:p-6 max-w-lg w-full max-h-[90vh] overflow-y-auto">
             <h2 className="text-xl font-serif text-gray-800 mb-6">
               {editingItem.data ? 'Edit Accommodation' : 'Add Accommodation'}
             </h2>
@@ -1086,7 +1086,7 @@ export default function DashboardPage() {
                   className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-rose-500 focus:border-rose-500"
                 />
               </div>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">Phone</label>
                   <input
@@ -1116,7 +1116,7 @@ export default function DashboardPage() {
                 />
                 <label htmlFor="has_room_block" className="text-sm text-gray-700">Has room block</label>
               </div>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">Block Name</label>
                   <input
@@ -1180,7 +1180,7 @@ export default function DashboardPage() {
       {/* Edit FAQ Modal */}
       {editingItem?.type === 'faq' && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-2xl p-6 max-w-lg w-full max-h-[90vh] overflow-y-auto">
+          <div className="bg-white rounded-2xl p-4 sm:p-6 max-w-lg w-full max-h-[90vh] overflow-y-auto">
             <h2 className="text-xl font-serif text-gray-800 mb-6">
               {editingItem.data ? 'Edit FAQ' : 'Add FAQ'}
             </h2>
