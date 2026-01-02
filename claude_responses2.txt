@@ -1042,3 +1042,28 @@ User clarified Oaklander is FIRST hotel, not second. WebFetch confirmed both hot
 - Log counts for debugging
 
 Pushed to deploy.
+
+=== CLAUDE RESPONSE - Revert to Sequential Fetching ===
+All 6 subpages timed out (45s each) with parallel browsers. Rate limiting or Render resource constraints.
+
+Reverted to sequential fetching with single browser:
+- Slower (~3-4 min total) but reliable
+- Uses existing browser that already fetched main page
+- No parallel browser spawning
+
+Pushed to deploy.
+
+=== CLAUDE RESPONSE - Bot Protection Error Analysis ===
+User got "bot protection" error. Logs showed TWO concurrent scrape requests:
+
+1. **First request (20:04:40)** - Working fine, fetching subpages sequentially
+2. **Second request (20:05:29)** - Started while first was running, timed out
+
+The second request failed because Render was busy with the first scrape. Only one scrape can run at a time with limited resources.
+
+Travel page logs:
+- `networkidle` timed out after 10s (expected on slow pages)
+- Still got 691953 chars of content
+- Need to see if address counting worked and if Claude extracted both hotels
+
+User may have clicked import twice, causing the concurrent requests.

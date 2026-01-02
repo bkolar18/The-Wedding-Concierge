@@ -461,9 +461,9 @@ class WeddingScraper:
                           'room block', 'book your room', 'reserv', 'check-in', 'check-out',
                           'courtyard', 'marriott', 'hilton', 'hyatt', 'inn', 'suites']
         if any(kw in page_name.lower() for kw in ['travel', 'accommodations', 'hotels']):
-            # Try to find the main travel content section
-            main_content = None
-            best_score = 0
+            # Collect ALL hotel sections, not just the best one
+            hotel_sections = []
+            seen_texts = set()  # Avoid duplicates
 
             # Look for sections with travel-related content
             for section in soup_copy.find_all(['main', 'article', 'section', 'div']):
@@ -474,6 +474,10 @@ class WeddingScraper:
 
                 # Skip sections that look like registry/product listings
                 if any(x in section_text_lower for x in ['needs 1 of', 'add to cart', 'shop registry', 'our wish list']):
+                    continue
+
+                # Skip very short or very long sections (likely nav or containers)
+                if len(section_text) < 100 or len(section_text) > 10000:
                     continue
 
                 # Score this section based on hotel-related content
@@ -487,31 +491,35 @@ class WeddingScraper:
                 # Bonus points for phone number pattern (hotels have phone numbers)
                 if re.search(r'\(\d{3}\)\s*\d{3}[-.]?\d{4}', section_text):
                     score += 5
-                    logger.info(f"Found phone number in section")
 
                 # Bonus for address-like pattern (street addresses)
                 if re.search(r'\d+\s+\w+\s+(st|street|ave|avenue|blvd|boulevard|rd|road|dr|drive|ln|lane)', section_text_lower):
                     score += 5
-                    logger.info(f"Found address pattern in section")
 
                 # Bonus for check-in/check-out dates
                 if 'check-in' in section_text_lower and 'check-out' in section_text_lower:
                     score += 10
-                    logger.info(f"Found check-in/check-out in section")
 
                 # Is it a travel section by class/id?
                 if any(kw in section_class or kw in section_id for kw in ['travel', 'hotel', 'accommod']):
                     score += 3
 
-                # Update best match if this section has higher score and sufficient content
-                if score > best_score and len(section_text) > 200:
-                    best_score = score
-                    main_content = section.get_text(separator="\n", strip=True)
-                    logger.info(f"New best travel section: score={score}, length={len(main_content)}")
+                # Collect sections with decent hotel-related scores
+                if score >= 8 and len(section_text) > 100:
+                    # Create a text fingerprint to avoid duplicates
+                    fingerprint = section_text[:100]
+                    if fingerprint not in seen_texts:
+                        seen_texts.add(fingerprint)
+                        content = section.get_text(separator="\n", strip=True)
+                        hotel_sections.append((score, content))
+                        logger.info(f"Found hotel section: score={score}, length={len(content)}")
 
-            if main_content and best_score >= 3:
-                logger.info(f"Using travel section with score {best_score}")
-                return self._clean_page_text(main_content)[:5000]
+            if hotel_sections:
+                # Sort by score descending and combine all
+                hotel_sections.sort(key=lambda x: x[0], reverse=True)
+                combined = "\n\n".join([content for score, content in hotel_sections])
+                logger.info(f"Combined {len(hotel_sections)} hotel sections, total {len(combined)} chars")
+                return self._clean_page_text(combined)[:8000]  # Increased limit for multiple hotels
 
         # For Q&A/FAQ pages, look for question/answer content
         if any(kw in page_name.lower() for kw in ['q-a', 'qa', 'faq']):
