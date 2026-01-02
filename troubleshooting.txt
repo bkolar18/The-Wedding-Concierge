@@ -1,150 +1,167 @@
-2026-01-02T21:17:14.148943292Z   File "/opt/render/project/src/.venv/lib/python3.13/site-packages/sqlalchemy/dialects/postgresql/asyncpg.py", line 797, in _handle_exception
-2026-01-02T21:17:14.148945012Z     raise translated_error from error
-2026-01-02T21:17:14.148946862Z sqlalchemy.exc.ProgrammingError: (sqlalchemy.dialects.postgresql.asyncpg.ProgrammingError) <class 'asyncpg.exceptions.UndefinedColumnError'>: column message_logs.retry_count does not exist
-2026-01-02T21:17:14.148950562Z [SQL: SELECT message_logs.id, message_logs.wedding_id, message_logs.guest_id, message_logs.scheduled_message_id, message_logs.phone_number, message_logs.message_content, message_logs.twilio_sid, message_logs.status, message_logs.error_code, message_logs.error_message, message_logs.retry_count, message_logs.created_at, message_logs.sent_at, message_logs.delivered_at 
-2026-01-02T21:17:14.148952372Z FROM message_logs 
-2026-01-02T21:17:14.148954182Z WHERE message_logs.status = $1::VARCHAR AND message_logs.retry_count < $2::INTEGER]
-2026-01-02T21:17:14.148956022Z [parameters: ('failed', 3)]
-2026-01-02T21:17:14.148957822Z (Background on this error at: https://sqlalche.me/e/20/f405)
-2026-01-02T21:18:23.712091799Z INFO:     Shutting down
-2026-01-02T21:18:23.812567621Z INFO:     Waiting for application shutdown.
-2026-01-02T21:18:23.812709344Z 2026-01-02 21:18:23,812 - main - INFO - SMS scheduler shut down
-2026-01-02T21:18:23.812884969Z 2026-01-02 21:18:23,812 - apscheduler.scheduler - INFO - Scheduler has been shut down
-2026-01-02T21:18:23.81292767Z INFO:     Application shutdown complete.
-2026-01-02T21:18:23.813013822Z INFO:     Finished server process [58]
-2026-01-02T21:31:11.966702658Z ==> Setting WEB_CONCURRENCY=1 by default, based on available CPUs in the instance
-2026-01-02T21:31:11.983311708Z ==> Deploying...
-2026-01-02T21:32:20.332090175Z ==> No open ports detected, continuing to scan...
-2026-01-02T21:32:20.547264161Z ==> Docs on specifying a port: https://render.com/docs/web-services#port-binding
-2026-01-02T21:32:20.777649125Z 2026-01-02 21:32:20,777 - tzlocal - DEBUG - /etc/timezone found, contents:
-2026-01-02T21:32:20.777666756Z  Etc/UTC
-2026-01-02T21:32:20.777669016Z 
-2026-01-02T21:32:20.778223888Z 2026-01-02 21:32:20,778 - tzlocal - DEBUG - /etc/localtime found
-2026-01-02T21:32:20.779281718Z 2026-01-02 21:32:20,779 - tzlocal - DEBUG - 2 found:
-2026-01-02T21:32:20.779292159Z  {'/etc/timezone': 'Etc/UTC', '/etc/localtime is a symlink to': 'Etc/UTC'}
-2026-01-02T21:32:20.857647619Z 2026-01-02 21:32:20,857 - apscheduler.scheduler - INFO - Adding job tentatively -- it will be properly scheduled when the scheduler starts
-2026-01-02T21:32:20.857812408Z 2026-01-02 21:32:20,857 - apscheduler.scheduler - INFO - Adding job tentatively -- it will be properly scheduled when the scheduler starts
-2026-01-02T21:32:20.857978048Z 2026-01-02 21:32:20,857 - apscheduler.scheduler - INFO - Adding job tentatively -- it will be properly scheduled when the scheduler starts
-2026-01-02T21:32:20.85958012Z 2026-01-02 21:32:20,859 - apscheduler.scheduler - INFO - Added job "process_relative_schedules" to job store "default"
-2026-01-02T21:32:20.859686146Z 2026-01-02 21:32:20,859 - apscheduler.scheduler - INFO - Added job "process_fixed_schedules" to job store "default"
-2026-01-02T21:32:20.85974919Z 2026-01-02 21:32:20,859 - apscheduler.scheduler - INFO - Added job "retry_failed_messages" to job store "default"
-2026-01-02T21:32:20.859824214Z 2026-01-02 21:32:20,859 - apscheduler.scheduler - INFO - Scheduler started
-2026-01-02T21:32:20.859911629Z 2026-01-02 21:32:20,859 - main - INFO - SMS scheduler initialized with 3 background jobs
-2026-01-02T21:32:20.860201916Z 2026-01-02 21:32:20,860 - apscheduler.scheduler - DEBUG - Looking for jobs to run
-2026-01-02T21:32:20.860333803Z 2026-01-02 21:32:20,860 - apscheduler.scheduler - DEBUG - Next wakeup is due at 2026-01-02 21:37:20.857542+00:00 (in 299.997380 seconds)
-2026-01-02T21:32:20.860408928Z INFO:     Application startup complete.
-2026-01-02T21:32:20.860709045Z INFO:     Uvicorn running on http://0.0.0.0:10000 (Press CTRL+C to quit)
-2026-01-02T21:32:21.357177706Z INFO:     127.0.0.1:42268 - "HEAD / HTTP/1.1" 404 Not Found
-2026-01-02T21:32:22.766147875Z ==> Your service is live 🎉
-2026-01-02T21:32:22.797351873Z ==> 
-2026-01-02T21:32:22.827459732Z ==> ///////////////////////////////////////////////////////////
-2026-01-02T21:32:22.858160981Z ==> 
-2026-01-02T21:32:22.887824319Z ==> Available at your primary URL https://wedding-concierge-api.onrender.com
-2026-01-02T21:32:22.918361498Z ==> 
-2026-01-02T21:32:22.948206857Z ==> ///////////////////////////////////////////////////////////
-2026-01-02T21:32:24.085892803Z INFO:     34.82.26.101:0 - "GET / HTTP/1.1" 404 Not Found
-2026-01-02T21:33:24.282127935Z INFO:     71.191.62.74:0 - "OPTIONS /api/auth/me HTTP/1.1" 200 OK
-2026-01-02T21:33:24.582845476Z INFO:     71.191.62.74:0 - "GET /api/auth/me HTTP/1.1" 200 OK
-2026-01-02T21:33:24.805370618Z INFO:     71.191.62.74:0 - "OPTIONS /api/wedding/me HTTP/1.1" 200 OK
-2026-01-02T21:33:25.020119811Z INFO:     71.191.62.74:0 - "GET /api/wedding/me HTTP/1.1" 200 OK
-2026-01-02T21:36:16.352633964Z INFO:     71.191.62.74:0 - "OPTIONS /api/scrape HTTP/1.1" 200 OK
-2026-01-02T21:36:16.712275847Z INFO:     71.191.62.74:0 - "POST /api/scrape HTTP/1.1" 307 Temporary Redirect
-2026-01-02T21:36:16.855982485Z INFO:     71.191.62.74:0 - "OPTIONS /api/scrape/ HTTP/1.1" 200 OK
-2026-01-02T21:36:17.059024676Z 2026-01-02 21:36:17,058 - api.routes.scrape - INFO - Allowing non-whitelisted domain: www.weddingwire.us
-2026-01-02T21:36:17.358731962Z 2026-01-02 21:36:17,358 - services.scraper.scraper - INFO - Scraping https://www.weddingwire.us/website/katie-perkins-and-john-cogoli/welcome-1 (platform: weddingwire)
-2026-01-02T21:36:17.358776895Z 2026-01-02 21:36:17,358 - services.scraper.scraper - INFO - Using browser for https://www.weddingwire.us/website/katie-perkins-and-john-cogoli/welcome-1 (known to require it)
-2026-01-02T21:36:17.358789156Z 2026-01-02 21:36:17,358 - services.scraper.browser_fetch - INFO - Starting stealth browser...
-2026-01-02T21:36:22.964451203Z 2026-01-02 21:36:22,964 - services.scraper.browser_fetch - INFO - Stealth browser started with viewport 1524x903
-2026-01-02T21:36:23.865585058Z 2026-01-02 21:36:23,865 - services.scraper.browser_fetch - INFO - Fetching with stealth browser: https://www.weddingwire.us/website/katie-perkins-and-john-cogoli/welcome-1
-2026-01-02T21:36:26.159453253Z 2026-01-02 21:36:26,159 - services.scraper.browser_fetch - INFO - Browser fetch status: 200
-2026-01-02T21:36:32.861272288Z 2026-01-02 21:36:32,860 - services.scraper.browser_fetch - INFO - Browser fetch successful: 167903 chars
-2026-01-02T21:36:34.057112402Z 2026-01-02 21:36:34,056 - services.scraper.scraper - INFO - Found 43 navigation elements to scan
-2026-01-02T21:36:34.05864251Z 2026-01-02 21:36:34,058 - services.scraper.scraper - INFO - Nav-based discovery found 0 subpages
-2026-01-02T21:36:34.058679342Z 2026-01-02 21:36:34,058 - services.scraper.scraper - INFO - Nav-based discovery found no links, trying keyword fallback
-2026-01-02T21:36:34.059176441Z 2026-01-02 21:36:34,059 - services.scraper.scraper - INFO - Skipping (will redirect): 'photos-5' -> https://www.weddingwire.us/website/katie-perkins-and-john-cogoli/photos-5
-2026-01-02T21:36:34.059203342Z 2026-01-02 21:36:34,059 - services.scraper.scraper - INFO - Skipping (will redirect): 'registry-7' -> https://www.weddingwire.us/website/katie-perkins-and-john-cogoli/registry-7
-2026-01-02T21:36:34.059291437Z 2026-01-02 21:36:34,059 - services.scraper.scraper - INFO - Will scrape 5 subpages: ['welcome-1', 'weddingparty-9', 'events-2', 'rsvp-3', 'accommodations-4']
-2026-01-02T21:36:34.059303428Z 2026-01-02 21:36:34,059 - services.scraper.scraper - INFO - Available but not scraped: ['photos-5', 'registry-7']
-2026-01-02T21:36:34.059381563Z 2026-01-02 21:36:34,059 - services.scraper.scraper - INFO - Fetching 5 subpages sequentially
-2026-01-02T21:36:34.059413545Z 2026-01-02 21:36:34,059 - services.scraper.scraper - INFO - Fetching subpage: 'welcome-1' (https://www.weddingwire.us/website/katie-perkins-and-john-cogoli/welcome-1) (wait=2.0s)
-2026-01-02T21:36:34.059443676Z 2026-01-02 21:36:34,059 - services.scraper.scraper - INFO - Using browser for https://www.weddingwire.us/website/katie-perkins-and-john-cogoli/welcome-1 (known to require it)
-2026-01-02T21:36:34.660317613Z 2026-01-02 21:36:34,660 - services.scraper.browser_fetch - INFO - Fetching with stealth browser: https://www.weddingwire.us/website/katie-perkins-and-john-cogoli/welcome-1
-2026-01-02T21:36:35.958423296Z 2026-01-02 21:36:35,958 - services.scraper.browser_fetch - INFO - Browser fetch status: 200
-2026-01-02T21:36:40.558264637Z 2026-01-02 21:36:40,557 - services.scraper.browser_fetch - INFO - Browser fetch successful: 51042 chars
-2026-01-02T21:36:41.662593923Z 2026-01-02 21:36:41,662 - services.scraper.scraper - INFO - Successfully scraped subpage: 'welcome-1' (392 chars)
-2026-01-02T21:36:41.662624245Z 2026-01-02 21:36:41,662 - services.scraper.scraper - INFO - Fetching subpage: 'weddingparty-9' (https://www.weddingwire.us/website/katie-perkins-and-john-cogoli/weddingparty-9) (wait=2.0s)
-2026-01-02T21:36:41.662641586Z 2026-01-02 21:36:41,662 - services.scraper.scraper - INFO - Using browser for https://www.weddingwire.us/website/katie-perkins-and-john-cogoli/weddingparty-9 (known to require it)
-2026-01-02T21:36:42.16463732Z 2026-01-02 21:36:42,164 - services.scraper.browser_fetch - INFO - Fetching with stealth browser: https://www.weddingwire.us/website/katie-perkins-and-john-cogoli/weddingparty-9
-2026-01-02T21:36:43.558661266Z 2026-01-02 21:36:43,558 - services.scraper.browser_fetch - INFO - Browser fetch status: 200
-2026-01-02T21:36:48.463148561Z 2026-01-02 21:36:48,462 - services.scraper.browser_fetch - INFO - Browser fetch successful: 49634 chars
-2026-01-02T21:36:49.370029579Z 2026-01-02 21:36:49,369 - services.scraper.scraper - INFO - Successfully scraped subpage: 'weddingparty-9' (170 chars)
-2026-01-02T21:36:49.370070291Z 2026-01-02 21:36:49,369 - services.scraper.scraper - INFO - Fetching subpage: 'events-2' (https://www.weddingwire.us/website/katie-perkins-and-john-cogoli/events-2) (wait=2.0s)
-2026-01-02T21:36:49.370252161Z 2026-01-02 21:36:49,369 - services.scraper.scraper - INFO - Using browser for https://www.weddingwire.us/website/katie-perkins-and-john-cogoli/events-2 (known to require it)
-2026-01-02T21:36:49.961437641Z 2026-01-02 21:36:49,961 - services.scraper.browser_fetch - INFO - Fetching with stealth browser: https://www.weddingwire.us/website/katie-perkins-and-john-cogoli/events-2
-2026-01-02T21:36:51.259632279Z 2026-01-02 21:36:51,259 - services.scraper.browser_fetch - INFO - Browser fetch status: 200
-2026-01-02T21:36:56.259163429Z 2026-01-02 21:36:56,258 - services.scraper.browser_fetch - INFO - Browser fetch successful: 53176 chars
-2026-01-02T21:36:57.466056822Z 2026-01-02 21:36:57,465 - services.scraper.scraper - INFO - Successfully scraped subpage: 'events-2' (382 chars)
-2026-01-02T21:36:57.466082564Z 2026-01-02 21:36:57,465 - services.scraper.scraper - INFO - Fetching subpage: 'rsvp-3' (https://www.weddingwire.us/website/katie-perkins-and-john-cogoli/rsvp-3) (wait=2.0s)
-2026-01-02T21:36:57.466102075Z 2026-01-02 21:36:57,466 - services.scraper.scraper - INFO - Using browser for https://www.weddingwire.us/website/katie-perkins-and-john-cogoli/rsvp-3 (known to require it)
-2026-01-02T21:36:58.061151187Z 2026-01-02 21:36:58,060 - services.scraper.browser_fetch - INFO - Fetching with stealth browser: https://www.weddingwire.us/website/katie-perkins-and-john-cogoli/rsvp-3
-2026-01-02T21:36:59.059553795Z 2026-01-02 21:36:59,058 - services.scraper.browser_fetch - INFO - Browser fetch status: 200
-2026-01-02T21:37:03.366253925Z 2026-01-02 21:37:03,364 - services.scraper.browser_fetch - INFO - Browser fetch successful: 51307 chars
-2026-01-02T21:37:04.658385996Z 2026-01-02 21:37:04,658 - services.scraper.scraper - INFO - Successfully scraped subpage: 'rsvp-3' (266 chars)
-2026-01-02T21:37:04.658420088Z 2026-01-02 21:37:04,658 - services.scraper.scraper - INFO - Fetching subpage: 'accommodations-4' (https://www.weddingwire.us/website/katie-perkins-and-john-cogoli/accommodations-4) (wait=3.0s)
-2026-01-02T21:37:04.658432289Z 2026-01-02 21:37:04,658 - services.scraper.scraper - INFO - Using browser for https://www.weddingwire.us/website/katie-perkins-and-john-cogoli/accommodations-4 (known to require it)
-2026-01-02T21:37:05.165026109Z 2026-01-02 21:37:05,164 - services.scraper.browser_fetch - INFO - Fetching with stealth browser: https://www.weddingwire.us/website/katie-perkins-and-john-cogoli/accommodations-4
-2026-01-02T21:37:06.859815985Z 2026-01-02 21:37:06,858 - services.scraper.browser_fetch - INFO - Browser fetch status: 200
-2026-01-02T21:37:09.861583128Z 2026-01-02 21:37:09,858 - services.scraper.browser_fetch - INFO - Travel page detected - waiting for all hotels to load
-2026-01-02T21:37:09.963109274Z 2026-01-02 21:37:09,962 - services.scraper.browser_fetch - INFO - Network idle, checking for hotels
-2026-01-02T21:37:11.457951858Z 2026-01-02 21:37:11,457 - services.scraper.browser_fetch - INFO - Found 1 addresses (hotels)
-2026-01-02T21:37:11.463659187Z 2026-01-02 21:37:11,463 - services.scraper.browser_fetch - INFO - Less than 2 hotels, waiting longer...
-2026-01-02T21:37:17.758670018Z 2026-01-02 21:37:17,758 - services.scraper.browser_fetch - INFO - Travel page complete - 1 addresses found
-2026-01-02T21:37:18.462839656Z 2026-01-02 21:37:18,462 - services.scraper.browser_fetch - INFO - Browser fetch successful: 173112 chars
-2026-01-02T21:37:19.664304487Z 2026-01-02 21:37:19,663 - services.scraper.scraper - INFO - Found hotel section: score=9, length=618
-2026-01-02T21:37:19.665055861Z 2026-01-02 21:37:19,664 - services.scraper.scraper - INFO - Found hotel section: score=9, length=543
-2026-01-02T21:37:19.665062161Z 2026-01-02 21:37:19,664 - services.scraper.scraper - INFO - Found hotel section: score=8, length=253
-2026-01-02T21:37:19.666211448Z 2026-01-02 21:37:19,666 - services.scraper.scraper - INFO - Combined 3 hotel sections, total 1418 chars
-2026-01-02T21:37:19.666899127Z 2026-01-02 21:37:19,666 - services.scraper.scraper - INFO - Successfully scraped subpage: 'accommodations-4' (1412 chars)
-2026-01-02T21:37:19.666905908Z 2026-01-02 21:37:19,666 - services.scraper.scraper - INFO - Subpage content keys: ['welcome-1', 'weddingparty-9', 'events-2', 'rsvp-3', 'accommodations-4']
-2026-01-02T21:37:19.666909908Z 2026-01-02 21:37:19,666 - services.scraper.scraper - INFO - Subpage 'welcome-1' preview: Katie Perkins & John Cogoli - Wedding Website - Welcome! Menu Welcome! Wedding Party Events RSVP Accommodations Photos Registry Katie Perkins & John C...
-2026-01-02T21:37:19.666916018Z 2026-01-02 21:37:19,666 - services.scraper.scraper - INFO - Subpage 'weddingparty-9' preview: Katie Perkins & John Cogoli - Wedding Website - Wedding Party Menu Welcome! Wedding Party Events RSVP Accommodations Photos Registry Wedding Party Mee...
-2026-01-02T21:37:19.666918428Z 2026-01-02 21:37:19,666 - services.scraper.scraper - INFO - Subpage 'events-2' preview: Katie Perkins & John Cogoli - Wedding Website - Events Menu Welcome! Wedding Party Events RSVP Accommodations Photos Registry Events Here you'll find ...
-2026-01-02T21:37:19.666921278Z 2026-01-02 21:37:19,666 - services.scraper.scraper - INFO - Subpage 'rsvp-3' preview: Katie Perkins & John Cogoli - Wedding Website - RSVP Menu Welcome! Wedding Party Events RSVP Accommodations Photos Registry RSVP To RSVP, simply searc...
-2026-01-02T21:37:19.66693971Z 2026-01-02 21:37:19,666 - services.scraper.scraper - INFO - Subpage 'accommodations-4' preview: Menu Welcome! Wedding Party Events RSVP Accommodations Photos Registry Accommodations We are so excited to celebrate with you! Here are our best picks...
-2026-01-02T21:37:19.766764268Z 2026-01-02 21:37:19,766 - services.scraper.scraper - INFO - full_text total length: 4652 chars
-2026-01-02T21:37:19.766782729Z 2026-01-02 21:37:19,766 - services.scraper.scraper - INFO - Contains TRAVEL marker: False
-2026-01-02T21:37:19.766866634Z 2026-01-02 21:37:19,766 - services.scraper.data_mapper - INFO - Initializing Claude client with API key: sk-ant-api03-GTsaIEA...
-2026-01-02T21:37:19.970268326Z 2026-01-02 21:37:19,970 - services.scraper.data_mapper - INFO - Text to Claude: 4652 chars
-2026-01-02T21:37:19.970605875Z 2026-01-02 21:37:19,970 - services.scraper.data_mapper - INFO - Contains 'hotel': False
-2026-01-02T21:37:19.970629527Z 2026-01-02 21:37:19,970 - services.scraper.data_mapper - INFO - Contains 'travel': False
-2026-01-02T21:37:19.970722612Z 2026-01-02 21:37:19,970 - services.scraper.data_mapper - INFO - Contains 'accommod': True
-2026-01-02T21:37:20.062417621Z 2026-01-02 21:37:20,062 - anthropic._base_client - DEBUG - Request options: {'method': 'post', 'url': '/v1/messages', 'timeout': Timeout(connect=5.0, read=600, write=600, pool=600), 'files': None, 'idempotency_key': 'stainless-python-retry-75494ec2-1a4e-4df4-98b0-3a9538721587', 'json_data': {'max_tokens': 2000, 'messages': [{'role': 'user', 'content': 'Extract structured wedding information from this wedding website content.\n\nCRITICAL: Look carefully for hotel/accommodation information. It typically appears:\n- In sections marked "=== TRAVEL PAGE ===" or similar\n- Near keywords like "where to stay", "hotel", "room block", "accommodations", "lodging"\n- With booking codes, special rates, group names, or reservation links\n\nReturn a JSON object with the following fields (use null for missing data):\n\n{\n    "partner1_name": "First partner\'s full name",\n    "partner2_name": "Second partner\'s full name",\n    "wedding_date": "YYYY-MM-DD format or null",\n    "wedding_time": "HH:MM AM/PM format or null",\n    "dress_code": "Dress code description or null",\n    "ceremony_venue_name": "Ceremony venue name or null",\n    "ceremony_venue_address": "Full address or null",\n    "reception_venue_name": "Reception venue name (if different from ceremony) or null",\n    "reception_venue_address": "Full address or null",\n    "reception_time": "HH:MM AM/PM format or null",\n    "events": [\n        {\n            "event_name": "e.g. Rehearsal Dinner, Welcome Party",\n            "event_date": "YYYY-MM-DD or null",\n            "event_time": "HH:MM AM/PM or null",\n            "venue_name": "venue name or null",\n            "venue_address": "address or null",\n            "description": "description or null",\n            "dress_code": "dress code or null"\n        }\n    ],\n    "accommodations": [\n        {\n            "hotel_name": "Hotel name (e.g. Marriott, Hilton, Hampton Inn)",\n            "address": "Full address or null",\n            "phone": "Phone number or null",\n            "booking_url": "Booking URL or null",\n            "has_room_block": true/false,\n            "room_block_name": "Block name (e.g. \'Smith-Jones Wedding\') or null",\n            "room_block_code": "Booking code or null",\n            "room_block_rate": "Rate description (e.g. \'$159/night\') or null",\n            "room_block_deadline": "Deadline date or null",\n            "notes": "Additional notes like amenities, distance to venue, shuttle info, etc."\n        }\n    ],\n    "faqs": [\n        {\n            "question": "Question text",\n            "answer": "Answer text",\n            "category": "Category like Travel, Attire, etc. or null"\n        }\n    ],\n    "additional_notes": "Any other important info or null"\n}\n\nEXTRACTION PRIORITIES:\n1. Partner names - usually in format "Name1 & Name2" or "Name1 and Name2"\n2. HOTELS/ACCOMMODATIONS - Look in TRAVEL PAGE sections for hotel names, addresses, room block codes, rates\n3. Events - rehearsal dinner, welcome party, ceremony, reception, brunch\n4. Q&A or FAQ sections\n\nReturn ONLY valid JSON, no explanation.\n\nWebsite content:\nKatie Perkins & John Cogoli - Wedding Website - Welcome!\nMenu\nWelcome!\nWedding Party\nEvents\nRSVP\nAccommodations\nPhotos\nRegistry\nKatie Perkins & John Cogoli\nWe are getting married!\nSeptember\n, 2024\nEast Lyme, Connecticut\nWelcome!\nWe can\'t wait to celebrate with you! In anticipation of the big day, we have created this wedding website to keep you up to date on all the details of our wedding.\nKatie Perkins & John Cogoli\nSeptember 14, 2024\nMy Website\nPlan your wedding\nAbout us\nMade with love on\nYour Opt Out Preference Signal is Honored\nDo Not Sell My Personal Information\nWe allow certain online advertising partners to collect information from our services (e.g. device identifiers and usage information) to deliver ads that are more relevant to you and assist us with related analytics activities. This may be considered "selling" or "sharing/processing” for targeted online advertising under applicable law. Please see our\nPrivacy Policy\nfor more information.\nAllow All\nManage Consent Preferences\nStrictly Necessary Cookies\nAlways Active\nThese online trackers are absolutely necessary for the functioning of the Site. They allow the User’s navigation through the Site and enable the use of the different options and services that are offered by the Site. Without their use, certain functions on the Site may not work properly.\nShare or Sale of Personal Data\nShare or Sale of Personal Data\nBack Button\nCookie List\nSearch Icon\nFilter Icon\nClear\ncheckbox label\nApply\nCancel\nConsent\nLeg.Interest\ncheckbox label\ncheckbox label\ncheckbox label\nConfirm My Choices\n\n=== WELCOME-1 PAGE ===\nKatie Perkins & John Cogoli - Wedding Website - Welcome!\nMenu\nWelcome!\nWedding Party\nEvents\nRSVP\nAccommodations\nPhotos\nRegistry\nKatie Perkins & John Cogoli\nWe are getting married!\nSeptember\n, 2024\nEast Lyme, Connecticut\nWelcome!\nWe can\'t wait to celebrate with you! In anticipation of the big day, we have created this wedding website to keep you up to date on all the details of our wedding.\n\n=== WEDDINGPARTY-9 PAGE ===\nKatie Perkins & John Cogoli - Wedding Website - Wedding Party\nMenu\nWelcome!\nWedding Party\nEvents\nRSVP\nAccommodations\nPhotos\nRegistry\nWedding Party\nMeet our wedding party!\n\n=== EVENTS-2 PAGE ===\nKatie Perkins & John Cogoli - Wedding Website - Events\nMenu\nWelcome!\nWedding Party\nEvents\nRSVP\nAccommodations\nPhotos\nRegistry\nEvents\nHere you\'ll find important information about our wedding events.\nSep\nCeremony at St. Matthias\n317 Chesterfield Road\nEast Lyme 06333\n12:45PM\nSep\nCocktail Hour & Reception at Heavitree Bed and Breakfast\n78 Oakville Road\nGriswold 06351\n3:00PM - 10:00PM\n\n=== RSVP-3 PAGE ===\nKatie Perkins & John Cogoli - Wedding Website - RSVP\nMenu\nWelcome!\nWedding Party\nEvents\nRSVP\nAccommodations\nPhotos\nRegistry\nRSVP\nTo RSVP, simply search for your name and confirm your attendance details.\nSearch\nYour confirmation has been sent successfully.\nNew search\n\n=== ACCOMMODATIONS-4 PAGE ===\nMenu\nWelcome!\nWedding Party\nEvents\nRSVP\nAccommodations\nPhotos\nRegistry\nAccommodations\nWe are so excited to celebrate with you! Here are our best picks for places to stay near all the action.\nComfort Inn\n317 Voluntown Road, Jewett City, CT 06351\nPhone number\n: 860-376-3200\nThis Inn is 1.3 miles away from the reception venue if you\'d like to stay close by instead of driving home. Please make sure to make your reservations in advance.\nBook now\nWedding guests\ncan enjoy savings of up to\n25% off Budget\nbase rates when renting a vehicle from a participating location in the contiguous\nU.S. and Canada.\nSelect my car\nAccommodations\nWe are so excited to celebrate with you! Here are our best picks for places to stay near all the action.\nComfort Inn\n317 Voluntown Road, Jewett City, CT 06351\nPhone number\n: 860-376-3200\nThis Inn is 1.3 miles away from the reception venue if you\'d like to stay close by instead of driving home. Please make sure to make your reservations in advance.\nBook now\nWedding guests\ncan enjoy savings of up to\n25% off Budget\nbase rates when renting a vehicle from a participating location in the contiguous\nU.S. and Canada.\nSelect my car\nComfort Inn\n317 Voluntown Road, Jewett City, CT 06351\nPhone number\n: 860-376-3200\nThis Inn is 1.3 miles away from the reception venue if you\'d like to stay close by instead of driving home. Please make sure to make your reservations in advance.\nBook now\n\n=== PAGES TO REDIRECT GUESTS TO ===\nThe following pages are available on the couple\'s wedding website. Direct guests to visit these URLs to view this content:\n- photos-5: https://www.weddingwire.us/website/katie-perkins-and-john-cogoli/photos-5\n- registry-7: https://www.weddingwire.us/website/katie-perkins-and-john-cogoli/registry-7\n'}], 'model': 'claude-sonnet-4-20250514'}}
-2026-01-02T21:37:20.063297422Z 2026-01-02 21:37:20,063 - anthropic._base_client - DEBUG - Sending HTTP Request: POST https://api.anthropic.com/v1/messages
-2026-01-02T21:37:20.270884826Z 2026-01-02 21:37:20,270 - httpcore.connection - DEBUG - connect_tcp.started host='api.anthropic.com' port=443 local_address=None timeout=5.0 socket_options=[(1, 9, True), (6, 5, 60), (6, 6, 5), (6, 4, 60)]
-2026-01-02T21:37:20.371725832Z 2026-01-02 21:37:20,371 - httpcore.connection - DEBUG - connect_tcp.complete return_value=<httpcore._backends.anyio.AnyIOStream object at 0x7f971c41cad0>
-2026-01-02T21:37:20.371760345Z 2026-01-02 21:37:20,371 - httpcore.connection - DEBUG - start_tls.started ssl_context=<ssl.SSLContext object at 0x7f971caebda0> server_hostname='api.anthropic.com' timeout=5.0
-2026-01-02T21:37:20.381474315Z 2026-01-02 21:37:20,381 - httpcore.connection - DEBUG - start_tls.complete return_value=<httpcore._backends.anyio.AnyIOStream object at 0x7f971c7d3890>
-2026-01-02T21:37:20.381762191Z 2026-01-02 21:37:20,381 - httpcore.http11 - DEBUG - send_request_headers.started request=<Request [b'POST']>
-2026-01-02T21:37:20.382157174Z 2026-01-02 21:37:20,382 - httpcore.http11 - DEBUG - send_request_headers.complete
-2026-01-02T21:37:20.382233619Z 2026-01-02 21:37:20,382 - httpcore.http11 - DEBUG - send_request_body.started request=<Request [b'POST']>
-2026-01-02T21:37:20.382506174Z 2026-01-02 21:37:20,382 - httpcore.http11 - DEBUG - send_request_body.complete
-2026-01-02T21:37:20.382537616Z 2026-01-02 21:37:20,382 - httpcore.http11 - DEBUG - receive_response_headers.started request=<Request [b'POST']>
-2026-01-02T21:37:20.858018633Z 2026-01-02 21:37:20,857 - apscheduler.scheduler - DEBUG - Looking for jobs to run
-2026-01-02T21:37:20.858342341Z 2026-01-02 21:37:20,858 - apscheduler.scheduler - DEBUG - Next wakeup is due at 2026-01-02 21:42:20.857542+00:00 (in 299.999398 seconds)
-2026-01-02T21:37:20.858475319Z 2026-01-02 21:37:20,858 - apscheduler.executors.default - INFO - Running job "process_fixed_schedules (trigger: interval[0:05:00], next run at: 2026-01-02 21:42:20 UTC)" (scheduled at 2026-01-02 21:37:20.857542+00:00)
-2026-01-02T21:37:20.858529952Z 2026-01-02 21:37:20,858 - services.sms.jobs - INFO - Running process_fixed_schedules job
-2026-01-02T21:37:20.870689733Z 2026-01-02 21:37:20,870 - apscheduler.executors.default - INFO - Job "process_fixed_schedules (trigger: interval[0:05:00], next run at: 2026-01-02 21:42:20 UTC)" executed successfully
-2026-01-02T21:37:27.554259582Z 2026-01-02 21:37:27,554 - httpcore.http11 - DEBUG - receive_response_headers.complete return_value=(b'HTTP/1.1', 200, b'OK', [(b'Date', b'Fri, 02 Jan 2026 21:37:27 GMT'), (b'Content-Type', b'application/json'), (b'Transfer-Encoding', b'chunked'), (b'Connection', b'keep-alive'), (b'anthropic-ratelimit-input-tokens-limit', b'30000'), (b'anthropic-ratelimit-input-tokens-remaining', b'29000'), (b'anthropic-ratelimit-input-tokens-reset', b'2026-01-02T21:37:24Z'), (b'anthropic-ratelimit-output-tokens-limit', b'8000'), (b'anthropic-ratelimit-output-tokens-remaining', b'7000'), (b'anthropic-ratelimit-output-tokens-reset', b'2026-01-02T21:37:32Z'), (b'anthropic-ratelimit-requests-limit', b'50'), (b'anthropic-ratelimit-requests-remaining', b'49'), (b'anthropic-ratelimit-requests-reset', b'2026-01-02T21:37:21Z'), (b'anthropic-ratelimit-tokens-limit', b'38000'), (b'anthropic-ratelimit-tokens-remaining', b'36000'), (b'anthropic-ratelimit-tokens-reset', b'2026-01-02T21:37:24Z'), (b'request-id', b'req_011CWjGo1oSsMvPnvouBcSt6'), (b'strict-transport-security', b'max-age=31536000; includeSubDomains; preload'), (b'anthropic-organization-id', b'e832d9b8-9193-4c08-83d0-9ade84d6cbbe'), (b'Server', b'cloudflare'), (b'x-envoy-upstream-service-time', b'7065'), (b'cf-cache-status', b'DYNAMIC'), (b'X-Robots-Tag', b'none'), (b'Content-Encoding', b'gzip'), (b'CF-RAY', b'9b7d65a66ebcc54c-PDX')])
-2026-01-02T21:37:27.554976244Z 2026-01-02 21:37:27,554 - httpx - INFO - HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 200 OK"
-2026-01-02T21:37:27.555152684Z 2026-01-02 21:37:27,555 - httpcore.http11 - DEBUG - receive_response_body.started request=<Request [b'POST']>
-2026-01-02T21:37:27.55561187Z 2026-01-02 21:37:27,555 - httpcore.http11 - DEBUG - receive_response_body.complete
-2026-01-02T21:37:27.555732267Z 2026-01-02 21:37:27,555 - httpcore.http11 - DEBUG - response_closed.started
-2026-01-02T21:37:27.555854504Z 2026-01-02 21:37:27,555 - httpcore.http11 - DEBUG - response_closed.complete
-2026-01-02T21:37:27.556102028Z 2026-01-02 21:37:27,555 - anthropic._base_client - DEBUG - HTTP Response: POST https://api.anthropic.com/v1/messages "200 OK" Headers({'date': 'Fri, 02 Jan 2026 21:37:27 GMT', 'content-type': 'application/json', 'transfer-encoding': 'chunked', 'connection': 'keep-alive', 'anthropic-ratelimit-input-tokens-limit': '30000', 'anthropic-ratelimit-input-tokens-remaining': '29000', 'anthropic-ratelimit-input-tokens-reset': '2026-01-02T21:37:24Z', 'anthropic-ratelimit-output-tokens-limit': '8000', 'anthropic-ratelimit-output-tokens-remaining': '7000', 'anthropic-ratelimit-output-tokens-reset': '2026-01-02T21:37:32Z', 'anthropic-ratelimit-requests-limit': '50', 'anthropic-ratelimit-requests-remaining': '49', 'anthropic-ratelimit-requests-reset': '2026-01-02T21:37:21Z', 'anthropic-ratelimit-tokens-limit': '38000', 'anthropic-ratelimit-tokens-remaining': '36000', 'anthropic-ratelimit-tokens-reset': '2026-01-02T21:37:24Z', 'request-id': 'req_011CWjGo1oSsMvPnvouBcSt6', 'strict-transport-security': 'max-age=31536000; includeSubDomains; preload', 'anthropic-organization-id': 'e832d9b8-9193-4c08-83d0-9ade84d6cbbe', 'server': 'cloudflare', 'x-envoy-upstream-service-time': '7065', 'cf-cache-status': 'DYNAMIC', 'x-robots-tag': 'none', 'content-encoding': 'gzip', 'cf-ray': '9b7d65a66ebcc54c-PDX'})
-2026-01-02T21:37:27.55613285Z 2026-01-02 21:37:27,556 - anthropic._base_client - DEBUG - request_id: req_011CWjGo1oSsMvPnvouBcSt6
-2026-01-02T21:37:27.566420344Z 2026-01-02 21:37:27,566 - services.scraper.data_mapper - INFO - Claude extracted: 1 accommodations
-2026-01-02T21:37:27.566439625Z 2026-01-02 21:37:27,566 - services.scraper.data_mapper - INFO - Accommodations: [{'hotel_name': 'Comfort Inn', 'address': '317 Voluntown Road, Jewett City, CT 06351', 'phone': '860-376-3200', 'booking_url': None, 'has_room_block': False, 'room_block_name': None, 'room_block_code': None, 'room_block_rate': None, 'room_block_deadline': None, 'notes': '1.3 miles away from the reception venue. Please make reservations in advance.'}]
-2026-01-02T21:37:28.166709349Z 2026-01-02 21:37:28,166 - services.scraper.browser_fetch - INFO - Stealth browser closed
-2026-01-02T21:37:28.167173166Z INFO:     71.191.62.74:0 - "POST /api/scrape/ HTTP/1.1" 200 OK
-2026-01-02T21:37:29.837752468Z ==> Detected service running on port 10000
-2026-01-02T21:37:29.933884255Z ==> Docs on specifying a port: https://render.com/docs/web-services#port-binding
+M
+My Workspace
+
+wedding-concierge-db
+
+Search
+Ctrl+
+K
+
+New
+
+Upgrade
+
+
+Dashboard
+wedding-concierge-db
+Info
+Monitor
+Logs
+Metrics
+Manage
+Apps
+Recovery
+
+Changelog
+Invite a friend
+
+Contact support
+Render Status
+PostgreSQL
+wedding-concierge-db
+Free
+Upgrade your instance
+View docs
+
+Connect
+Service ID:
+dpg-d5a4q063jp1c73ce0t0g-a
+
+Info
+Your database will expire on January 29, 2026. The database will be deleted unless you upgrade to a paid instance type.
+General
+Name
+A unique name for your database.
+wedding-concierge-db
+
+Edit
+Created
+3 days ago
+Status
+available
+PostgreSQL Version
+18
+Region
+Oregon (US West)
+Read Replicas
+
+Add Read Replica
+Storage
+6.66% used out of 1 GB
+Database storage
+Storage Autoscaling
+Disabled
+Datadog API Key
+
+Add Datadog API Key
+Postgres Instance
+Instance Type
+Free
+256 MB
+ RAM
+0.1
+ CPU
+1 GB
+ Storage
+Update
+A credit card is required to change instance types.
+Add payment information
+High Availability
+Run a standby instance of your database and automatically fail over to it if the primary encounters an issue.
+
+
+Disabled
+Only available for Pro instances and higher.
+See upgrade options
+Connections
+Hostname
+An internal hostname used by your Render services.
+dpg-d5a4q063jp1c73ce0t0g-a
+
+Port
+5432
+
+Database
+wedding_concierge_db
+
+Username
+wedding_concierge_db_user
+
+Password
+••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••
+
+
+Internal Database URL
+••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••
+
+
+External Database URL
+••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••
+
+
+PSQL Command
+••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••
+
+
+Credentials
+Create new default credentials and delete the old ones when ready.
+
+Username
+1
+
+Password
+
+Created
+
+Open Connections
+wedding_concierge_db_userDefault	
+••••••••••••••••
+3d	3	
+
+New default credential
+Networking
+Inbound IP Restrictions
+Limit incoming traffic to your services from specific IP ranges. Sources are specified in CIDR block notation.
+
+1
+IP range is allowed from outside of your private network.
+
+Validate IP address
+0.0.0.0
+PostgreSQL Inbound IP Rules
+Source	Description	Delete
+CIDR block
+0.0.0.0/0
+Description
+everywhere
+
+
+Add source
+Cancel
+Save
+
+Delete Database
+
+Restart Database
+
+Suspend Database
+0 services selected:
+
+Move
+
+Generate Blueprint
+
+Resume
+
+Suspend
+

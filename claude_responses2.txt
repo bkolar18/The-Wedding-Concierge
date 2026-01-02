@@ -1456,3 +1456,144 @@ function formatEventDate(dateStr: string): string {
 ```
 
 Updated the template to use these functions for platform badge and event dates.
+
+=== INSTRUCTIONS - Creating scrape_jobs Table ===
+
+The background job pattern requires a new `scrape_jobs` table in the database. Here's how to create it:
+
+**Option 1: Alembic Migration (Recommended)**
+
+If you have Alembic set up, generate and run a migration:
+
+```bash
+# SSH into Render or run locally with DATABASE_URL set
+cd backend
+alembic revision --autogenerate -m "Add scrape_jobs table"
+alembic upgrade head
+```
+
+**Option 2: Manual SQL**
+
+Connect to your PostgreSQL database on Render and run:
+
+```sql
+CREATE TYPE scrapejobstatus AS ENUM ('pending', 'processing', 'completed', 'failed');
+
+CREATE TABLE scrape_jobs (
+    id VARCHAR(36) PRIMARY KEY,
+    url TEXT NOT NULL,
+    status scrapejobstatus DEFAULT 'pending',
+    progress INTEGER DEFAULT 0,
+    message VARCHAR(255),
+    platform VARCHAR(50),
+    scraped_data JSON,
+    preview_data JSON,
+    error TEXT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    started_at TIMESTAMP,
+    completed_at TIMESTAMP
+);
+
+CREATE INDEX idx_scrape_jobs_status ON scrape_jobs(status);
+```
+
+**Option 3: Check if Auto-Migration Works**
+
+If your app uses SQLAlchemy's `create_all()` on startup, the table may be created automatically. Check your `main.py` or database initialization code for something like:
+
+```python
+async with engine.begin() as conn:
+    await conn.run_sync(Base.metadata.create_all)
+```
+
+**Verifying the Table Exists**
+
+Connect to your Render PostgreSQL and run:
+```sql
+SELECT table_name FROM information_schema.tables WHERE table_name = 'scrape_jobs';
+```
+
+If it returns a row, you're good to go!
+
+=== CLAUDE RESPONSE - Finding PostgreSQL on Render ===
+
+User asked: "where do i find my PostgreSQL database on render?"
+
+In Render Dashboard:
+
+1. Go to https://dashboard.render.com
+2. Click on your **PostgreSQL database** in the left sidebar (it should be listed under "PostgreSQL" or in your services list)
+3. Once in the database dashboard, you'll see:
+   - **Connections** tab - has the connection string, host, database name, username, password
+   - **Shell** tab - lets you run SQL directly in the browser
+
+**To run the SQL manually:**
+1. Click the **Shell** tab
+2. Paste the SQL commands from the instructions
+3. Press Enter to execute
+
+**Or connect via command line:**
+```bash
+# Copy the "External Database URL" from the Connections tab
+psql "postgres://user:password@host:5432/dbname"
+```
+
+If you don't see a PostgreSQL database in your Render dashboard, it means one wasn't created yet. You'd need to:
+1. Click **New +** → **PostgreSQL**
+2. Give it a name and create it
+3. Update your backend's `DATABASE_URL` environment variable to point to it
+
+=== CLAUDE RESPONSE - User's Render Dashboard ===
+
+User shared their Render dashboard showing:
+- **wedding-concierge-db** (PostgreSQL 18, Oregon region, Status: Available)
+
+Instructions provided:
+
+1. Click on **wedding-concierge-db** in that list
+2. Click the **Shell** tab at the top
+3. Paste this SQL and press Enter:
+
+```sql
+CREATE TYPE scrapejobstatus AS ENUM ('pending', 'processing', 'completed', 'failed');
+
+CREATE TABLE scrape_jobs (
+    id VARCHAR(36) PRIMARY KEY,
+    url TEXT NOT NULL,
+    status scrapejobstatus DEFAULT 'pending',
+    progress INTEGER DEFAULT 0,
+    message VARCHAR(255),
+    platform VARCHAR(50),
+    scraped_data JSON,
+    preview_data JSON,
+    error TEXT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    started_at TIMESTAMP,
+    completed_at TIMESTAMP
+);
+```
+
+=== CLAUDE RESPONSE - No Shell Tab on Free Tier ===
+
+User clicked on wedding-concierge-db and saw the Info page but no Shell tab. The free tier doesn't have a built-in Shell.
+
+**Option 1: Use PSQL Command (if you have PostgreSQL installed locally)**
+
+1. Click the eye icon next to **PSQL Command** to reveal it
+2. Copy the command
+3. Open a terminal/command prompt and paste it
+4. Once connected, paste the SQL to create the table
+
+**Option 2: Use a GUI tool like DBeaver or pgAdmin**
+
+1. Click the eye icon next to **External Database URL** to reveal it
+2. Copy that URL
+3. Use it to connect with DBeaver, pgAdmin, or similar
+
+**Option 3: If you don't have PostgreSQL tools installed**
+
+You can install psql via:
+- **Windows**: Download PostgreSQL from https://www.postgresql.org/download/windows/ (you can install just the command line tools)
+- **Mac**: `brew install libpq` then `brew link --force libpq`
+
+Alternative: Check if the app auto-creates tables on startup (which would be easier).
