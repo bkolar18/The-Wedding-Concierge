@@ -1396,3 +1396,63 @@ Use a background job pattern:
 3. Client polls for completion or gets notified when done
 
 Want me to add a warning message for now, or implement the background job pattern? The warning is quick, the job pattern is more work but a better UX.
+
+=== CLAUDE RESPONSE - Background Job Pattern Implemented ===
+
+User said: "lets do the background UX"
+
+Implemented the full background job pattern:
+
+**Backend (backend/api/routes/scrape.py):**
+- New `ScrapeJob` model to track jobs in database
+- `POST /api/scrape/start` - Starts job, returns job_id immediately
+- `GET /api/scrape/status/{job_id}` - Returns progress and results
+- Background task runs scrape using `asyncio.create_task`
+
+**Frontend (frontend/src/app/import/page.tsx):**
+- Calls `/start` endpoint, gets job_id back immediately
+- Polls `/status/{job_id}` every 3 seconds
+- Uses real progress from server instead of fake animation
+- Handles network errors gracefully (retries up to 60 times)
+
+**How it works:**
+1. User submits URL → Server returns job ID immediately (fast)
+2. Scraping runs server-side in background
+3. Frontend polls every 3 seconds for progress
+4. If user switches apps → Scrape continues on server, they can come back and see results
+
+**Note:** The new `scrape_jobs` table needs to be created. If auto-migrations are set up it should happen automatically.
+
+=== CLAUDE RESPONSE - UI Polish for Preview Page ===
+
+User requested:
+- Show "The Knot" instead of "the_knot" in the platform bubble
+- Show event dates as MM/DD/YYYY instead of YYYY-MM-DD
+
+Added helper functions in `frontend/src/app/import/page.tsx`:
+
+```javascript
+// Format platform name for display
+function formatPlatformName(platform: string): string {
+  const platformNames: Record<string, string> = {
+    'the_knot': 'The Knot',
+    'zola': 'Zola',
+    'joy': 'WithJoy',
+    'weddingwire': 'WeddingWire',
+    'minted': 'Minted',
+    'generic': 'Website',
+  };
+  return platformNames[platform] || platform;
+}
+
+// Format date as MM/DD/YYYY for event dates
+function formatEventDate(dateStr: string): string {
+  const match = dateStr.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+  if (match) {
+    return `${match[2]}/${match[3]}/${match[1]}`;
+  }
+  return dateStr;
+}
+```
+
+Updated the template to use these functions for platform badge and event dates.

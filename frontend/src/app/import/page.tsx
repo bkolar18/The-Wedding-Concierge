@@ -38,6 +38,31 @@ function formatDateString(dateStr: string): string {
   return dateStr;
 }
 
+// Format date as MM/DD/YYYY for event dates
+function formatEventDate(dateStr: string): string {
+  const match = dateStr.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+  if (match) {
+    const year = match[1];
+    const month = match[2];
+    const day = match[3];
+    return `${month}/${day}/${year}`;
+  }
+  return dateStr;
+}
+
+// Format platform name for display
+function formatPlatformName(platform: string): string {
+  const platformNames: Record<string, string> = {
+    'the_knot': 'The Knot',
+    'zola': 'Zola',
+    'joy': 'WithJoy',
+    'weddingwire': 'WeddingWire',
+    'minted': 'Minted',
+    'generic': 'Website',
+  };
+  return platformNames[platform] || platform;
+}
+
 export default function ImportPage() {
   const router = useRouter();
   const { user, token } = useAuth();
@@ -282,8 +307,8 @@ export default function ImportPage() {
                   Preview Extracted Data
                 </h1>
                 {platform && (
-                  <span className="px-3 py-1 bg-rose-100 text-rose-700 text-sm rounded-full capitalize">
-                    {platform}
+                  <span className="px-3 py-1 bg-rose-100 text-rose-700 text-sm rounded-full">
+                    {formatPlatformName(platform)}
                   </span>
                 )}
               </div>
@@ -364,7 +389,7 @@ export default function ImportPage() {
                         <div key={idx} className="p-4">
                           <p className="font-medium text-gray-800">{event.name}</p>
                           <div className="text-sm text-gray-600 mt-1 space-y-0.5">
-                            {event.date && <p>{event.date}{event.time ? ` at ${event.time}` : ''}</p>}
+                            {event.date && <p>{formatEventDate(event.date)}{event.time ? ` at ${event.time}` : ''}</p>}
                             {event.venue_name && <p>{event.venue_name}</p>}
                             {event.venue_address && <p className="text-gray-500">{event.venue_address}</p>}
                             {event.dress_code && <p className="text-gray-500">Dress code: {event.dress_code}</p>}
