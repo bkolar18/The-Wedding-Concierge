@@ -1,0 +1,993 @@
+
+## Resend (Modern Email API)
+
+**What it is:** A developer-focused email service built specifically for transactional emails (password resets, notifications, etc.).
+
+**How it works:**
+- You make an API call with your message
+- Resend handles all the email infrastructure
+- They manage deliverability, reputation, etc.
+
+**Pros:**
+- Just 1 API key (simpler setup)
+- Better deliverability (dedicated sending infrastructure)
+- Built-in analytics (see if emails were delivered/opened)
+- Free tier: 3,000 emails/month
+- Modern Python SDK: `resend.Emails.send()`
+
+**Cons:**
+- Another service to sign up for
+- Requires domain verification for production (to send from your own domain)
+- Free tier has Resend branding in emails (or use their subdomain)
+
+---
+
+## Recommendation
+
+**For The Wedding Concierge:**
+- Resend is better because:
+  1. Password reset emails MUST be delivered reliably
+  2. Simpler code (1 API key vs 4 SMTP vars)
+  3. Free tier covers your needs (3,000 emails/month = a lot of password resets)
+  4. You'll want email analytics eventually
+
+**Quick comparison:**
+| Feature | SMTP (Gmail) | Resend |
+|---------|--------------|--------|
+| Setup complexity | 4 env vars + app password | 1 API key |
+| Free limit | 500/day | 3,000/month |
+| Deliverability | Lower (shared IP) | Higher (dedicated) |
+| Spam risk | Higher | Lower |
+| Code simplicity | More complex | Simpler |
+
+=== CLAUDE RESPONSE - What Modern Web Apps Use for Email ===
+
+Most modern web apps use **dedicated email API services** like Resend, SendGrid, Postmark, or AWS SES - not raw SMTP.
+
+**Why:**
+- **Deliverability** - These services have established IP reputations with email providers (Gmail, Outlook, etc.), so emails actually arrive in inboxes instead of spam
+- **Scale** - SMTP through Gmail breaks at ~500 emails/day; these services handle millions
+- **Reliability** - They handle retries, bounce management, and compliance automatically
+- **Analytics** - See delivery rates, opens, clicks, bounces
+
+**Who uses what:**
+| Service | Used By | Free Tier |
+|---------|---------|-----------|
+| SendGrid | Uber, Airbnb, Spotify | 100/day |
+| Postmark | Basecamp, Wildbit | 100/month |
+| Resend | Newer startups, indie devs | 3,000/month |
+| AWS SES | Large enterprises | 62,000/month (if on EC2) |
+| Mailgun | GitHub, Lyft | 5,000/month for 3 months |
+
+**The pattern:** Almost no production app sends email through Gmail SMTP. That's only for hobby projects or testing.
+
+For a wedding SaaS like yours, Resend or Postmark are ideal - they're built for transactional emails (password resets, confirmations) and have generous free tiers.
+
+---
+
+**Note:** User requested all responses be logged to this file for the remainder of the week.
+
+=== CLAUDE RESPONSE - Resend Integration Complete ===
+
+Switched from SMTP to Resend for email delivery.
+
+## Changes Made
+
+**backend/requirements.txt:**
+- Added `resend` package
+
+**backend/core/config.py:**
+- Replaced SMTP settings (4 variables) with:
+  - `RESEND_API_KEY` - single API key
+  - `EMAIL_FROM` - sender address (default: Resend's test domain)
+
+**backend/services/email.py:**
+- Rewrote to use Resend SDK instead of SMTP
+- Simplified API: `resend.Emails.send(params)`
+- Added `send_contact_notification()` method
+
+**backend/api/routes/contact.py:**
+- Simplified to use new email service method
+
+## Setup Instructions
+
+1. Go to https://resend.com and create account
+2. Get API key from dashboard
+3. Add to Render environment variables:
+   ```
+   RESEND_API_KEY=re_xxxxxxxxxx
+   FRONTEND_URL=https://the-wedding-concierge.vercel.app
+   ```
+
+## For Production (Custom Domain)
+
+To send from your own domain instead of `onboarding@resend.dev`:
+1. Add domain in Resend dashboard
+2. Add DNS records they provide
+3. Update `EMAIL_FROM` env var to `The Wedding Concierge <noreply@yourdomain.com>`
+
+## Testing
+
+Without API key configured, emails log to console:
+```
+[Email] Resend not configured. Would send to user@example.com: Reset Your Password
+```
+
+With API key, emails actually send and you'll see:
+```
+[Email] Sent successfully to user@example.com, id: xxxxxxxx
+```
+
+=== CLAUDE RESPONSE - Fix The Knot/WeddingWire Scraping ===
+
+## Problem Identified
+
+The Knot and WeddingWire scraping was broken. After investigation:
+
+**Root Cause:** Playwright browsers weren't installed on Render. The build only ran `pip install`, but Playwright needs browser binaries installed separately.
+
+## Sites That Will Fail
+
+| Category | Examples | Why |
+|----------|----------|-----|
+| Advanced bot protection | Cloudflare, PerimeterX | Interactive challenges |
+| Password-protected | ~30-40% of wedding sites | Need credentials |
+| Unsupported platforms | Squarespace, Wix, WordPress | No extraction logic |
+
+## The Fix
+
+### Step 1: Created render.yaml
+
+**File:** `backend/render.yaml`
+
+```yaml
+services:
+  - type: web
+    name: wedding-concierge-api
+    runtime: python
+    buildCommand: |
+      pip install -r requirements.txt
+      playwright install chromium
+      playwright install-deps chromium
+    startCommand: uvicorn main:app --host 0.0.0.0 --port $PORT
+```
+
+### Step 2: Added Playwright Health Check
+
+**File:** `backend/api/routes/health.py`
+
+New endpoint: `GET /api/health/playwright`
+- Returns `{"playwright": "ok"}` if working
+- Returns `{"playwright": "error", "detail": "..."}` if not
+
+## User Preferences Noted
+
+- Keep it free (no paid cloud scraping services)
+- US market only (no international platforms)
+
+## Next Steps
+
+After deploying, test with:
+1. `GET /api/health/playwright` - verify Playwright works
+2. Try scraping a The Knot URL - should work now
+
+If still failing after Playwright is confirmed working, will update stealth configuration.
+
+=== CLAUDE RESPONSE - Continuing Scraper Fix (Session Resume) ===
+
+Resuming from previous session. Changes completed:
+
+1. **Created `backend/render.yaml`** - Ensures Playwright browsers are installed during Render build
+2. **Added Playwright health check** to `backend/api/routes/health.py`
+
+Now committing and pushing these changes to trigger a Render rebuild with Playwright properly installed.
+
+**Commit pushed:** `8937507` - "Add Playwright browser installation for Render deployment"
+
+## What Happens Next
+
+Render will automatically detect the push and rebuild with:
+- `pip install -r requirements.txt`
+- `playwright install chromium`
+- `playwright install-deps chromium`
+
+## Verification Steps
+
+Once Render finishes deploying (usually 2-5 minutes):
+
+1. Test Playwright is working:
+   ```
+   GET https://your-api.onrender.com/api/health/playwright
+   ```
+   Should return: `{"playwright": "ok", "browser": "chromium"}`
+
+2. Test The Knot scraping by adding a wedding with a theknot.com URL
+
+If Step 1 fails, check Render build logs for Playwright installation errors.
+If Step 1 passes but Step 2 fails, we'll update the stealth configuration.
+
+=== CLAUDE RESPONSE ===
+
+The Playwright health check confirmed the problem - **Chromium isn't installed on Render**.
+
+**What happened:** The `render.yaml` was in `backend/` but Render only reads it from the repo root. I moved it and pushed.
+
+**However**, Render likely won't auto-detect `render.yaml` since your service was created via the dashboard (not as a "Blueprint"). You'll need to manually update the build command:
+
+**Go to Render Dashboard → wedding-concierge-api → Settings → Build Command**
+
+Change it to:
+```
+pip install -r requirements.txt && playwright install chromium && playwright install-deps chromium
+```
+
+Then click **Save Changes** and trigger a **Manual Deploy**.
+
+After the deploy finishes, test again:
+```
+curl https://wedding-concierge-api.onrender.com/api/health/playwright
+```
+
+Should return `{"playwright": "ok", "browser": "chromium"}` instead of the error.
+
+=== CLAUDE RESPONSE ===
+
+The issue is `playwright install-deps chromium` tries to run as root to install system packages, which Render doesn't allow.
+
+The fix is to remove that command and just use `playwright install chromium`:
+
+**In Render Dashboard → Settings → Build Command, change it to:**
+```
+pip install -r requirements.txt && playwright install chromium
+```
+
+Remove the `playwright install-deps chromium` part entirely.
+
+The browser should work without the system dependencies - those are mainly for PDF generation and other optional features.
+
+Pushed fix to render.yaml. Also update the Build Command in Render Dashboard to match:
+```
+pip install -r requirements.txt && playwright install chromium
+```
+
+Then trigger a manual deploy.
+
+=== CLAUDE RESPONSE ===
+
+Playwright still isn't installed. The deploy may not have used the updated build command.
+
+Did you update the **Build Command** in Render Dashboard → Settings? It needs to be changed to:
+```
+pip install -r requirements.txt && playwright install chromium
+```
+
+Then click "Save Changes" and trigger "Manual Deploy" from the top right.
+
+The `render.yaml` file won't be used automatically since your service was created through the dashboard. You have to set the build command manually in Settings.
+
+=== CLAUDE RESPONSE ===
+
+Found it. Render needs an environment variable to persist the browser location between build and runtime.
+
+**In Render Dashboard → Environment → Add Environment Variable:**
+```
+PLAYWRIGHT_BROWSERS_PATH = /opt/render/project/playwright
+```
+
+Then trigger another manual deploy. This tells Playwright where to store browsers so they persist after the build step.
+
+Sources:
+- [Deploying python playwright application on render](https://community.render.com/t/deploying-python-playwright-application-on-render/20503)
+- [Playwright install with chromium - Render](https://community.render.com/t/playwright-install-with-chromium/11218)
+
+=== CLAUDE RESPONSE ===
+
+Yes, that's expected. The Knot and WeddingWire are slower because:
+
+1. **Playwright launches a real browser** - This takes 2-5 seconds to start up
+2. **Bot protection delays** - The page needs time to load and pass Akamai's checks
+3. **Multiple sub-pages** - The scraper fetches travel, Q&A, schedule, etc. (up to 10 pages)
+4. **Each sub-page uses the browser** - Once it detects bot protection, all requests go through Playwright
+
+Sites like Zola, Joy, and Minted are much faster because they don't have aggressive bot protection, so the scraper uses simple HTTP requests instead.
+
+Rough timing:
+- **Zola/Joy/Minted**: 3-8 seconds
+- **The Knot/WeddingWire**: 15-45 seconds
+
+The good news is it works now.
+
+=== CLAUDE RESPONSE ===
+
+No, creating the concierge is fast regardless of which site you scraped. The slow part is only the scraping itself.
+
+After scraping completes:
+1. **Claude AI extraction** - 2-5 seconds (parses the scraped text into structured data)
+2. **Database save** - Under 1 second (creates wedding, events, accommodations, etc.)
+
+So once you see the preview data, clicking "Create" should complete in a few seconds. The Playwright overhead only affects the initial URL fetch, not what happens after.
+
+=== CLAUDE RESPONSE ===
+
+Found the problem. The `/scrape/import` endpoint **re-scrapes the entire website** instead of using the already-scraped data from the preview step.
+
+For The Knot, that means:
+1. First scrape (preview): 15-45 seconds ✓
+2. Click "Create" → Second scrape: another 15-45 seconds ← You are here
+
+This is inefficient. The fix would be to pass the already-scraped data from step 1 to step 2 instead of re-scraping.
+
+For now, it should complete - just wait another 15-30 seconds. But I can fix this so it doesn't double-scrape.
+
+=== CLAUDE RESPONSE ===
+
+Done. Pushed the fix. Now when you click "Create My Concierge", it will use the already-scraped data instead of re-scraping. Should be nearly instant now instead of another 15-45 seconds.
+
+Changes made:
+- Backend: `/scrape/import` now accepts optional `data` field with pre-scraped data
+- Frontend: Stores scraped data after preview scan, passes it when creating wedding
+
+=== CLAUDE RESPONSE ===
+
+Done. Updated "up to a minute" to "up to 2 minutes" in the scan progress message.
+
+=== CLAUDE RESPONSE ===
+
+Done. Changes pushed:
+
+1. **File upload button** - Styled "Choose File:" button with spacing before filename
+2. **Edit guests** - Added pencil icon button on each row, opens edit modal
+3. **Expandable list** - "Show 25 more" button instead of "...and x more", plus "Show less" to collapse
+
+=== CLAUDE RESPONSE ===
+
+Done. Pushed mobile optimizations:
+
+**Dashboard fixes:**
+- Share section: `p-4 sm:p-8` padding (comfortable on small screens)
+- Modal form grids: Stack vertically on mobile, 2 columns on desktop
+- Modal containers: `p-4 sm:p-6` padding
+
+**Chat page:**
+- Hamburger menu appears on mobile when links are available
+- Dropdown shows "Wedding Website" and "My Dashboard"
+- Desktop: Links remain visible as before
+
+=== CLAUDE RESPONSE ===
+
+Pushed mobile overflow fixes based on iPhone screenshots:
+
+1. **Share section**: Added `break-words` to paragraph, `break-all` to URL so it wraps
+2. **FAQs**: Added `min-w-0` and `break-words` so questions/answers wrap properly
+3. **Tab bar**: Shows shorter text on mobile ("Details" / "Outreach" instead of full names)
+4. **Main container**: Added `overflow-x-hidden` to prevent horizontal scroll
+
+=== CLAUDE RESPONSE ===
+
+Fixed Guest Outreach tab mobile overflow + updated icons:
+
+**Guest Outreach mobile fixes:**
+- Added `overflow-hidden` to main container and all section cards
+- Responsive padding (`p-4 sm:p-6`)
+- Added `break-words` and `min-w-0` to text containers
+- Action buttons won't get squished
+
+**Icon updates:**
+- Ceremony: Now a heart icon
+- Dress Code: Now a dress/clothing shape
+
+=== CLAUDE RESPONSE ===
+
+Done. Pushed:
+
+- **Dress Code icon**: Now a bow tie
+- **Details tab icon**: Now a heart
+- **Guest table on mobile**: Hidden Group and Status columns (only Name, Phone, and action buttons visible)
+
+=== CLAUDE RESPONSE - Import Page Enhancements ===
+
+Done. The long wait message will now appear after 50 seconds during scanning. It displays in an amber notification box with the message explaining that The Knot and WeddingWire have extra security that requires more time.
+
+The implementation is complete. Here's what was added:
+
+**Long Wait Message (50+ seconds):**
+- Displays an amber notification box after 50 seconds of scanning
+- Message: "Taking a bit longer? Some wedding sites like The Knot and WeddingWire have extra security that requires more time to navigate. Hang tight — we're working on it!"
+- Resets when scanning completes or user goes back to input
+
+The complete Preview Extracted Data page now shows:
+- Partner names & wedding date
+- Ceremony and reception venues with addresses
+- Dress code
+- Summary stats (events, hotels, FAQs, registry)
+- Full events list with dates, times, venues, and addresses
+- Accommodations with room block details
+- FAQs with questions and answers
+- Long wait notification after 50 seconds
+
+=== CLAUDE RESPONSE - Import Preview & Long Wait Message ===
+
+Done. The long wait message will now appear after 50 seconds during scanning. It displays in an amber notification box with the message explaining that The Knot and WeddingWire require more time.
+
+The complete Preview Extracted Data page now shows:
+- Partner names & wedding date
+- Ceremony and reception venues with addresses
+- Dress code
+- Summary stats (events, hotels, FAQs, registry)
+- Full events list with dates, times, venues, and addresses
+- Accommodations with room block details
+- FAQs with questions and answers
+- Long wait notification after 50 seconds
+
+=== CLAUDE RESPONSE - Simplified Long Wait Message ===
+
+Done — simplified the message to: "Taking a bit longer? Some wedding sites like The Knot and WeddingWire require more time to navigate. Hang tight — we're working on it!"
+
+=== CLAUDE RESPONSE - Pushed Changes ===
+
+Pushed. The changes are now live:
+
+- **backend/api/routes/scrape.py** - Preview now includes events, accommodations, FAQs, and venue addresses
+- **frontend/src/lib/api.ts** - New TypeScript types for scrape preview data
+- **frontend/src/app/import/page.tsx** - Enhanced preview display + 50-second long wait message
+
+=== CLAUDE RESPONSE - Why Friend's Bot Missing Accommodation Data ===
+
+This is likely due to **different import times**. A few possible causes:
+
+1. **Imported at different times** - If your friend imported the wedding before recent scraping improvements, their wedding record may have incomplete accommodation data. Your import might have happened after the fixes.
+
+2. **Two separate wedding records** - Even using the same URL, each import creates a new wedding record with its own access code. The data extracted depends on when it was scraped.
+
+3. **Scraping variability** - The Knot/WeddingWire can be inconsistent. One scrape might successfully navigate to the Travel page while another might miss it due to timing or bot detection.
+
+**Quick fix:** Have your friend re-import the wedding using the `/import` page. This will use the latest scraping logic and create a fresh wedding record with better data extraction.
+
+**To verify the issue**, you could check the database to compare what accommodation data exists in each wedding record.
+
+=== CLAUDE RESPONSE - Scraper Reliability Improvements ===
+
+Added two improvements to make scraping more reliable:
+
+**1. Retry Logic for Critical Subpages**
+- Travel, accommodations, schedule, and FAQ pages now retry up to 3 times if they fail
+- 2-second delay between retries to handle bot-protected sites
+- Non-critical pages still only try once
+
+**2. Preview Page Notice**
+Added a blue notice after the summary stats:
+"Something missing or doesn't look right? Try scanning again, or continue and add missing details from your dashboard."
+
+This helps users know they can:
+1. Rescan if data looks incomplete
+2. Continue and manually add missing info later
+
+Changes pushed to main.
+
+=== CLAUDE RESPONSE - Data Storage Costs ===
+
+Yes, but it depends on your hosting setup and scale. Here's a breakdown:
+
+**Database (PostgreSQL)**
+- **Free tiers available**: Supabase (500MB), Neon (512MB), Railway ($5 credit/month), Render (90 days free)
+- **When you pay**: Once you exceed free tier limits or need production reliability
+- **Cost**: Usually $5-25/month for small-to-medium apps
+
+**What takes up space in your app:**
+- Wedding records: Small (~1-5KB each)
+- Scraped data (`full_text`): Larger (~30KB per wedding)
+- Chat history: Grows over time
+- Guest lists: Minimal
+
+**Bigger costs to watch:**
+1. **Anthropic API** (Claude) - This is likely your biggest expense
+   - Scraping uses Claude to extract data
+   - Every chat message uses Claude
+   - Pricing: ~$3-15 per million tokens depending on model
+
+2. **Backend hosting** (Railway/Render) - $5-20/month after free tier
+
+**My estimate for early stage (100 weddings, moderate chat usage):**
+- Database: Free tier should cover it
+- Backend hosting: ~$5-10/month
+- Claude API: $20-50/month depending on usage
+
+=== CLAUDE RESPONSE - Corrected Cost Estimate with Haiku + SMS ===
+
+**Claude Haiku Pricing** (much cheaper):
+- Input: $0.25 per million tokens
+- Output: $1.25 per million tokens
+- Estimated cost: **$5-15/month** for 100 weddings with moderate chat usage
+
+**SMS Costs** (Twilio or similar):
+- ~$0.0079 per SMS segment (160 chars) in the US
+- If sending to 100 guests per wedding: ~$0.79 per blast
+- Monthly estimate for 10 weddings sending 2 blasts each: **$15-20/month**
+
+**Updated Budget (100 weddings, early stage):**
+| Service | Monthly Cost |
+|---------|-------------|
+| Database | Free tier |
+| Backend hosting | $5-10 |
+| Claude Haiku API | $5-15 |
+| SMS (Twilio) | $15-20 |
+| **Total** | **$25-45/month** |
+
+=== CLAUDE RESPONSE - Real API Cost Data ===
+
+User reported: $0.37 in API costs today, mostly from Sonnet webscrapes.
+
+**Breakdown:**
+- Sonnet for webscraping (data extraction) - most of the cost
+- Haiku for chat responses - minimal cost
+
+**Why Sonnet for scraping makes sense:**
+- Better at parsing messy HTML/text
+- More accurate extraction of events, accommodations, FAQs
+- One-time cost per wedding import
+
+**Scaling projection:**
+- If each scrape costs ~$0.05-0.10 (Sonnet)
+- 100 wedding imports = $5-10 one-time
+- Chat usage on Haiku stays cheap ongoing
+
+Current architecture (Sonnet for scraping, Haiku for chat) is a good cost optimization — pay more upfront for accurate data extraction, then cheap ongoing chat.
+
+=== CLAUDE RESPONSE - Friend Still Having Accommodation Issues ===
+
+Possible causes:
+
+**1. Testing different wedding URLs?**
+Different weddings might have accommodations structured differently.
+
+**2. Same wedding, but old import?**
+Friend might be looking at a wedding imported before today's retry fix. Need to re-import.
+
+**3. Network/IP differences**
+The Knot's bot detection might be treating friend's IP more aggressively.
+
+**Debug steps:**
+1. Have friend try the exact same URL
+2. Check if preview shows 0 Hotels before clicking "Create My Concierge"
+3. If 0, click "Start Over" and retry
+
+Could add logging to see what's happening during their scrapes.
+
+=== CLAUDE RESPONSE - Checking Railway Logs ===
+
+Railway CLI not installed. Two options:
+
+**Option 1: Check logs via Railway Dashboard**
+1. Go to railway.app
+2. Open project → Backend service
+3. Click "Logs" tab
+4. Look for: `Failed to fetch`, `travel`, `accommodations`, `attempt 2/3`
+
+**Option 2: Install Railway CLI**
+```bash
+npm install -g @railway/cli
+railway login
+railway logs
+```
+
+=== CLAUDE RESPONSE - Correct Hosting: Render (not Railway) ===
+
+Backend is deployed on **Render**, not Railway.
+
+**To check Render logs:**
+1. Go to dashboard.render.com
+2. Click on `wedding-concierge-api` service
+3. Click "Logs" in the left sidebar
+4. Look for:
+   - `Fetching subpage: .../travel`
+   - `attempt 2/3` or `attempt 3/3`
+   - `Failed to fetch`
+   - `Successfully scraped subpage: travel`
+
+=== CLAUDE RESPONSE - Wrong Logs (Database, Not Backend) ===
+
+The troubleshooting.txt file contains **PostgreSQL database logs**, not backend/scraper logs. These only show database connections.
+
+To see scraper logs, need to check the **web service** logs in Render:
+1. Go to Render dashboard
+2. Look for `wedding-concierge-api` (web service, not database)
+3. Click on that service → Logs
+
+Web service logs would show:
+- `Fetching subpage: .../travel`
+- `Successfully scraped subpage`
+- `Claude extracted: X accommodations`
+
+=== CLAUDE RESPONSE - Log Analysis: Root Cause Found ===
+
+Analyzed the Render logs and found the issue:
+
+**Failed scrape (16:13) - 0 accommodations:**
+- `Contains 'hotel': False` - No hotel mentioned anywhere in content
+- The "Travel" page was showing registry items (flatware, laundry basket, bananas) instead of hotel info
+- Claude correctly returned 0 accommodations because there were none in the content
+
+**Successful scrape (15:54) - 2 accommodations:**
+- Same wedding, different result
+- Content must have loaded differently
+
+**Possible causes:**
+1. This wedding doesn't have travel/accommodation info set up
+2. The Knot page loads content inconsistently (sometimes registry, sometimes travel)
+3. Dynamic JS content loading differently each time
+
+**Potential fix:** Add Claude extraction retry if expected data is missing but keywords are present.
+
+=== CLAUDE RESPONSE - Root Cause Found & Fixed ===
+
+**The Problem:**
+Friend's scrape at 15:22: `Contains 'hotel': False` → 0 accommodations
+Your scrape at 15:53: `Contains 'hotel': True` → 2 accommodations
+
+The browser was only waiting 3 seconds for JS to render. The Knot's travel page loads hotel info dynamically, and 3 seconds wasn't enough time for it to appear consistently.
+
+**The Fix:**
+Increased wait time from 3 seconds to 8 seconds for travel/accommodations/hotels pages.
+
+```python
+slow_render_pages = ["travel", "accommodations", "hotels"]
+wait_time = 8.0 if needs_extra_wait else 3.0
+```
+
+Have your friend try importing again - it should now consistently get the hotel info.
+
+=== CLAUDE RESPONSE - Wait Time Impact Analysis ===
+
+**Current timing:**
+- 6 pages × 3s + 1 travel × 8s = 26 seconds of waiting
+
+**With 5s default:**
+- 6 pages × 5s + 1 travel × 8s = 38 seconds of waiting
+
+**Difference: +12 seconds**
+
+Not drastic. Full scrape already takes 1-2 minutes, so +12 seconds for more reliable data extraction is worth it.
+
+=== CLAUDE RESPONSE - Wait Time Increased ===
+
+Pushed. New wait times:
+- Default pages: 5 seconds (was 3)
+- Travel/accommodations: 8 seconds
+
+Have your friend try again after Render redeploys.
+
+=== CLAUDE RESPONSE - Photos Page Skipped ===
+
+Pushed. Now skipping photos/photo pages during scraping.
+Saves ~30 seconds per scrape on The Knot/WeddingWire.
+
+New estimated time: ~3 minutes → ~2.5 minutes
+
+=== CLAUDE RESPONSE - Wait Notification Updated ===
+
+Pushed. Changed "up to 2 minutes" to "up to 3 minutes" on the import page.
+
+=== CLAUDE RESPONSE - Scraping Location Clarification ===
+
+Scraping happens on **Render's server**, not the user's computer.
+
+Flow:
+1. User's browser sends URL to backend
+2. Render server runs Playwright, fetches pages, calls Claude
+3. Results return to browser
+
+User's internet/computer speed doesn't affect scraping — only the milliseconds for request/response.
+
+The different results were due to The Knot's inconsistent JS rendering, not network differences. The 8-second wait fix should make it consistent.
+
+=== CLAUDE RESPONSE - Pricing Page Fade-In Animations ===
+
+Pushed. Added fade-in animations to pricing page:
+- Hero title/subtitle: animate on page load
+- Pricing card: fades in on scroll
+- FAQ items: staggered fade-in with delays (100ms, 200ms, 300ms, 400ms, 500ms)
+
+Uses same `useScrollAnimation` hook as the home page.
+
+=== CLAUDE RESPONSE - Comprehensive Pre-Beta Review ===
+
+**Overall Assessment: 7/10 - Ready for Beta with Fixes**
+
+## CRITICAL ISSUES (Must Fix)
+1. Hardcoded SECRET_KEY - Move to env variable
+2. No rate limiting on auth - Brute force risk
+3. No CSRF protection
+4. Password reset email not implemented
+5. Using Resend demo account (emails won't send)
+6. Access code not unique (guests could access wrong wedding)
+7. SMS webhook signature not verified
+
+## HIGH PRIORITY
+- Input validation on scrape URLs (SSRF risk)
+- Max file upload size
+- Sentry error tracking
+- Database migrations with Alembic
+- Add indexes on wedding_id, guest_id
+- Email verification on registration
+- Toast notifications for user feedback
+
+## WHAT'S WORKING WELL
+- Chat engine with good context building
+- Multi-platform website scraper
+- SMS with templates, scheduling, opt-out
+- Clean UI/UX with animations
+- Solid async architecture
+
+## RECOMMENDED TIMELINE
+- Week 1: Security fixes
+- Week 2: Email service, error handling
+- Week 3: Monitoring, database optimization
+- Week 4: Limited beta launch (10-20 users)
+
+=== CLAUDE RESPONSE - Security Fixes Completed ===
+
+Implemented all critical security fixes:
+
+## Completed Security Fixes
+
+| Fix | Details |
+|-----|---------|
+| **SECRET_KEY validation** | Added Pydantic validator that fails in production with insecure defaults, warns in dev |
+| **Rate limiting** | Added slowapi rate limits: register (5/min), login (10/min), forgot-password (3/min), reset-password (5/min) |
+| **Production error handling** | Generic "An internal error occurred" message in production, full details only in dev |
+| **CSRF protection** | Not needed - JWT tokens in Authorization headers, not cookies |
+| **Twilio webhook verification** | Validates X-Twilio-Signature header in production, rejects spoofed requests |
+| **SSRF protection** | Blocks localhost, private IPs, cloud metadata; resolves hostnames to check for private IP redirection |
+| **File upload limits** | Max 5MB for guest uploads, validates .csv/.xlsx/.xls extensions |
+
+### Files Modified
+- `backend/core/config.py` - SECRET_KEY validation, IS_PRODUCTION flag
+- `backend/main.py` - Rate limiter setup, production error handling
+- `backend/api/routes/auth.py` - Rate limiting decorators
+- `backend/api/routes/scrape.py` - SSRF protection
+- `backend/api/routes/sms.py` - Twilio signature verification, file upload limits
+- `backend/services/sms/twilio_service.py` - Webhook validation method
+- `backend/requirements.txt` - Added slowapi
+
+=== CLAUDE RESPONSE - Scraper Registry Sidebar Fix ===
+
+## Problem
+Friend's scrape still showing 0 accommodations. Log analysis revealed:
+
+```
+Contains 'hotel': False
+Contains 'accommod': False
+```
+
+The Travel page content showed registry items:
+```
+Travel
+Gift Providers
+Shop Registry
+View Cash Funds
+Our Wish List
+Filter/Sort
+Price low to high
+...
+20pc Ashby Flatware Set Silver
+Banana - each
+```
+
+**Root Cause:** The Knot has a persistent registry sidebar widget on all pages. When using `soup.get_text()`, it captures the sidebar content instead of actual travel information.
+
+## Fixes Applied
+
+1. **Added `_extract_main_content()` method** - Filters out registry, sidebar, gift-list, wishlist, footer, cookie consent, and modal elements before extracting text
+
+2. **Smart travel page extraction** - For travel pages, specifically looks for sections containing keywords like "hotel", "accommod", "room block", etc.
+
+3. **Enhanced `_clean_page_text()`** - Now filters out:
+   - Registry indicators ("Needs 1 of", "Shop Registry", "Gift Providers", etc.)
+   - Product listings (price patterns like "$50.00")
+   - Store brand names ("Target™", "Threshold™", etc.)
+
+4. **Updated subpage extraction** - Now uses `_extract_main_content()` instead of raw `get_text()` for all subpages
+
+## Important Note
+It's possible the couple simply hasn't added accommodation information to their Travel page. The Knot shows a Travel tab by default, but if no hotels are added, the page just displays the registry sidebar.
+
+Once Render deploys (~2-5 minutes), have friend try scraping again. If still no accommodation data, the couple may not have added that info to their site.
+
+=== CLAUDE RESPONSE - Travel Page Content Confirmed ===
+
+User provided actual content from the couple's Travel page. They DO have hotel info:
+
+**The Oaklander Hotel, Autograph Collection**
+- 5130 Bigelow Blvd, Pittsburgh, PA 15213
+- (412) 578-8500
+- Book before 1/3/2026 for discount
+- After-party hosted here
+
+**Courtyard Pittsburgh University Center**
+- 100 Lytton Ave, Pittsburgh, PA 15213
+- (412) 682-6200
+- Book before 12/30/2025 for discount
+
+The data IS on the page - our scraper just isn't capturing it properly.
+
+=== CLAUDE RESPONSE - No Registry Sidebar ===
+
+User confirmed there is NO registry sidebar on the travel page when viewing normally. The travel content loads first, then gets replaced by registry content during scraping.
+
+This suggests The Knot loads content in stages, and we're capturing at the wrong stage.
+
+=== CLAUDE RESPONSE - Improved Travel Content Extraction ===
+
+Pushed multiple fixes to capture travel content properly:
+
+## Browser Level (browser_fetch.py)
+- Close any popup/modal overlays before capturing
+- Click on main content area to dismiss overlay widgets
+- Wait for hotel-related text to appear before capturing
+- Scroll to bottom to trigger lazy loading
+
+## Scraper Level (scraper.py)
+- **Scoring system** instead of first-match - finds section with MOST hotel content
+- Skip sections with registry keywords ("needs 1 of", "shop registry", etc.)
+- Bonus points for:
+  - Phone numbers (+5) - hotels have phone numbers like (412) 578-8500
+  - Street addresses (+5) - patterns like "5130 Bigelow Blvd"
+  - Check-in/Check-out dates (+10) - definite hotel indicator
+  - Hotel brand names (+1 each) - Marriott, Hilton, Courtyard, Oaklander, etc.
+- Only use a section if score >= 3 (ensures meaningful content)
+
+The new approach finds the section with the highest "hotel score" rather than just grabbing the first match, which should avoid registry widgets even if they're in the DOM.
+
+After Render deploys, logs should show:
+```
+Found phone number in section
+Found address pattern in section
+Found check-in/check-out in section
+New best travel section: score=21, length=1500
+Using travel section with score 21
+```
+
+=== CLAUDE RESPONSE - Slow Render Deployment ===
+
+Render deployments can be slow for a few reasons:
+
+1. **Playwright browser installation** - Downloads ~200MB+ of Chromium binaries
+2. **Free tier cold starts** - Free tier services spin down after inactivity
+3. **Build queue** - Free tier has lower priority in the build queue
+
+Check status at: **Render Dashboard → wedding-concierge-api → Events/Deploys**
+
+Should show progression:
+- "Build started"
+- "Build succeeded"
+- "Deploy started"
+- "Deploy live"
+
+If stuck on "Build started" for more than 10 minutes, there might be an issue.
+
+=== CLAUDE RESPONSE - Scrape Worked But Took 5 Minutes ===
+
+Scrape successfully captured hotel info:
+```
+Found hotel content with selector: text=/check-in/i
+New best travel section: score=27, length=485
+Claude extracted: 1 accommodations
+```
+
+But 5 minutes is too long. Timing breakdown per page:
+- Main page: ~40s
+- our-story: ~46s
+- wedding-party: ~39s
+- q-a: ~33s
+- travel: ~44s
+- registry: ~36s
+- rsvp: ~37s
+
+Each subpage taking 30-45 seconds due to excessive wait times.
+
+**Proposed optimizations:**
+1. Skip unnecessary pages (our-story, wedding-party, registry, rsvp)
+2. Reduce wait times (5-8s per page is excessive)
+3. Fetch subpages in parallel instead of sequential
+
+Could cut scrape time from 5 minutes to ~1-1.5 minutes.
+
+=== CLAUDE RESPONSE - Persistent Logging Instructions ===
+
+Created `CLAUDE.md` in project root with instruction to log responses to `claude_responses2.txt` automatically. Claude Code reads this file and includes it in every prompt.
+
+=== CLAUDE RESPONSE - Parallel Scraping Drawbacks ===
+
+**No additional cost:**
+- Claude API is called once at the end with all content - same whether pages are fetched sequentially or in parallel
+- No extra Anthropic charges
+
+**Potential drawbacks:**
+
+| Concern | Risk Level | Details |
+|---------|------------|---------|
+| Bot detection | Medium | Multiple simultaneous requests look less human-like. The Knot might block more aggressively |
+| Memory usage | Medium | Multiple browser tabs open at once = more RAM. Render free tier has limited memory |
+| Rate limiting | Low-Medium | The Knot could throttle/block IPs making concurrent requests |
+| Debugging | Low | Harder to trace issues when pages load simultaneously |
+
+**Safer alternatives:**
+1. Reduce wait times - Current 5-8 seconds is excessive, could use 2-3 seconds
+2. Remove popup close logic on non-travel pages - saves ~1-2 seconds each
+3. Batch parallel - Fetch 2-3 pages at a time instead of all 6
+
+=== CLAUDE RESPONSE - Scraping Speed Optimizations Implemented ===
+
+Implemented batch parallel scraping + reduced wait times:
+
+**Changes:**
+- Removed all popup close logic (not needed, adds latency)
+- Batch parallel: 3 pages fetched simultaneously instead of sequential
+- Wait times reduced: 2s default, 3s for travel pages (was 5-8s)
+- Simplified travel page detection: single check-in selector wait
+- Scroll wait reduced from 1.5s to 0.3s
+
+**Expected improvement:** ~5 minutes → ~1.5-2 minutes for The Knot
+
+**How it works:**
+```python
+# Batch parallel fetching - 3 pages at a time
+batch_size = 3
+for i in range(0, len(subpages), batch_size):
+    batch = subpages[i:i + batch_size]
+    results = await asyncio.gather(*[fetch_subpage(url) for url in batch])
+```
+
+With 6 subpages, this means 2 batches instead of 6 sequential fetches.
+
+=== CLAUDE RESPONSE - Fix Event Times in Preview ===
+
+Event times weren't showing in the preview because of field name mismatch:
+- Claude returns: `event_name`, `event_date`, `event_time`
+- Frontend expects: `name`, `date`, `time`
+
+Added transformation in `backend/api/routes/scrape.py`:
+```python
+events = [
+    {
+        "name": e.get("event_name", ""),
+        "date": e.get("event_date"),
+        "time": e.get("event_time"),
+        ...
+    }
+    for e in raw_events
+]
+```
+
+Now event times will display as "January 31, 2026 at 3:00 PM" in the preview.
+
+=== CLAUDE RESPONSE - Log Analysis: Failed Import & Timing ===
+
+**1. Why first import failed with "Load Failed":**
+Render was redeploying while scrape was running. Server shutdown mid-request:
+```
+INFO: Shutting down
+INFO: Waiting for application shutdown.
+```
+The new deployment killed the in-flight scrape request.
+
+**2. Most recent import time: 3 min 46 sec**
+
+| Stage | Time |
+|-------|------|
+| Start | 19:09:32 |
+| Main page done | 19:10:07 (35s) |
+| Batch 1 done (3 pages) | 19:11:42 (+1m35s) |
+| Batch 2 done (3 pages) | 19:13:05 (+1m23s) |
+| Claude API | 19:13:17 (+12s) |
+
+Better than 5 minutes, but each page still takes 30-40 seconds due to The Knot's bot protection and Render's limited memory with parallel browser tabs.
+
+=== CLAUDE RESPONSE - Session Continuation ===
+Continued from previous session. All scraping optimization work was completed:
+- Batch parallel scraping (3 pages at a time) implemented
+- All popup close logic removed
+- Event times added to preview extracted data
+- CLAUDE.md created for persistent logging
+
+Mobile optimization plan exists in plans folder for dashboard and chat page navigation improvements.

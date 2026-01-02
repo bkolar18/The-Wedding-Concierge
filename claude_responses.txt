@@ -4104,3 +4104,32 @@ Fixed Guest Outreach tab mobile overflow + updated icons:
 **Icon updates:**
 - Ceremony: Now a heart icon
 - Dress Code: Now a dress/clothing shape
+
+=== CLAUDE RESPONSE ===
+
+Done. Pushed:
+
+- **Dress Code icon**: Now a bow tie
+- **Details tab icon**: Now a heart
+- **Guest table on mobile**: Hidden Group and Status columns (only Name, Phone, and action buttons visible)
+
+=== CLAUDE RESPONSE - Import Page Enhancements ===
+
+Done. The long wait message will now appear after 50 seconds during scanning. It displays in an amber notification box with the message explaining that The Knot and WeddingWire have extra security that requires more time.
+
+The implementation is complete. Here's what was added:
+
+**Long Wait Message (50+ seconds):**
+- Displays an amber notification box after 50 seconds of scanning
+- Message: "Taking a bit longer? Some wedding sites like The Knot and WeddingWire have extra security that requires more time to navigate. Hang tight — we're working on it!"
+- Resets when scanning completes or user goes back to input
+
+The complete Preview Extracted Data page now shows:
+- Partner names & wedding date
+- Ceremony and reception venues with addresses
+- Dress code
+- Summary stats (events, hotels, FAQs, registry)
+- Full events list with dates, times, venues, and addresses
+- Accommodations with room block details
+- FAQs with questions and answers
+- Long wait notification after 50 seconds

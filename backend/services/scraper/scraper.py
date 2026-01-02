@@ -290,33 +290,39 @@ class WeddingScraper:
             # Pages that need extra wait time for JS to render hotel/accommodation info
             slow_render_pages = ["travel", "accommodations", "hotels"]
 
-            async def fetch_subpage(subpage_url: str) -> tuple:
-                """Fetch a single subpage and return (page_name, content)."""
+            async def fetch_subpage_with_own_browser(subpage_url: str) -> tuple:
+                """Fetch a single subpage with its own browser instance for true parallelism."""
                 page_name = urlparse(subpage_url).path.split("/")[-1] or "subpage"
                 needs_extra_wait = any(slow in page_name.lower() for slow in slow_render_pages)
-                # Use 3 seconds for travel/hotel pages, 2 seconds for other pages
                 wait_time = 3.0 if needs_extra_wait else 2.0
 
                 logger.info(f"Fetching subpage: {subpage_url} (wait={wait_time}s)")
-                subpage_html = await self._fetch_page(subpage_url, wait_time=wait_time)
-                if subpage_html:
-                    subpage_soup = BeautifulSoup(subpage_html, "html.parser")
-                    content = self._extract_main_content(subpage_soup, page_name)
-                    logger.info(f"Successfully scraped subpage: {page_name} ({len(content)} chars)")
-                    return (page_name, content)
-                else:
-                    logger.warning(f"Failed to fetch subpage: {subpage_url}")
-                    return (page_name, None)
 
-            # Batch parallel fetching - 3 pages at a time to avoid overwhelming the server
-            batch_size = 3
-            for i in range(0, len(subpages), batch_size):
-                batch = subpages[i:i + batch_size]
-                logger.info(f"Fetching batch {i // batch_size + 1}: {len(batch)} pages")
-                results = await asyncio.gather(*[fetch_subpage(url) for url in batch])
-                for page_name, content in results:
-                    if content:
-                        subpage_content[page_name] = content
+                # Create independent browser for this fetch to enable true parallelism
+                browser = StealthBrowser()
+                try:
+                    await browser.start()
+                    subpage_html = await browser.fetch_page(subpage_url, wait_time=wait_time)
+                    if subpage_html and not self._is_blocked_response(subpage_html):
+                        subpage_soup = BeautifulSoup(subpage_html, "html.parser")
+                        content = self._extract_main_content(subpage_soup, page_name)
+                        logger.info(f"Successfully scraped subpage: {page_name} ({len(content)} chars)")
+                        return (page_name, content)
+                    else:
+                        logger.warning(f"Failed to fetch subpage: {subpage_url}")
+                        return (page_name, None)
+                except Exception as e:
+                    logger.error(f"Error fetching subpage {subpage_url}: {e}")
+                    return (page_name, None)
+                finally:
+                    await browser.close()
+
+            # True parallel fetching - all subpages at once with independent browsers
+            logger.info(f"Fetching {len(subpages)} subpages in parallel")
+            results = await asyncio.gather(*[fetch_subpage_with_own_browser(url) for url in subpages])
+            for page_name, content in results:
+                if content:
+                    subpage_content[page_name] = content
 
             # Diagnostic logging for subpage content
             logger.info(f"Subpage content keys: {list(subpage_content.keys())}")
