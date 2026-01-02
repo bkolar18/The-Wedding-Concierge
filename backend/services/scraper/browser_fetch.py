@@ -171,18 +171,21 @@ class StealthBrowser:
                     await page.wait_for_load_state("networkidle", timeout=10000)
                     logger.info("Network idle, checking for hotels")
 
-                    # Count phone numbers as proxy for hotel count (each hotel has a phone)
-                    phone_count = await page.evaluate("""
+                    # Count addresses as proxy for hotel count (look for ZIP codes)
+                    address_count = await page.evaluate("""
                         () => {
                             const text = document.body.innerText;
-                            const phoneMatches = text.match(/\\(\\d{3}\\)\\s*\\d{3}-\\d{4}/g);
-                            return phoneMatches ? phoneMatches.length : 0;
+                            // Match US ZIP codes (5 digits, optionally with -4 extension)
+                            const zipMatches = text.match(/\\b\\d{5}(-\\d{4})?\\b/g);
+                            // Filter to likely addresses (near state abbreviations or "USA")
+                            const addressMatches = text.match(/[A-Z]{2},?\\s*\\d{5}/g);
+                            return addressMatches ? addressMatches.length : 0;
                         }
                     """)
-                    logger.info(f"Found {phone_count} phone numbers (hotels)")
+                    logger.info(f"Found {address_count} addresses (hotels)")
 
-                    # If only 1 hotel found, wait a bit more and scroll
-                    if phone_count < 2:
+                    # If only 1 address found, wait a bit more and scroll
+                    if address_count < 2:
                         logger.info("Less than 2 hotels, waiting longer...")
                         await asyncio.sleep(2)
 
@@ -196,14 +199,14 @@ class StealthBrowser:
                     await asyncio.sleep(0.3)
 
                     # Final check
-                    final_phone_count = await page.evaluate("""
+                    final_address_count = await page.evaluate("""
                         () => {
                             const text = document.body.innerText;
-                            const phoneMatches = text.match(/\\(\\d{3}\\)\\s*\\d{3}-\\d{4}/g);
-                            return phoneMatches ? phoneMatches.length : 0;
+                            const addressMatches = text.match(/[A-Z]{2},?\\s*\\d{5}/g);
+                            return addressMatches ? addressMatches.length : 0;
                         }
                     """)
-                    logger.info(f"Travel page complete - {final_phone_count} hotels found")
+                    logger.info(f"Travel page complete - {final_address_count} addresses found")
 
                 except Exception as e:
                     logger.warning(f"Travel page wait error: {e}")

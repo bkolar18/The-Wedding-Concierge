@@ -1029,3 +1029,16 @@ Friend's import only got Courtyard hotel, missing The Oaklander.
 - Total ~3s extra to trigger all lazy-loaded content
 
 Pushed to deploy.
+
+=== CLAUDE RESPONSE - Oaklander First Hotel Fix ===
+User clarified Oaklander is FIRST hotel, not second. WebFetch confirmed both hotels exist - it's a timing issue with Playwright.
+
+**Root cause:** React hydration - Oaklander (rank 1) loads AFTER Courtyard (rank 2) due to async rendering.
+
+**Fix:** Updated travel page handling:
+- Wait for `networkidle` state (React hydration complete)
+- Count phone numbers as proxy for hotel count
+- If <2 hotels found, wait 2 more seconds
+- Log hotel counts for debugging
+
+Pushed to deploy.
