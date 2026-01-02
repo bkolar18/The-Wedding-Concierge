@@ -167,7 +167,7 @@ export default function ImportPage() {
                       />
                     </div>
                     <p className="text-xs text-gray-500 text-center">
-                      This may take up to a minute while we scan all pages...
+                      This may take up to 2 minutes while we scan all pages...
                     </p>
                   </div>
                 )}
