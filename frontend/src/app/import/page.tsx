@@ -177,7 +177,7 @@ export default function ImportPage() {
                       />
                     </div>
                     <p className="text-xs text-gray-500 text-center">
-                      This may take up to 2 minutes while we scan all pages...
+                      This may take up to 3 minutes while we scan all pages...
                     </p>
                     {showLongWaitMessage && (
                       <div className="mt-3 p-3 bg-amber-50 border border-amber-200 rounded-lg">
