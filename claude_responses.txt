@@ -3670,3 +3670,128 @@ FRONTEND_URL=https://the-wedding-concierge.vercel.app
 - Password reset tokens expire after 1 hour
 - Contact form sends to SMTP_USER email or placeholder in dev
 - All forms have consistent styling with rose/gradient theme
+
+=== CLAUDE RESPONSE - Email Service Configuration ===
+
+You're right - the code is there but it needs SMTP credentials to actually send emails. Currently without credentials, it just logs to console:
+
+```
+[Email] SMTP not configured. Would send to user@example.com: Reset Your Password
+```
+
+To make it work, you need to add these environment variables to Render:
+
+**Option 1: Gmail (quick for testing)**
+```
+SMTP_HOST=smtp.gmail.com
+SMTP_PORT=587
+SMTP_USER=your-gmail@gmail.com
+SMTP_PASSWORD=your-app-password  # Not your regular password - need to generate an "App Password"
+```
+
+**Option 2: Resend (recommended for production)**
+Resend is simpler and more reliable. Would you like me to swap out the SMTP service for Resend? It's:
+- Free for 3,000 emails/month
+- Just one API key instead of SMTP config
+- More reliable delivery
+
+**Option 3: SendGrid, Mailgun, etc.**
+Similar to Resend but more complex setup.
+
+Options presented to user:
+1. Set up Resend integration (recommended)
+2. Keep SMTP and configure Gmail/other provider
+3. Something else
+
+=== CLAUDE RESPONSE - SMTP vs Resend Comparison ===
+
+## SMTP (Simple Mail Transfer Protocol)
+
+**What it is:** The traditional protocol for sending emails. It's like the postal service of email - a standard way computers send messages to each other.
+
+**How it works:**
+- You connect to an SMTP server (Gmail, Outlook, etc.)
+- Authenticate with username/password
+- Server relays your email to the recipient
+
+**Pros:**
+- Universal standard - works with any email provider
+- You can use your existing Gmail/Outlook account
+- No additional service to sign up for
+
+**Cons:**
+- Requires 4+ environment variables (host, port, user, password)
+- Gmail requires "App Passwords" (extra security step)
+- Can hit sending limits (Gmail: 500/day)
+- Emails more likely to land in spam (no dedicated IP reputation)
+- More complex error handling
+
+---
+
+## Resend (Modern Email API)
+
+**What it is:** A developer-focused email service built specifically for transactional emails (password resets, notifications, etc.).
+
+**How it works:**
+- You make an API call with your message
+- Resend handles all the email infrastructure
+- They manage deliverability, reputation, etc.
+
+**Pros:**
+- Just 1 API key (simpler setup)
+- Better deliverability (dedicated sending infrastructure)
+- Built-in analytics (see if emails were delivered/opened)
+- Free tier: 3,000 emails/month
+- Modern Python SDK: `resend.Emails.send()`
+
+**Cons:**
+- Another service to sign up for
+- Requires domain verification for production (to send from your own domain)
+- Free tier has Resend branding in emails (or use their subdomain)
+
+---
+
+## Recommendation
+
+**For The Wedding Concierge:**
+- Resend is better because:
+  1. Password reset emails MUST be delivered reliably
+  2. Simpler code (1 API key vs 4 SMTP vars)
+  3. Free tier covers your needs (3,000 emails/month = a lot of password resets)
+  4. You'll want email analytics eventually
+
+**Quick comparison:**
+| Feature | SMTP (Gmail) | Resend |
+|---------|--------------|--------|
+| Setup complexity | 4 env vars + app password | 1 API key |
+| Free limit | 500/day | 3,000/month |
+| Deliverability | Lower (shared IP) | Higher (dedicated) |
+| Spam risk | Higher | Lower |
+| Code simplicity | More complex | Simpler |
+
+=== CLAUDE RESPONSE - What Modern Web Apps Use for Email ===
+
+Most modern web apps use **dedicated email API services** like Resend, SendGrid, Postmark, or AWS SES - not raw SMTP.
+
+**Why:**
+- **Deliverability** - These services have established IP reputations with email providers (Gmail, Outlook, etc.), so emails actually arrive in inboxes instead of spam
+- **Scale** - SMTP through Gmail breaks at ~500 emails/day; these services handle millions
+- **Reliability** - They handle retries, bounce management, and compliance automatically
+- **Analytics** - See delivery rates, opens, clicks, bounces
+
+**Who uses what:**
+| Service | Used By | Free Tier |
+|---------|---------|-----------|
+| SendGrid | Uber, Airbnb, Spotify | 100/day |
+| Postmark | Basecamp, Wildbit | 100/month |
+| Resend | Newer startups, indie devs | 3,000/month |
+| AWS SES | Large enterprises | 62,000/month (if on EC2) |
+| Mailgun | GitHub, Lyft | 5,000/month for 3 months |
+
+**The pattern:** Almost no production app sends email through Gmail SMTP. That's only for hobby projects or testing.
+
+For a wedding SaaS like yours, Resend or Postmark are ideal - they're built for transactional emails (password resets, confirmations) and have generous free tiers.
+
+---
+
+**Note:** User requested all responses be logged to this file for the remainder of the week.

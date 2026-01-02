@@ -37,6 +37,9 @@ python-dateutil
 twilio
 phonenumbers
 
+# Email
+resend
+
 # Background Jobs
 apscheduler
 

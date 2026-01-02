@@ -1,85 +1,43 @@
-"""Email service for sending transactional emails."""
-import asyncio
-import smtplib
-import ssl
-from email.mime.text import MIMEText
-from email.mime.multipart import MIMEMultipart
+"""Email service using Resend."""
 from typing import Optional
+import resend
 
 from core.config import settings
 
 
 class EmailService:
-    """Service for sending emails via SMTP."""
+    """Service for sending emails via Resend."""
 
     def __init__(self):
-        self.host = settings.SMTP_HOST
-        self.port = settings.SMTP_PORT
-        self.user = settings.SMTP_USER
-        self.password = settings.SMTP_PASSWORD
-        self.from_email = settings.SMTP_FROM_EMAIL
-        self.from_name = settings.SMTP_FROM_NAME
+        if settings.RESEND_API_KEY:
+            resend.api_key = settings.RESEND_API_KEY
 
     @property
     def is_configured(self) -> bool:
         """Check if email service is configured."""
-        return bool(self.host and self.user and self.password)
+        return bool(settings.RESEND_API_KEY)
 
     async def send_email(
         self,
         to_email: str,
         subject: str,
         html_content: str,
-        text_content: Optional[str] = None
     ) -> bool:
-        """Send an email asynchronously."""
+        """Send an email via Resend."""
         if not self.is_configured:
-            print(f"[Email] SMTP not configured. Would send to {to_email}: {subject}")
+            print(f"[Email] Resend not configured. Would send to {to_email}: {subject}")
             return True  # Return True in dev mode so flow continues
 
-        # Run in thread pool to not block async
-        loop = asyncio.get_event_loop()
-        return await loop.run_in_executor(
-            None,
-            self._send_email_sync,
-            to_email,
-            subject,
-            html_content,
-            text_content
-        )
-
-    def _send_email_sync(
-        self,
-        to_email: str,
-        subject: str,
-        html_content: str,
-        text_content: Optional[str] = None
-    ) -> bool:
-        """Send email synchronously (called in thread pool)."""
         try:
-            message = MIMEMultipart("alternative")
-            message["Subject"] = subject
-            message["From"] = f"{self.from_name} <{self.from_email}>"
-            message["To"] = to_email
+            params = {
+                "from": settings.EMAIL_FROM,
+                "to": [to_email],
+                "subject": subject,
+                "html": html_content,
+            }
 
-            # Add plain text version if provided
-            if text_content:
-                part1 = MIMEText(text_content, "plain")
-                message.attach(part1)
-
-            # Add HTML version
-            part2 = MIMEText(html_content, "html")
-            message.attach(part2)
-
-            # Create secure connection
-            context = ssl.create_default_context()
-
-            with smtplib.SMTP(self.host, self.port) as server:
-                server.starttls(context=context)
-                server.login(self.user, self.password)
-                server.sendmail(self.from_email, to_email, message.as_string())
-
-            print(f"[Email] Sent successfully to {to_email}")
+            response = resend.Emails.send(params)
+            print(f"[Email] Sent successfully to {to_email}, id: {response.get('id')}")
             return True
 
         except Exception as e:
@@ -127,25 +85,60 @@ class EmailService:
 </html>
 """
 
-        text_content = f"""
-{greeting}
-
-We received a request to reset your password.
-
-Reset your password here: {reset_url}
-
-This link will expire in 1 hour.
-
-If you didn't request this, you can safely ignore this email.
-
-- The Wedding Concierge Team
-"""
-
         return await self.send_email(
             to_email=to_email,
             subject="Reset Your Password - The Wedding Concierge",
             html_content=html_content,
-            text_content=text_content
+        )
+
+    async def send_contact_notification(self, name: str, email: str, message: str, wedding_date: Optional[str] = None) -> bool:
+        """Send contact form notification to admin."""
+        html_content = f"""
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        body {{ font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; line-height: 1.6; color: #333; }}
+        .container {{ max-width: 600px; margin: 0 auto; padding: 20px; }}
+        .header {{ background: linear-gradient(to right, #f43f5e, #e11d48); color: white; padding: 20px; border-radius: 8px 8px 0 0; }}
+        .content {{ background: #f9fafb; padding: 20px; border-radius: 0 0 8px 8px; }}
+        .field {{ margin-bottom: 16px; }}
+        .label {{ font-weight: 600; color: #374151; }}
+        .value {{ background: white; padding: 12px; border-radius: 6px; margin-top: 4px; }}
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h2 style="margin: 0;">New Contact Form Submission</h2>
+        </div>
+        <div class="content">
+            <div class="field">
+                <div class="label">Name</div>
+                <div class="value">{name}</div>
+            </div>
+            <div class="field">
+                <div class="label">Email</div>
+                <div class="value"><a href="mailto:{email}">{email}</a></div>
+            </div>
+            {f'<div class="field"><div class="label">Wedding Date</div><div class="value">{wedding_date}</div></div>' if wedding_date else ''}
+            <div class="field">
+                <div class="label">Message</div>
+                <div class="value">{message}</div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
+"""
+
+        # For now, send to a placeholder - in production, set an admin email
+        admin_email = "delivered@resend.dev"  # Resend's test email that always succeeds
+
+        return await self.send_email(
+            to_email=admin_email,
+            subject=f"Contact Form: {name}",
+            html_content=html_content,
         )
 
 
