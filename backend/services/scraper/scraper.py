@@ -119,18 +119,18 @@ class WeddingScraper:
             logger.warning(f"HTTP error fetching {url}: {e}")
             return None
 
-    async def _fetch_with_browser(self, url: str) -> Optional[str]:
+    async def _fetch_with_browser(self, url: str, wait_time: float = 3.0) -> Optional[str]:
         """Fetch a page using the stealth browser (slower, but bypasses bot protection)."""
         try:
             if self._browser is None:
                 self._browser = StealthBrowser()
                 await self._browser.start()
-            return await self._browser.fetch_page(url)
+            return await self._browser.fetch_page(url, wait_time=wait_time)
         except PlaywrightNotAvailableError:
             logger.warning("Playwright not available - cannot use browser-based scraping")
             return None
 
-    async def _fetch_page(self, url: str) -> Optional[str]:
+    async def _fetch_page(self, url: str, wait_time: float = 3.0) -> Optional[str]:
         """Fetch a single page with tiered fallback strategy.
 
         Tier 1: httpx (fast, free)
@@ -138,6 +138,7 @@ class WeddingScraper:
 
         Args:
             url: The URL to fetch
+            wait_time: Time to wait for JS rendering (browser only)
 
         Returns:
             HTML content or None if fetch failed
@@ -145,7 +146,7 @@ class WeddingScraper:
         # If we already know we need browser for this session, skip httpx
         if self._use_browser_for_session or self._should_use_browser(url):
             logger.info(f"Using browser for {url} (known to require it)")
-            html = await self._fetch_with_browser(url)
+            html = await self._fetch_with_browser(url, wait_time=wait_time)
             if html and not self._is_blocked_response(html):
                 self._use_browser_for_session = True
                 return html
@@ -158,7 +159,7 @@ class WeddingScraper:
 
         # Tier 2: Fall back to browser
         logger.info(f"httpx blocked, trying browser for {url}")
-        html = await self._fetch_with_browser(url)
+        html = await self._fetch_with_browser(url, wait_time=wait_time)
         if html and not self._is_blocked_response(html):
             self._use_browser_for_session = True  # Use browser for remaining requests
             return html
@@ -283,15 +284,20 @@ class WeddingScraper:
 
             # Critical subpages that should be retried if they fail
             critical_pages = ["travel", "accommodations", "hotels", "q-a", "qa", "faq", "schedule"]
+            # Pages that need extra wait time for JS to render hotel/accommodation info
+            slow_render_pages = ["travel", "accommodations", "hotels"]
 
             for subpage_url in subpages:
                 page_name = urlparse(subpage_url).path.split("/")[-1] or "subpage"
                 is_critical = any(critical in page_name.lower() for critical in critical_pages)
+                needs_extra_wait = any(slow in page_name.lower() for slow in slow_render_pages)
                 max_attempts = 3 if is_critical else 1
+                # Use 8 seconds wait for travel/hotel pages to ensure content loads
+                wait_time = 8.0 if needs_extra_wait else 3.0
 
                 for attempt in range(max_attempts):
-                    logger.info(f"Fetching subpage: {subpage_url} (attempt {attempt + 1}/{max_attempts})")
-                    subpage_html = await self._fetch_page(subpage_url)
+                    logger.info(f"Fetching subpage: {subpage_url} (attempt {attempt + 1}/{max_attempts}, wait={wait_time}s)")
+                    subpage_html = await self._fetch_page(subpage_url, wait_time=wait_time)
                     if subpage_html:
                         subpage_soup = BeautifulSoup(subpage_html, "html.parser")
                         subpage_content[page_name] = subpage_soup.get_text(separator="\n", strip=True)[:5000]
