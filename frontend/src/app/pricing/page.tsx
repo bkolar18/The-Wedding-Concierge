@@ -1,27 +1,60 @@
 'use client';
 
+import { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 
+// Hook for scroll-triggered animations
+function useScrollAnimation() {
+  const ref = useRef<HTMLElement>(null);
+  const [isVisible, setIsVisible] = useState(false);
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setIsVisible(true);
+          observer.disconnect();
+        }
+      },
+      { threshold: 0.1, rootMargin: '0px 0px -50px 0px' }
+    );
+
+    if (ref.current) {
+      observer.observe(ref.current);
+    }
+
+    return () => observer.disconnect();
+  }, []);
+
+  return { ref, isVisible };
+}
+
 export default function PricingPage() {
+  const pricingCard = useScrollAnimation();
+  const faqSection = useScrollAnimation();
+
   return (
     <div className="min-h-screen bg-gradient-to-b from-rose-50 to-white flex flex-col">
       <Header />
 
       {/* Hero */}
       <section className="py-16 px-4 text-center">
-        <h1 className="text-4xl md:text-5xl font-serif text-gray-800 mb-4">
+        <h1 className="text-4xl md:text-5xl font-serif text-gray-800 mb-4 animate-fade-in-up">
           Simple, Transparent Pricing
         </h1>
-        <p className="text-lg text-gray-600 max-w-md mx-auto">
+        <p className="text-lg text-gray-600 max-w-md mx-auto animate-fade-in-up animate-delay-100">
           One price. Unlimited questions. No surprises.
         </p>
       </section>
 
       {/* Pricing Card */}
-      <section className="pb-20 px-4 flex-grow">
-        <div className="max-w-md mx-auto">
+      <section
+        ref={pricingCard.ref as React.RefObject<HTMLElement>}
+        className="pb-20 px-4 flex-grow"
+      >
+        <div className={`max-w-md mx-auto ${pricingCard.isVisible ? 'animate-fade-in-up animate-delay-200' : 'opacity-0'}`}>
           <div className="bg-white rounded-3xl shadow-xl overflow-hidden border border-gray-100">
             {/* Header */}
             <div className="bg-gradient-to-r from-rose-500 to-rose-600 p-8 text-center text-white">
@@ -112,14 +145,17 @@ export default function PricingPage() {
       </section>
 
       {/* FAQ Section */}
-      <section className="py-16 px-4 bg-white">
+      <section
+        ref={faqSection.ref as React.RefObject<HTMLElement>}
+        className="py-16 px-4 bg-white"
+      >
         <div className="max-w-2xl mx-auto">
-          <h2 className="text-2xl font-serif text-gray-800 text-center mb-12">
+          <h2 className={`text-2xl font-serif text-gray-800 text-center mb-12 ${faqSection.isVisible ? 'animate-fade-in-up' : 'opacity-0'}`}>
             Frequently Asked Questions
           </h2>
 
           <div className="space-y-6">
-            <div className="border-b border-gray-100 pb-6">
+            <div className={`border-b border-gray-100 pb-6 ${faqSection.isVisible ? 'animate-fade-in-up animate-delay-100' : 'opacity-0'}`}>
               <h3 className="font-medium text-gray-800 mb-2">When am I charged?</h3>
               <p className="text-gray-600">
                 You only pay when you're ready to share your chat link with guests.
@@ -127,7 +163,7 @@ export default function PricingPage() {
               </p>
             </div>
 
-            <div className="border-b border-gray-100 pb-6">
+            <div className={`border-b border-gray-100 pb-6 ${faqSection.isVisible ? 'animate-fade-in-up animate-delay-200' : 'opacity-0'}`}>
               <h3 className="font-medium text-gray-800 mb-2">What if I need to update my wedding details?</h3>
               <p className="text-gray-600">
                 No problem! You can re-import your wedding website anytime to update
@@ -135,7 +171,7 @@ export default function PricingPage() {
               </p>
             </div>
 
-            <div className="border-b border-gray-100 pb-6">
+            <div className={`border-b border-gray-100 pb-6 ${faqSection.isVisible ? 'animate-fade-in-up animate-delay-300' : 'opacity-0'}`}>
               <h3 className="font-medium text-gray-800 mb-2">How long does my access last?</h3>
               <p className="text-gray-600">
                 Your wedding concierge stays active for 6 months after your wedding date,
@@ -143,7 +179,7 @@ export default function PricingPage() {
               </p>
             </div>
 
-            <div className="border-b border-gray-100 pb-6">
+            <div className={`border-b border-gray-100 pb-6 ${faqSection.isVisible ? 'animate-fade-in-up animate-delay-400' : 'opacity-0'}`}>
               <h3 className="font-medium text-gray-800 mb-2">What websites can you import?</h3>
               <p className="text-gray-600">
                 We support The Knot, Zola, Joy, WeddingWire, Minted, and most custom
@@ -151,7 +187,7 @@ export default function PricingPage() {
               </p>
             </div>
 
-            <div className="pb-6">
+            <div className={`pb-6 ${faqSection.isVisible ? 'animate-fade-in-up animate-delay-500' : 'opacity-0'}`}>
               <h3 className="font-medium text-gray-800 mb-2">How does SMS messaging work?</h3>
               <p className="text-gray-600">
                 Upload your guest list and send text messages directly to all your guests.
