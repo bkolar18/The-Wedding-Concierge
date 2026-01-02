@@ -1017,3 +1017,15 @@ User suggested 2 browsers with 3 pages each instead of 6 browsers (more memory e
 **For 9 pages:** ~2.5 min (round 1: 6 pages, round 2: 3 pages)
 
 Pushed to deploy.
+
+=== CLAUDE RESPONSE - Missing Hotel Fix ===
+Friend's import only got Courtyard hotel, missing The Oaklander.
+
+**Root cause:** Travel page scraped content only showed Courtyard. The Knot lazy-loads hotels as you scroll, and we were only doing one quick scroll.
+
+**Fix:** Added progressive scrolling for travel pages:
+- Scroll to 25%, 50%, 75%, 100% with 0.5s pauses between each
+- Scroll back to top then down again
+- Total ~3s extra to trigger all lazy-loaded content
+
+Pushed to deploy.

@@ -162,27 +162,51 @@ class StealthBrowser:
             # Wait for dynamic content to load
             await asyncio.sleep(wait_time)
 
-            # For travel pages, do progressive scrolling to load all hotels
+            # For travel pages, wait for all hotels to load
             url_lower = url.lower()
             if any(kw in url_lower for kw in ['/travel', '/accommodations', '/hotels']):
-                logger.info("Travel page detected - progressive scroll to load all hotels")
+                logger.info("Travel page detected - waiting for all hotels to load")
                 try:
-                    # Progressive scroll: move down in steps to trigger lazy loading
-                    for scroll_pct in [25, 50, 75, 100]:
-                        await page.evaluate(f"""
-                            window.scrollTo(0, document.body.scrollHeight * {scroll_pct / 100})
-                        """)
+                    # Wait for network to be mostly idle (React hydration complete)
+                    await page.wait_for_load_state("networkidle", timeout=10000)
+                    logger.info("Network idle, checking for hotels")
+
+                    # Count phone numbers as proxy for hotel count (each hotel has a phone)
+                    phone_count = await page.evaluate("""
+                        () => {
+                            const text = document.body.innerText;
+                            const phoneMatches = text.match(/\\(\\d{3}\\)\\s*\\d{3}-\\d{4}/g);
+                            return phoneMatches ? phoneMatches.length : 0;
+                        }
+                    """)
+                    logger.info(f"Found {phone_count} phone numbers (hotels)")
+
+                    # If only 1 hotel found, wait a bit more and scroll
+                    if phone_count < 2:
+                        logger.info("Less than 2 hotels, waiting longer...")
+                        await asyncio.sleep(2)
+
+                    # Progressive scroll to ensure all content loaded
+                    for scroll_pct in [50, 100]:
+                        await page.evaluate(f"window.scrollTo(0, document.body.scrollHeight * {scroll_pct / 100})")
                         await asyncio.sleep(0.5)
 
-                    # Scroll back to top and down again to ensure everything loaded
+                    # Scroll back to top to capture everything
                     await page.evaluate("window.scrollTo(0, 0)")
                     await asyncio.sleep(0.3)
-                    await page.evaluate("window.scrollTo(0, document.body.scrollHeight)")
-                    await asyncio.sleep(0.5)
 
-                    logger.info("Travel page scroll complete")
+                    # Final check
+                    final_phone_count = await page.evaluate("""
+                        () => {
+                            const text = document.body.innerText;
+                            const phoneMatches = text.match(/\\(\\d{3}\\)\\s*\\d{3}-\\d{4}/g);
+                            return phoneMatches ? phoneMatches.length : 0;
+                        }
+                    """)
+                    logger.info(f"Travel page complete - {final_phone_count} hotels found")
+
                 except Exception as e:
-                    logger.warning(f"Travel scroll error: {e}")
+                    logger.warning(f"Travel page wait error: {e}")
             else:
                 # Quick scroll for non-travel pages
                 try:
