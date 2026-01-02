@@ -4081,3 +4081,12 @@ Done. Pushed mobile optimizations:
 - Hamburger menu appears on mobile when links are available
 - Dropdown shows "Wedding Website" and "My Dashboard"
 - Desktop: Links remain visible as before
+
+=== CLAUDE RESPONSE ===
+
+Pushed mobile overflow fixes based on iPhone screenshots:
+
+1. **Share section**: Added `break-words` to paragraph, `break-all` to URL so it wraps
+2. **FAQs**: Added `min-w-0` and `break-words` so questions/answers wrap properly
+3. **Tab bar**: Shows shorter text on mobile ("Details" / "Outreach" instead of full names)
+4. **Main container**: Added `overflow-x-hidden` to prevent horizontal scroll
