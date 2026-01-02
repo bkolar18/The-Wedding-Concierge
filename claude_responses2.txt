@@ -1119,3 +1119,219 @@ WeddingWire site returned garbled content quickly with 0 results.
 - BROWSER_REQUIRED_PLATFORMS → uses stealth browser
 
 Pushed to deploy.
+
+=== CLAUDE RESPONSE - Missing Events Page Fix ===
+WeddingWire scrape missed the Events page (ceremony/reception details).
+
+**Root cause:** "events" wasn't in subpage_keywords list.
+
+**Fix:** Added to subpage_keywords:
+- events, ceremony, reception, welcome
+
+Also updated WeddingWire known patterns to include events, accommodations.
+
+**Date issue:** Scraped content showed "January 20, 2024" but Claude extracted 19th. This is a Claude extraction error - one-off or systematic unclear.
+
+Pushed to deploy.
+
+=== CLAUDE RESPONSE - Better Logging Options ===
+
+Good question. A few options:
+
+**1. Render CLI (easiest)**
+```bash
+render logs --tail your-service-name
+```
+You'd install the Render CLI and can stream logs live. Then paste relevant sections.
+
+**2. Share Render dashboard URL**
+The logs URL like `https://dashboard.render.com/web/srv-xxx/logs` - I can't access it directly, but you could screenshot or copy from there.
+
+**3. Add a debug endpoint (more work but powerful)**
+We could add an API endpoint like `/api/debug/last-scrape` that returns the last scrape's logs/timing/data. Then you'd just hit that URL and paste the JSON.
+
+**4. Your current process**
+Honestly works fine - the troubleshooting.txt approach gives me full context. The only downside is it's manual for you.
+
+**Hybrid suggestion:** Keep doing what you're doing for complex issues, but for quick checks you could use:
+```bash
+render logs --tail | grep -E "(ERROR|WARNING|scrape|Claude)"
+```
+
+Want me to add a debug endpoint that captures scrape details? It would make debugging faster for both of us.
+
+=== CLAUDE RESPONSE - Render CLI Instructions ===
+
+## Render CLI Installation
+
+**Homebrew (macOS/Linux) - Recommended:**
+```bash
+brew update
+brew install render
+```
+
+**Linux/macOS (curl):**
+```bash
+curl -fsSL https://raw.githubusercontent.com/render-oss/cli/refs/heads/main/bin/install.sh | sh
+```
+
+**Windows:**
+Download from https://github.com/render-oss/cli/releases/ - get the Windows executable matching your architecture.
+
+## Setup
+
+1. Open new terminal after install
+2. Run `render` to confirm installation
+3. Run `render login` to authenticate via browser
+
+## Viewing Logs
+
+```bash
+render services
+```
+This opens interactive menu - select your service to view logs.
+
+Or for quick filtering:
+```bash
+render services | grep scrape
+```
+
+Sources:
+- https://render.com/docs/cli
+- https://github.com/render-oss/cli
+
+=== CLAUDE RESPONSE - Nav-Based Subpage Discovery ===
+
+Yes, that's a much better approach. Currently we're matching URLs against a hardcoded keyword list - which is fragile and keeps breaking when sites use different names.
+
+The smarter approach:
+
+1. **Scrape home page**
+2. **Find the navigation menu** (usually `<nav>` element or links in header)
+3. **Extract ALL internal links from nav** - these ARE the subpages
+4. **Scrape those**
+
+No keyword matching needed. If the nav has "Events", "Travel", "Our Story", "RSVP" - we just grab them all.
+
+```python
+# Instead of keyword matching:
+def _find_nav_subpages(self, soup, base_url):
+    nav_links = []
+
+    # Find nav element or header links
+    for nav in soup.find_all(['nav', 'header']):
+        for link in nav.find_all('a', href=True):
+            href = link['href']
+            # If it's an internal subpage link, add it
+            if self._is_internal_subpage(href, base_url):
+                nav_links.append(href)
+
+    return nav_links
+```
+
+This would have caught "Events" automatically because it's in the nav menu.
+
+Want me to implement this? It would replace the keyword-based approach with nav-based discovery.
+
+=== CLAUDE RESPONSE - Implemented Nav-Based Subpage Discovery ===
+
+User confirmed: "yes implement this. this should also help our scraper match contents to specific pages right? like before we had an issue where registry was appearing in the travel page. if we have the scraper extract data associated with each nav link would it be cleaner and easy to disaggregate?"
+
+I implemented nav-based subpage discovery with the following changes to `backend/services/scraper/scraper.py`:
+
+**1. New method `_find_nav_subpages()`:**
+- Finds all `<nav>`, `<header>` elements plus elements with nav-related classes
+- Extracts internal links with their display text (e.g., "Travel", "Q&A", "Events")
+- Returns list of dicts with `url`, `name` (lowercase), and `display_name`
+- Logs each discovered nav link for debugging
+
+```python
+def _find_nav_subpages(self, soup: BeautifulSoup, base_url: str) -> List[Dict[str, str]]:
+    """Find navigation links from nav/header elements with their display names."""
+    nav_elements = soup.find_all(['nav', 'header'])
+
+    # Also check for nav-related class patterns
+    nav_class_patterns = ['[class*="nav"]', '[class*="menu"]', '[role="navigation"]', ...]
+
+    for nav in nav_elements:
+        for link in nav.find_all('a', href=True):
+            link_text = link.get_text(strip=True)
+            # Store url + nav link text
+            nav_links.append({
+                'url': full_url,
+                'name': link_text.lower(),  # e.g., "travel"
+                'display_name': link_text    # e.g., "Travel"
+            })
+```
+
+**2. Updated `_find_subpages()` to be a wrapper:**
+- Uses `_find_nav_subpages()` first
+- Falls back to `_find_subpages_by_keywords()` if nav detection fails
+- Returns just URLs for backward compatibility
+
+**3. Updated `scrape()` method:**
+- Uses nav link names as content keys instead of URL path segments
+- Better logging with display names
+- Content is now tagged with the actual nav link text (e.g., "travel" from nav, not inferred from URL)
+
+**Benefits for disaggregation:**
+- Content is associated with the nav link that points to it
+- Registry content stays with "registry" key, travel with "travel"
+- No more cross-contamination from URL path mismatches
+- Finds ALL pages the site has, not just keyword matches
+
+**Fallback chain:**
+1. Nav-based discovery (preferred)
+2. Keyword-based discovery (if nav fails)
+3. Platform-specific known URLs (last resort)
+
+=== CLAUDE RESPONSE - Skip Photos/Registry Pages ===
+
+User requested: "lets avoid scraping photos and registry pages. identify if the website has them for claude to reference that they exist, but just have the chatbot redirect them to the couples website to view the registry or photos on their own. this will save time during the import process"
+
+Implemented in `backend/services/scraper/scraper.py`:
+
+**1. Updated skip logic to include registry:**
+```python
+# Pages to skip scraping - chatbot will redirect users to view these directly
+skip_keywords = ["photos", "photo", "gallery", "registry", "gift", "gifts"]
+
+# Separate into pages to scrape vs pages to just note existence
+pages_to_scrape = []
+pages_available = []  # Pages that exist but we won't scrape
+
+for link in nav_links:
+    if any(skip in link['name'].lower() for skip in skip_keywords):
+        # Track that this page exists (for Claude to reference)
+        pages_available.append({
+            'name': link['display_name'],
+            'url': link['url'],
+            'type': 'photos' if 'photo' in name else 'registry'
+        })
+    else:
+        pages_to_scrape.append(link)
+```
+
+**2. Added `pages_available` to all platform scrapers:**
+- Passed as parameter to `_scrape_the_knot()`, `_scrape_zola()`, `_scrape_joy()`, `_scrape_weddingwire()`, `_scrape_generic()`
+- Stored in returned data dict for frontend/API access
+
+**3. Added redirect note to Claude's context (full_text):**
+```python
+if pages_available:
+    available_note = "\n\n=== PAGES TO REDIRECT GUESTS TO ===\n"
+    available_note += "The following pages are available on the couple's wedding website. "
+    available_note += "Direct guests to visit these URLs to view this content:\n"
+    for page in pages_available:
+        available_note += f"- {page['name']}: {page['url']}\n"
+    combined_text += available_note
+```
+
+**Result:**
+- Import is faster (skips 2+ slow pages)
+- Claude knows photos/registry exist and has their URLs
+- When guests ask about photos or registry, Claude redirects them to the couple's website
+
+**Example Claude behavior:**
+- Guest: "Where can I see photos?"
+- Claude: "You can view photos on Hannah & Parker's wedding website at https://theknot.com/.../photos"

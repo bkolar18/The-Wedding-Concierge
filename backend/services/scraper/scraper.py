@@ -168,8 +168,112 @@ class WeddingScraper:
 
         return None
 
+    def _find_nav_subpages(self, soup: BeautifulSoup, base_url: str) -> List[Dict[str, str]]:
+        """Find navigation links from nav/header elements with their display names.
+
+        Returns a list of dicts with 'url' and 'name' keys, where 'name' is the
+        nav link text (e.g., "Travel", "Q&A", "Registry").
+
+        This approach:
+        1. Finds ALL pages the site actually has (not just keyword matches)
+        2. Associates content with the correct page type based on nav text
+        3. Prevents cross-contamination between page types
+        """
+        nav_links = []
+        seen_urls = set()
+        parsed_base = urlparse(base_url)
+        base_path = parsed_base.path.rstrip("/")
+
+        # Look for navigation elements
+        nav_elements = soup.find_all(['nav', 'header'])
+
+        # Also look for common nav class patterns
+        nav_class_patterns = [
+            '[class*="nav"]', '[class*="Nav"]', '[class*="menu"]', '[class*="Menu"]',
+            '[role="navigation"]', '[class*="header"]', '[class*="Header"]'
+        ]
+        for pattern in nav_class_patterns:
+            try:
+                for elem in soup.select(pattern):
+                    if elem not in nav_elements:
+                        nav_elements.append(elem)
+            except Exception:
+                pass
+
+        logger.info(f"Found {len(nav_elements)} navigation elements to scan")
+
+        for nav in nav_elements:
+            for link in nav.find_all('a', href=True):
+                href = link['href']
+                link_text = link.get_text(strip=True)
+
+                # Skip empty links, anchors, external links
+                if not link_text or len(link_text) > 50:  # Nav links are typically short
+                    continue
+                if href.startswith('#') or href.startswith('javascript:') or href.startswith('mailto:'):
+                    continue
+
+                # Make absolute URL
+                if href.startswith('/'):
+                    full_url = f"{parsed_base.scheme}://{parsed_base.netloc}{href}"
+                elif not href.startswith('http'):
+                    full_url = urljoin(base_url, href)
+                else:
+                    full_url = href
+
+                # Skip external links
+                parsed_href = urlparse(full_url)
+                if parsed_href.netloc != parsed_base.netloc:
+                    continue
+
+                # Skip if it's the home page
+                href_path = parsed_href.path.rstrip('/')
+                if href_path == base_path or href_path == '':
+                    continue
+
+                # Skip if already seen
+                if full_url in seen_urls:
+                    continue
+
+                # Check if it's a subpage of the wedding site
+                if href_path.startswith(base_path) or base_path in href_path:
+                    seen_urls.add(full_url)
+                    # Clean up the link text (nav link name)
+                    clean_name = link_text.strip().lower()
+                    nav_links.append({
+                        'url': full_url,
+                        'name': clean_name,
+                        'display_name': link_text.strip()
+                    })
+                    logger.info(f"Found nav link: '{link_text}' -> {full_url}")
+
+        # Deduplicate by URL, keeping first occurrence
+        unique_links = []
+        final_urls = set()
+        for link in nav_links:
+            if link['url'] not in final_urls:
+                final_urls.add(link['url'])
+                unique_links.append(link)
+
+        logger.info(f"Nav-based discovery found {len(unique_links)} subpages")
+        return unique_links[:10]  # Limit to 10 sub-pages
+
     def _find_subpages(self, soup: BeautifulSoup, base_url: str) -> List[str]:
-        """Find navigation links to sub-pages on wedding websites."""
+        """Find navigation links to sub-pages on wedding websites.
+
+        This is now a wrapper that returns just URLs for backward compatibility.
+        Use _find_nav_subpages() for the full nav link info.
+        """
+        nav_links = self._find_nav_subpages(soup, base_url)
+        if nav_links:
+            return [link['url'] for link in nav_links]
+
+        # Fallback to keyword-based discovery if nav detection fails
+        logger.info("Nav-based discovery found no links, falling back to keyword matching")
+        return self._find_subpages_by_keywords(soup, base_url)
+
+    def _find_subpages_by_keywords(self, soup: BeautifulSoup, base_url: str) -> List[str]:
+        """Fallback: Find subpages using keyword matching (legacy approach)."""
         subpages = []
         parsed_base = urlparse(base_url)
         base_path = parsed_base.path.rstrip("/")
@@ -274,47 +378,85 @@ class WeddingScraper:
             # Try to get JSON-LD structured data first (works on many platforms)
             json_ld_data = self._extract_json_ld(soup)
 
-            # Find and scrape sub-pages
-            subpages = self._find_subpages(soup, url)
+            # Find subpages using nav-based discovery (preferred) or keyword fallback
+            nav_links = self._find_nav_subpages(soup, url)
 
-            # Fallback: If no subpages detected, use known platform URL patterns
-            if not subpages and platform:
+            # Fallback: If no nav links found, try keyword-based discovery
+            if not nav_links:
+                logger.info("Nav-based discovery found no links, trying keyword fallback")
+                keyword_urls = self._find_subpages_by_keywords(soup, url)
+                # Convert to nav_links format with URL-derived names
+                nav_links = [
+                    {'url': u, 'name': urlparse(u).path.split('/')[-1] or 'subpage', 'display_name': urlparse(u).path.split('/')[-1] or 'Subpage'}
+                    for u in keyword_urls
+                ]
+
+            # Second fallback: Use known platform URL patterns
+            if not nav_links and platform:
                 logger.info(f"No subpages detected in HTML, using known patterns for {platform}")
-                subpages = self._get_known_subpages(url, platform)
+                known_urls = self._get_known_subpages(url, platform)
+                nav_links = [
+                    {'url': u, 'name': urlparse(u).path.split('/')[-1] or 'subpage', 'display_name': urlparse(u).path.split('/')[-1] or 'Subpage'}
+                    for u in known_urls
+                ]
+
+            # Pages to skip scraping - chatbot will redirect users to view these directly
+            # We still track that they exist so Claude can reference them
+            skip_keywords = ["photos", "photo", "gallery", "registry", "gift", "gifts"]
+
+            # Separate into pages to scrape vs pages to just note existence
+            pages_to_scrape = []
+            pages_available = []  # Pages that exist but we won't scrape
+
+            for link in nav_links:
+                page_name_lower = link['name'].lower()
+                if any(skip in page_name_lower for skip in skip_keywords):
+                    # Track that this page exists (for Claude to reference)
+                    pages_available.append({
+                        'name': link['display_name'],
+                        'url': link['url'],
+                        'type': 'photos' if any(p in page_name_lower for p in ['photo', 'gallery']) else 'registry'
+                    })
+                    logger.info(f"Skipping (will redirect): '{link['display_name']}' -> {link['url']}")
+                else:
+                    pages_to_scrape.append(link)
+
+            nav_links = pages_to_scrape
+            logger.info(f"Will scrape {len(nav_links)} subpages: {[l['name'] for l in nav_links]}")
+            if pages_available:
+                logger.info(f"Available but not scraped: {[p['name'] for p in pages_available]}")
 
             subpage_content = {}
 
-            # Skip pages that don't contain useful info for the chat assistant
-            skip_pages = ["photos", "photo"]
-            subpages = [url for url in subpages if not any(skip in urlparse(url).path.lower() for skip in skip_pages)]
-
-            logger.info(f"Will scrape {len(subpages)} subpages: {subpages}")
-
             # Pages that need extra wait time for JS to render hotel/accommodation info
-            slow_render_pages = ["travel", "accommodations", "hotels"]
+            slow_render_keywords = ["travel", "accommodations", "hotels", "stay", "lodging"]
 
             # Use sequential fetching with the existing browser to avoid rate limiting
             # Parallel browsers were causing all subpages to timeout
-            logger.info(f"Fetching {len(subpages)} subpages sequentially")
+            logger.info(f"Fetching {len(nav_links)} subpages sequentially")
 
-            for subpage_url in subpages:
-                page_name = urlparse(subpage_url).path.split("/")[-1] or "subpage"
-                needs_extra_wait = any(slow in page_name.lower() for slow in slow_render_pages)
+            for link in nav_links:
+                subpage_url = link['url']
+                nav_name = link['name']  # Use nav link text as the page identifier
+                display_name = link['display_name']
+
+                needs_extra_wait = any(slow in nav_name.lower() for slow in slow_render_keywords)
                 wait_time = 3.0 if needs_extra_wait else 2.0
 
-                logger.info(f"Fetching subpage: {page_name} (wait={wait_time}s)")
+                logger.info(f"Fetching subpage: '{display_name}' ({subpage_url}) (wait={wait_time}s)")
 
                 try:
                     subpage_html = await self._fetch_page(subpage_url, wait_time=wait_time)
                     if subpage_html:
                         subpage_soup = BeautifulSoup(subpage_html, "html.parser")
-                        content = self._extract_main_content(subpage_soup, page_name)
-                        logger.info(f"Successfully scraped subpage: {page_name} ({len(content)} chars)")
-                        subpage_content[page_name] = content
+                        content = self._extract_main_content(subpage_soup, nav_name)
+                        logger.info(f"Successfully scraped subpage: '{display_name}' ({len(content)} chars)")
+                        # Use nav link name as key for better content disaggregation
+                        subpage_content[nav_name] = content
                     else:
-                        logger.warning(f"Failed to fetch subpage: {page_name}")
+                        logger.warning(f"Failed to fetch subpage: '{display_name}'")
                 except Exception as e:
-                    logger.error(f"Error fetching subpage {page_name}: {e}")
+                    logger.error(f"Error fetching subpage '{display_name}': {e}")
 
             # Diagnostic logging for subpage content
             logger.info(f"Subpage content keys: {list(subpage_content.keys())}")
@@ -323,16 +465,16 @@ class WeddingScraper:
                 logger.info(f"Subpage '{k}' preview: {preview}...")
 
             if platform == "the_knot":
-                return await self._scrape_the_knot(soup, url, json_ld_data, subpage_content)
+                return await self._scrape_the_knot(soup, url, json_ld_data, subpage_content, pages_available)
             elif platform == "zola":
-                return await self._scrape_zola(soup, url, json_ld_data, subpage_content)
+                return await self._scrape_zola(soup, url, json_ld_data, subpage_content, pages_available)
             elif platform == "joy":
-                return await self._scrape_joy(soup, url, json_ld_data, subpage_content)
+                return await self._scrape_joy(soup, url, json_ld_data, subpage_content, pages_available)
             elif platform == "weddingwire":
-                return await self._scrape_weddingwire(soup, url, json_ld_data, subpage_content)
+                return await self._scrape_weddingwire(soup, url, json_ld_data, subpage_content, pages_available)
             else:
                 # Generic scraping for unknown platforms
-                return await self._scrape_generic(soup, url, json_ld_data, subpage_content)
+                return await self._scrape_generic(soup, url, json_ld_data, subpage_content, pages_available)
 
         except Exception as e:
             return {
@@ -553,14 +695,16 @@ class WeddingScraper:
         # Fallback: get all text but clean it aggressively
         return self._clean_page_text(soup_copy.get_text(separator="\n", strip=True))[:5000]
 
-    async def _scrape_the_knot(self, soup: BeautifulSoup, url: str, json_ld: Dict, subpage_content: Dict[str, str] = None) -> Dict[str, Any]:
+    async def _scrape_the_knot(self, soup: BeautifulSoup, url: str, json_ld: Dict, subpage_content: Dict[str, str] = None, pages_available: List[Dict] = None) -> Dict[str, Any]:
         """Scrape The Knot wedding website with enhanced extraction."""
         subpage_content = subpage_content or {}
+        pages_available = pages_available or []
         data = {
             "platform": "the_knot",
             "url": url,
             "scraped_at": datetime.utcnow().isoformat(),
-            "pages_scraped": ["home"] + list(subpage_content.keys())
+            "pages_scraped": ["home"] + list(subpage_content.keys()),
+            "pages_available": pages_available  # Photos/registry pages to redirect to
         }
 
         # Try to extract couple names from URL first (most reliable for The Knot)
@@ -700,6 +844,17 @@ class WeddingScraper:
             subpage_texts.append(f"\n\n=== {page_name.upper()} PAGE ===\n{cleaned_content}")
 
         combined_text = main_text + "".join(subpage_texts)
+
+        # Add note about available pages (photos/registry) that weren't scraped
+        # This tells Claude to redirect users to view these on the couple's website
+        if pages_available:
+            available_note = "\n\n=== PAGES TO REDIRECT GUESTS TO ===\n"
+            available_note += "The following pages are available on the couple's wedding website. "
+            available_note += "Direct guests to visit these URLs to view this content:\n"
+            for page in pages_available:
+                available_note += f"- {page['name']}: {page['url']}\n"
+            combined_text += available_note
+
         data["full_text"] = combined_text[:30000]  # Increased to ensure travel content included
 
         # Diagnostic logging
@@ -711,14 +866,16 @@ class WeddingScraper:
 
         return data
 
-    async def _scrape_zola(self, soup: BeautifulSoup, url: str, json_ld: Dict, subpage_content: Dict[str, str] = None) -> Dict[str, Any]:
+    async def _scrape_zola(self, soup: BeautifulSoup, url: str, json_ld: Dict, subpage_content: Dict[str, str] = None, pages_available: List[Dict] = None) -> Dict[str, Any]:
         """Scrape Zola wedding website with enhanced extraction."""
         subpage_content = subpage_content or {}
+        pages_available = pages_available or []
         data = {
             "platform": "zola",
             "url": url,
             "scraped_at": datetime.utcnow().isoformat(),
-            "pages_scraped": ["home"] + list(subpage_content.keys())
+            "pages_scraped": ["home"] + list(subpage_content.keys()),
+            "pages_available": pages_available
         }
 
         # Zola uses React, so look for data in scripts
@@ -805,18 +962,30 @@ class WeddingScraper:
         for page_name, content in subpage_content.items():
             subpage_texts.append(f"\n\n=== {page_name.upper()} PAGE ===\n{content}")
         combined_text = main_text + "".join(subpage_texts)
+
+        # Add note about available pages (photos/registry) that weren't scraped
+        if pages_available:
+            available_note = "\n\n=== PAGES TO REDIRECT GUESTS TO ===\n"
+            available_note += "The following pages are available on the couple's wedding website. "
+            available_note += "Direct guests to visit these URLs to view this content:\n"
+            for page in pages_available:
+                available_note += f"- {page['name']}: {page['url']}\n"
+            combined_text += available_note
+
         data["full_text"] = combined_text[:20000]
 
         return data
 
-    async def _scrape_joy(self, soup: BeautifulSoup, url: str, json_ld: Dict, subpage_content: Dict[str, str] = None) -> Dict[str, Any]:
+    async def _scrape_joy(self, soup: BeautifulSoup, url: str, json_ld: Dict, subpage_content: Dict[str, str] = None, pages_available: List[Dict] = None) -> Dict[str, Any]:
         """Scrape WithJoy wedding website with enhanced extraction."""
         subpage_content = subpage_content or {}
+        pages_available = pages_available or []
         data = {
             "platform": "joy",
             "url": url,
             "scraped_at": datetime.utcnow().isoformat(),
-            "pages_scraped": ["home"] + list(subpage_content.keys())
+            "pages_scraped": ["home"] + list(subpage_content.keys()),
+            "pages_available": pages_available
         }
 
         # Joy uses Next.js, look for __NEXT_DATA__
@@ -893,25 +1062,37 @@ class WeddingScraper:
         for page_name, content in subpage_content.items():
             subpage_texts.append(f"\n\n=== {page_name.upper()} PAGE ===\n{content}")
         combined_text = main_text + "".join(subpage_texts)
+
+        # Add note about available pages (photos/registry) that weren't scraped
+        if pages_available:
+            available_note = "\n\n=== PAGES TO REDIRECT GUESTS TO ===\n"
+            available_note += "The following pages are available on the couple's wedding website. "
+            available_note += "Direct guests to visit these URLs to view this content:\n"
+            for page in pages_available:
+                available_note += f"- {page['name']}: {page['url']}\n"
+            combined_text += available_note
+
         data["full_text"] = combined_text[:20000]
 
         return data
 
-    async def _scrape_weddingwire(self, soup: BeautifulSoup, url: str, json_ld: Dict, subpage_content: Dict[str, str] = None) -> Dict[str, Any]:
+    async def _scrape_weddingwire(self, soup: BeautifulSoup, url: str, json_ld: Dict, subpage_content: Dict[str, str] = None, pages_available: List[Dict] = None) -> Dict[str, Any]:
         """Scrape WeddingWire website (similar to The Knot)."""
         # WeddingWire has similar structure to The Knot
-        data = await self._scrape_the_knot(soup, url, json_ld, subpage_content)
+        data = await self._scrape_the_knot(soup, url, json_ld, subpage_content, pages_available)
         data["platform"] = "weddingwire"
         return data
 
-    async def _scrape_generic(self, soup: BeautifulSoup, url: str, json_ld: Dict, subpage_content: Dict[str, str] = None) -> Dict[str, Any]:
+    async def _scrape_generic(self, soup: BeautifulSoup, url: str, json_ld: Dict, subpage_content: Dict[str, str] = None, pages_available: List[Dict] = None) -> Dict[str, Any]:
         """Generic scraping for unknown platforms with comprehensive extraction."""
         subpage_content = subpage_content or {}
+        pages_available = pages_available or []
         data = {
             "platform": "generic",
             "url": url,
             "scraped_at": datetime.utcnow().isoformat(),
-            "pages_scraped": ["home"] + list(subpage_content.keys())
+            "pages_scraped": ["home"] + list(subpage_content.keys()),
+            "pages_available": pages_available
         }
 
         # Try URL extraction
@@ -985,6 +1166,16 @@ class WeddingScraper:
         for page_name, content in subpage_content.items():
             subpage_texts.append(f"\n\n=== {page_name.upper()} PAGE ===\n{content}")
         combined_text = main_text + "".join(subpage_texts)
+
+        # Add note about available pages (photos/registry) that weren't scraped
+        if pages_available:
+            available_note = "\n\n=== PAGES TO REDIRECT GUESTS TO ===\n"
+            available_note += "The following pages are available on the couple's wedding website. "
+            available_note += "Direct guests to visit these URLs to view this content:\n"
+            for page in pages_available:
+                available_note += f"- {page['name']}: {page['url']}\n"
+            combined_text += available_note
+
         data["full_text"] = combined_text[:20000]
 
         return data
