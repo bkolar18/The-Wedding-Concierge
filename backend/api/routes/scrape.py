@@ -195,8 +195,21 @@ async def scrape_wedding_website(request: ScrapeRequest):
         mapper = WeddingDataMapper()
         structured_data = await mapper.extract_structured_data(raw_data)
 
-        # Get lists for preview
-        events = structured_data.get("events", [])
+        # Get lists for preview and transform to frontend format
+        raw_events = structured_data.get("events", [])
+        # Transform event field names from Claude format to frontend format
+        events = [
+            {
+                "name": e.get("event_name", ""),
+                "date": e.get("event_date"),
+                "time": e.get("event_time"),
+                "description": e.get("description"),
+                "venue_name": e.get("venue_name"),
+                "venue_address": e.get("venue_address"),
+                "dress_code": e.get("dress_code"),
+            }
+            for e in raw_events
+        ]
         accommodations = structured_data.get("accommodations", [])
         faqs = structured_data.get("faqs", [])
 
