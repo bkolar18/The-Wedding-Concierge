@@ -1,9 +1,10 @@
 """SMS and guest management API endpoints."""
 import io
 import csv
+import logging
 from datetime import datetime, date
 from typing import List, Optional
-from fastapi import APIRouter, HTTPException, Depends, UploadFile, File, Form
+from fastapi import APIRouter, HTTPException, Depends, UploadFile, File, Form, Request, Header
 from pydantic import BaseModel
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
@@ -11,11 +12,14 @@ from sqlalchemy.orm import selectinload
 
 from core.database import get_db
 from core.auth import get_current_user
+from core.config import IS_PRODUCTION
 from models.wedding import Wedding
 from models.user import User
 from models.sms import Guest, SMSTemplate, ScheduledMessage, MessageLog
 from services.sms.twilio_service import twilio_service
 from services.sms.template_service import template_service, DEFAULT_TEMPLATES
+
+logger = logging.getLogger(__name__)
 
 router = APIRouter()
 
@@ -240,9 +244,23 @@ async def upload_guests(
     if current_user.wedding_id != wedding_id:
         raise HTTPException(status_code=403, detail="Not authorized")
 
-    # Read file content
+    # Validate file size (max 5MB)
+    MAX_FILE_SIZE = 5 * 1024 * 1024  # 5MB
     content = await file.read()
+    if len(content) > MAX_FILE_SIZE:
+        raise HTTPException(
+            status_code=400,
+            detail=f"File too large. Maximum size is 5MB, got {len(content) / 1024 / 1024:.1f}MB"
+        )
+
     filename = file.filename or ""
+
+    # Validate file extension
+    if not filename.lower().endswith(('.csv', '.xlsx', '.xls')):
+        raise HTTPException(
+            status_code=400,
+            detail="Invalid file type. Please upload a CSV or Excel file (.csv, .xlsx, .xls)"
+        )
 
     guests_added = 0
     guests_skipped = 0
@@ -785,16 +803,50 @@ async def get_sms_history(
 
 # --- Webhook Endpoints (for Twilio callbacks) ---
 
+async def verify_twilio_signature(
+    request: Request,
+    x_twilio_signature: Optional[str] = Header(None, alias="X-Twilio-Signature")
+) -> bool:
+    """Verify Twilio webhook request signature."""
+    # In production, signature is required
+    if IS_PRODUCTION and not x_twilio_signature:
+        logger.warning("Twilio webhook received without signature")
+        raise HTTPException(status_code=403, detail="Missing Twilio signature")
+
+    # If no signature provided (dev mode), skip validation
+    if not x_twilio_signature:
+        return True
+
+    # Get the full URL of the request
+    url = str(request.url)
+
+    # Get form parameters
+    form_data = await request.form()
+    params = {key: str(value) for key, value in form_data.items()}
+
+    # Validate the signature
+    if not twilio_service.validate_webhook_request(url, params, x_twilio_signature):
+        logger.warning(f"Invalid Twilio signature for webhook: {url}")
+        raise HTTPException(status_code=403, detail="Invalid Twilio signature")
+
+    return True
+
+
 @router.post("/webhooks/status")
 async def sms_status_webhook(
+    request: Request,
     MessageSid: str = Form(...),
     MessageStatus: str = Form(...),
     To: str = Form(None),
     ErrorCode: str = Form(None),
     ErrorMessage: str = Form(None),
+    x_twilio_signature: Optional[str] = Header(None, alias="X-Twilio-Signature"),
     db: AsyncSession = Depends(get_db)
 ):
     """Handle Twilio delivery status callbacks."""
+    # Verify Twilio signature
+    await verify_twilio_signature(request, x_twilio_signature)
+
     # Find the message log by Twilio SID
     result = await db.execute(
         select(MessageLog).where(MessageLog.twilio_sid == MessageSid)
@@ -815,11 +867,16 @@ async def sms_status_webhook(
 
 @router.post("/webhooks/inbound")
 async def sms_inbound_webhook(
+    request: Request,
     From: str = Form(...),
     Body: str = Form(...),
+    x_twilio_signature: Optional[str] = Header(None, alias="X-Twilio-Signature"),
     db: AsyncSession = Depends(get_db)
 ):
     """Handle inbound SMS (opt-out requests)."""
+    # Verify Twilio signature
+    await verify_twilio_signature(request, x_twilio_signature)
+
     body_upper = Body.upper().strip()
 
     # Check for opt-out keywords

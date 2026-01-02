@@ -2,11 +2,14 @@
 import re
 from datetime import datetime, timedelta
 from typing import Optional
-from fastapi import APIRouter, HTTPException, Depends, status
+from fastapi import APIRouter, HTTPException, Depends, status, Request
 from pydantic import BaseModel, EmailStr
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 from sqlalchemy.orm import selectinload
+
+from slowapi import Limiter
+from slowapi.util import get_remote_address
 
 from core.database import get_db
 from core.config import settings
@@ -21,6 +24,9 @@ from models.wedding import Wedding
 from services.email import email_service
 
 router = APIRouter()
+
+# Rate limiter for auth endpoints
+limiter = Limiter(key_func=get_remote_address)
 
 
 def validate_password(password: str) -> tuple[bool, str]:
@@ -99,8 +105,10 @@ class ResetPasswordRequest(BaseModel):
 
 
 @router.post("/register", response_model=TokenResponse, status_code=status.HTTP_201_CREATED)
+@limiter.limit("5/minute")  # 5 registration attempts per minute per IP
 async def register(
     request: UserRegisterRequest,
+    req: Request,  # Required for rate limiter
     db: AsyncSession = Depends(get_db)
 ):
     """
@@ -148,8 +156,10 @@ async def register(
 
 
 @router.post("/login", response_model=TokenResponse)
+@limiter.limit("10/minute")  # 10 login attempts per minute per IP (allows for typos)
 async def login(
     request: UserLoginRequest,
+    req: Request,  # Required for rate limiter
     db: AsyncSession = Depends(get_db)
 ):
     """
@@ -237,8 +247,10 @@ async def logout():
 
 
 @router.post("/forgot-password")
+@limiter.limit("3/minute")  # 3 password reset requests per minute per IP
 async def forgot_password(
     request: ForgotPasswordRequest,
+    req: Request,  # Required for rate limiter
     db: AsyncSession = Depends(get_db)
 ):
     """
@@ -285,8 +297,10 @@ async def forgot_password(
 
 
 @router.post("/reset-password")
+@limiter.limit("5/minute")  # 5 password reset attempts per minute per IP
 async def reset_password(
     request: ResetPasswordRequest,
+    req: Request,  # Required for rate limiter
     db: AsyncSession = Depends(get_db)
 ):
     """

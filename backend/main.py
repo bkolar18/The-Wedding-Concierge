@@ -16,8 +16,15 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 import traceback
 
+from slowapi import Limiter, _rate_limit_exceeded_handler
+from slowapi.util import get_remote_address
+from slowapi.errors import RateLimitExceeded
+
 from core.config import settings
 from api.routes import chat, wedding, health, auth, scrape, sms, contact
+
+# Initialize rate limiter
+limiter = Limiter(key_func=get_remote_address)
 
 app = FastAPI(
     title=settings.APP_NAME,
@@ -25,10 +32,20 @@ app = FastAPI(
     version="0.1.0",
 )
 
+# Add rate limiter to app state and exception handler
+app.state.limiter = limiter
+app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
+
 
 @app.exception_handler(Exception)
 async def global_exception_handler(request: Request, exc: Exception):
     """Catch all exceptions and log them."""
+    # Log error details for debugging
+    logger.error(f"Unhandled exception: {type(exc).__name__}: {exc}")
+    logger.error(f"URL: {request.url}")
+    logger.error(traceback.format_exc())
+
+    # Also write to error.log file
     with open("error.log", "a") as f:
         f.write(f"=== GLOBAL ERROR ===\n")
         f.write(f"URL: {request.url}\n")
@@ -36,10 +53,20 @@ async def global_exception_handler(request: Request, exc: Exception):
         traceback.print_exc(file=f)
         f.write("\n")
         f.flush()
-    return JSONResponse(
-        status_code=500,
-        content={"detail": f"{type(exc).__name__}: {str(exc)}"}
-    )
+
+    # In production, hide error details from users
+    from core.config import IS_PRODUCTION
+    if IS_PRODUCTION:
+        return JSONResponse(
+            status_code=500,
+            content={"detail": "An internal error occurred. Please try again later."}
+        )
+    else:
+        # In development, show full error details for debugging
+        return JSONResponse(
+            status_code=500,
+            content={"detail": f"{type(exc).__name__}: {str(exc)}"}
+        )
 
 # CORS middleware for frontend
 app.add_middleware(

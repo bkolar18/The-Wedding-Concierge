@@ -1,12 +1,13 @@
 """Twilio SMS service for sending and scheduling messages."""
 import asyncio
 from datetime import datetime, timedelta
-from typing import Optional, Tuple
+from typing import Optional, Tuple, Dict
 from concurrent.futures import ThreadPoolExecutor
 
 import phonenumbers
 from twilio.rest import Client
 from twilio.base.exceptions import TwilioRestException
+from twilio.request_validator import RequestValidator
 
 from core.config import settings
 
@@ -234,6 +235,25 @@ class TwilioService:
             True if in quiet hours (should not send)
         """
         return hour < 8 or hour >= 21
+
+    def validate_webhook_request(self, url: str, params: Dict[str, str], signature: str) -> bool:
+        """
+        Validate a Twilio webhook request signature.
+
+        Args:
+            url: The full URL of the webhook endpoint
+            params: The form parameters from the request
+            signature: The X-Twilio-Signature header value
+
+        Returns:
+            True if the request is valid, False otherwise
+        """
+        if not settings.TWILIO_AUTH_TOKEN:
+            # If no auth token configured, skip validation (dev mode)
+            return True
+
+        validator = RequestValidator(settings.TWILIO_AUTH_TOKEN)
+        return validator.validate(url, params, signature)
 
 
 # Singleton instance

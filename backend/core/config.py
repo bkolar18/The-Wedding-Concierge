@@ -1,11 +1,17 @@
 """Application configuration."""
+import os
+import secrets
 from pathlib import Path
 from pydantic_settings import BaseSettings
+from pydantic import field_validator
 from typing import Optional
 
 # Get the backend directory (where this config.py lives is in core/, so go up one level)
 BACKEND_DIR = Path(__file__).resolve().parent.parent
 ENV_FILE = BACKEND_DIR / ".env"
+
+# Check if we're in production (Render sets this, or check for production database)
+IS_PRODUCTION = os.getenv("RENDER") is not None or "postgresql" in os.getenv("DATABASE_URL", "")
 
 
 class Settings(BaseSettings):
@@ -21,6 +27,21 @@ class Settings(BaseSettings):
     # Auth
     SECRET_KEY: str = "change-me-in-production"
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 60 * 24 * 7  # 1 week
+
+    @field_validator("SECRET_KEY")
+    @classmethod
+    def validate_secret_key(cls, v: str) -> str:
+        """Ensure SECRET_KEY is not the default in production."""
+        insecure_defaults = ["change-me-in-production", "change-me-to-a-random-string-in-production"]
+        if IS_PRODUCTION and v in insecure_defaults:
+            raise ValueError(
+                "SECRET_KEY must be set to a secure random value in production. "
+                f"Generate one with: python -c \"import secrets; print(secrets.token_urlsafe(32))\""
+            )
+        if v in insecure_defaults:
+            import logging
+            logging.warning("WARNING: Using insecure default SECRET_KEY. Set a secure value for production!")
+        return v
 
     # LLM
     ANTHROPIC_API_KEY: Optional[str] = None

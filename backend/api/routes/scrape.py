@@ -1,5 +1,10 @@
 """Wedding website scraping API endpoints."""
+import re
+import socket
+import ipaddress
+import logging
 from typing import Optional
+from urllib.parse import urlparse
 from datetime import date, datetime
 from fastapi import APIRouter, HTTPException, Depends
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
@@ -9,8 +14,109 @@ from services.scraper import WeddingScraper
 from services.scraper.data_mapper import WeddingDataMapper
 from core.auth import get_current_user_optional
 
+logger = logging.getLogger(__name__)
+
 # Optional auth - doesn't require login but accepts token if provided
 security = HTTPBearer(auto_error=False)
+
+# Allowed wedding website domains (whitelist approach)
+ALLOWED_DOMAINS = [
+    "theknot.com",
+    "zola.com",
+    "withjoy.com",
+    "weddingwire.com",
+    "minted.com",
+    "wedding.com",
+    "joykitchen.com",
+    "theblacktiebride.com",
+    "squarespace.com",
+    "weddingwebsite.com",
+    "wix.com",
+    "weebly.com",
+]
+
+
+def is_private_ip(ip: str) -> bool:
+    """Check if an IP address is private/internal."""
+    try:
+        ip_obj = ipaddress.ip_address(ip)
+        return (
+            ip_obj.is_private
+            or ip_obj.is_loopback
+            or ip_obj.is_link_local
+            or ip_obj.is_reserved
+            or ip_obj.is_multicast
+        )
+    except ValueError:
+        return False
+
+
+def validate_url_for_ssrf(url: str) -> tuple[bool, str]:
+    """
+    Validate a URL to prevent SSRF attacks.
+
+    Returns (is_valid, error_message)
+    """
+    try:
+        parsed = urlparse(url)
+
+        # Check scheme
+        if parsed.scheme not in ("http", "https"):
+            return False, "Only HTTP and HTTPS URLs are allowed"
+
+        # Get hostname
+        hostname = parsed.hostname
+        if not hostname:
+            return False, "Invalid URL: no hostname"
+
+        # Block localhost and common internal hostnames
+        blocked_hostnames = [
+            "localhost",
+            "127.0.0.1",
+            "0.0.0.0",
+            "::1",
+            "metadata.google.internal",  # Cloud metadata
+            "169.254.169.254",  # AWS/GCP metadata
+            "metadata",
+        ]
+        if hostname.lower() in blocked_hostnames:
+            return False, "Access to internal resources is not allowed"
+
+        # Check if hostname is an IP address
+        try:
+            ip_obj = ipaddress.ip_address(hostname)
+            if is_private_ip(hostname):
+                return False, "Access to private IP addresses is not allowed"
+        except ValueError:
+            # Not an IP address, resolve and check
+            try:
+                # Resolve hostname to check for private IPs
+                resolved_ips = socket.getaddrinfo(hostname, None)
+                for result in resolved_ips:
+                    ip = result[4][0]
+                    if is_private_ip(ip):
+                        logger.warning(f"SSRF attempt: {hostname} resolves to private IP {ip}")
+                        return False, "Access to private IP addresses is not allowed"
+            except socket.gaierror:
+                return False, f"Could not resolve hostname: {hostname}"
+
+        # Optional: Check against allowed domains (whitelist approach)
+        # This is a safer but more restrictive approach
+        domain = hostname.lower()
+        is_allowed = any(
+            domain == allowed or domain.endswith("." + allowed)
+            for allowed in ALLOWED_DOMAINS
+        )
+
+        if not is_allowed:
+            logger.info(f"Allowing non-whitelisted domain: {domain}")
+            # For now, allow non-whitelisted domains but log them
+            # In stricter mode, you could return False here
+
+        return True, ""
+
+    except Exception as e:
+        return False, f"Invalid URL: {str(e)}"
 
 
 def parse_date(date_str: Optional[str]) -> Optional[date]:
@@ -68,6 +174,11 @@ async def scrape_wedding_website(request: ScrapeRequest):
 
     Supports: The Knot, Zola, WithJoy, WeddingWire, Minted, and generic sites.
     """
+    # Validate URL to prevent SSRF
+    is_valid, error_msg = validate_url_for_ssrf(request.url)
+    if not is_valid:
+        raise HTTPException(status_code=400, detail=error_msg)
+
     scraper = WeddingScraper()
 
     try:
@@ -160,6 +271,11 @@ async def import_wedding_from_url(
             structured_data = request.data
             raw_data = {}  # No raw data when using pre-scraped
         else:
+            # Validate URL to prevent SSRF
+            is_valid, error_msg = validate_url_for_ssrf(request.url)
+            if not is_valid:
+                raise HTTPException(status_code=400, detail=error_msg)
+
             # Fallback: scrape the website (slower path)
             scraper = WeddingScraper()
             raw_data = await scraper.scrape(request.url)
