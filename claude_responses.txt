@@ -4047,3 +4047,15 @@ For The Knot, that means:
 This is inefficient. The fix would be to pass the already-scraped data from step 1 to step 2 instead of re-scraping.
 
 For now, it should complete - just wait another 15-30 seconds. But I can fix this so it doesn't double-scrape.
+
+=== CLAUDE RESPONSE ===
+
+Done. Pushed the fix. Now when you click "Create My Concierge", it will use the already-scraped data instead of re-scraping. Should be nearly instant now instead of another 15-45 seconds.
+
+Changes made:
+- Backend: `/scrape/import` now accepts optional `data` field with pre-scraped data
+- Frontend: Stores scraped data after preview scan, passes it when creating wedding
+
+=== CLAUDE RESPONSE ===
+
+Done. Updated "up to a minute" to "up to 2 minutes" in the scan progress message.

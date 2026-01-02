@@ -8,6 +8,7 @@ import {
   ScheduledMessage,
   getGuests,
   createGuest,
+  updateGuest,
   uploadGuests,
   deleteGuest,
   getTemplates,
@@ -25,7 +26,7 @@ interface SMSManagerProps {
   weddingId: string;
 }
 
-type ModalType = 'addGuest' | 'uploadGuests' | 'sendBlast' | 'scheduleMessage' | 'editTemplate' | null;
+type ModalType = 'addGuest' | 'editGuest' | 'uploadGuests' | 'sendBlast' | 'scheduleMessage' | 'editTemplate' | null;
 
 export default function SMSManager({ token, weddingId }: SMSManagerProps) {
   const [guests, setGuests] = useState<Guest[]>([]);
@@ -39,8 +40,11 @@ export default function SMSManager({ token, weddingId }: SMSManagerProps) {
 
   // Form states
   const [guestForm, setGuestForm] = useState<GuestCreateData>({ name: '', phone_number: '' });
+  const [editingGuestId, setEditingGuestId] = useState<string | null>(null);
+  const [visibleGuestsCount, setVisibleGuestsCount] = useState(10);
   const [blastMessage, setBlastMessage] = useState('');
   const [selectedTemplate, setSelectedTemplate] = useState<string>('');
+  const [selectedFileName, setSelectedFileName] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Schedule form state
@@ -101,6 +105,8 @@ export default function SMSManager({ token, weddingId }: SMSManagerProps) {
     setModalType(null);
     setModalError(null);
     setGuestForm({ name: '', phone_number: '' });
+    setEditingGuestId(null);
+    setSelectedFileName(null);
     setBlastMessage('');
     setSelectedTemplate('');
     setScheduleForm({
@@ -128,6 +134,33 @@ export default function SMSManager({ token, weddingId }: SMSManagerProps) {
     } finally {
       setIsSaving(false);
     }
+  };
+
+  const handleEditGuest = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editingGuestId) return;
+    setIsSaving(true);
+    setModalError(null);
+    try {
+      await updateGuest(token, weddingId, editingGuestId, guestForm);
+      await reloadData();
+      closeModal();
+    } catch (err) {
+      setModalError(err instanceof Error ? err.message : 'Failed to update guest');
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const openEditGuest = (guest: Guest) => {
+    setGuestForm({
+      name: guest.name,
+      phone_number: guest.phone_number,
+      email: guest.email || undefined,
+      group_name: guest.group_name || undefined,
+    });
+    setEditingGuestId(guest.id);
+    setModalType('editGuest');
   };
 
   const handleUploadGuests = async (file: File) => {
@@ -342,7 +375,7 @@ export default function SMSManager({ token, weddingId }: SMSManagerProps) {
                 </tr>
               </thead>
               <tbody>
-                {guests.slice(0, 10).map((guest) => (
+                {guests.slice(0, visibleGuestsCount).map((guest) => (
                   <tr key={guest.id} className="border-b border-gray-100 hover:bg-gray-50">
                     <td className="py-2">{guest.name}</td>
                     <td className="py-2 text-gray-600">{formatPhone(guest.phone_number)}</td>
@@ -357,21 +390,52 @@ export default function SMSManager({ token, weddingId }: SMSManagerProps) {
                       )}
                     </td>
                     <td className="py-2">
-                      <button
-                        onClick={() => handleDeleteGuest(guest.id)}
-                        className="text-gray-400 hover:text-red-600"
-                      >
-                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                        </svg>
-                      </button>
+                      <div className="flex gap-2">
+                        <button
+                          onClick={() => openEditGuest(guest)}
+                          className="text-gray-400 hover:text-gray-600"
+                          title="Edit guest"
+                        >
+                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                          </svg>
+                        </button>
+                        <button
+                          onClick={() => handleDeleteGuest(guest.id)}
+                          className="text-gray-400 hover:text-red-600"
+                          title="Delete guest"
+                        >
+                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                          </svg>
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 ))}
               </tbody>
             </table>
-            {guests.length > 10 && (
-              <p className="text-gray-500 text-sm mt-2">...and {guests.length - 10} more</p>
+            {guests.length > visibleGuestsCount && (
+              <button
+                onClick={() => setVisibleGuestsCount(prev => Math.min(prev + 25, guests.length))}
+                className="text-rose-600 hover:text-rose-700 text-sm mt-3 flex items-center"
+              >
+                <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                </svg>
+                Show {Math.min(25, guests.length - visibleGuestsCount)} more
+              </button>
+            )}
+            {guests.length > 10 && visibleGuestsCount > 10 && (
+              <button
+                onClick={() => setVisibleGuestsCount(10)}
+                className="text-gray-500 hover:text-gray-700 text-sm mt-2 flex items-center"
+              >
+                <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 15l7-7 7 7" />
+                </svg>
+                Show less
+              </button>
             )}
           </div>
         )}
@@ -573,6 +637,65 @@ export default function SMSManager({ token, weddingId }: SMSManagerProps) {
               </>
             )}
 
+            {/* Edit Guest Modal */}
+            {modalType === 'editGuest' && (
+              <>
+                <h3 className="text-xl font-semibold text-gray-800 mb-4">Edit Guest</h3>
+                <form onSubmit={handleEditGuest} className="space-y-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Name *</label>
+                    <input
+                      type="text"
+                      value={guestForm.name}
+                      onChange={(e) => setGuestForm({ ...guestForm, name: e.target.value })}
+                      className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-rose-500"
+                      required
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Phone Number *</label>
+                    <input
+                      type="tel"
+                      value={guestForm.phone_number}
+                      onChange={(e) => setGuestForm({ ...guestForm, phone_number: e.target.value })}
+                      placeholder="(555) 123-4567"
+                      className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-rose-500"
+                      required
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Email (optional)</label>
+                    <input
+                      type="email"
+                      value={guestForm.email || ''}
+                      onChange={(e) => setGuestForm({ ...guestForm, email: e.target.value })}
+                      placeholder="guest@example.com"
+                      className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-rose-500"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Group (optional)</label>
+                    <input
+                      type="text"
+                      value={guestForm.group_name || ''}
+                      onChange={(e) => setGuestForm({ ...guestForm, group_name: e.target.value })}
+                      placeholder="e.g., Bride's Family"
+                      className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-rose-500"
+                    />
+                  </div>
+                  {modalError && <p className="text-red-600 text-sm">{modalError}</p>}
+                  <div className="flex gap-3 pt-2">
+                    <button type="button" onClick={closeModal} className="flex-1 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50">
+                      Cancel
+                    </button>
+                    <button type="submit" disabled={isSaving} className="flex-1 py-2 bg-rose-600 text-white rounded-lg hover:bg-rose-700 disabled:opacity-50">
+                      {isSaving ? 'Saving...' : 'Save Changes'}
+                    </button>
+                  </div>
+                </form>
+              </>
+            )}
+
             {/* Upload Guests Modal */}
             {modalType === 'uploadGuests' && (
               <>
@@ -581,16 +704,31 @@ export default function SMSManager({ token, weddingId }: SMSManagerProps) {
                   <p className="text-gray-600 text-sm">
                     Upload a CSV or Excel file with columns: <code className="bg-gray-100 px-1">name</code>, <code className="bg-gray-100 px-1">phone</code>, and optionally <code className="bg-gray-100 px-1">group</code>, <code className="bg-gray-100 px-1">email</code>.
                   </p>
-                  <input
-                    type="file"
-                    ref={fileInputRef}
-                    accept=".csv,.xlsx,.xls"
-                    onChange={(e) => {
-                      const file = e.target.files?.[0];
-                      if (file) handleUploadGuests(file);
-                    }}
-                    className="w-full"
-                  />
+                  <div className="flex items-center gap-4">
+                    <button
+                      type="button"
+                      onClick={() => fileInputRef.current?.click()}
+                      className="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg font-medium transition-colors"
+                    >
+                      Choose File:
+                    </button>
+                    <span className="text-gray-600">
+                      {selectedFileName || 'No file chosen'}
+                    </span>
+                    <input
+                      type="file"
+                      ref={fileInputRef}
+                      accept=".csv,.xlsx,.xls"
+                      onChange={(e) => {
+                        const file = e.target.files?.[0];
+                        if (file) {
+                          setSelectedFileName(file.name);
+                          handleUploadGuests(file);
+                        }
+                      }}
+                      className="hidden"
+                    />
+                  </div>
                   {modalError && <p className="text-red-600 text-sm">{modalError}</p>}
                   {isSaving && <p className="text-gray-600">Uploading...</p>}
                   <button type="button" onClick={closeModal} className="w-full py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50">
