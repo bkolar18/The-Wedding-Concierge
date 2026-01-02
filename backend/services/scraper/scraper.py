@@ -305,7 +305,8 @@ class WeddingScraper:
                     subpage_html = await self._fetch_page(subpage_url, wait_time=wait_time)
                     if subpage_html:
                         subpage_soup = BeautifulSoup(subpage_html, "html.parser")
-                        subpage_content[page_name] = subpage_soup.get_text(separator="\n", strip=True)[:5000]
+                        # Use smart content extraction to filter out sidebars/widgets
+                        subpage_content[page_name] = self._extract_main_content(subpage_soup, page_name)
                         logger.info(f"Successfully scraped subpage: {page_name} ({len(subpage_content[page_name])} chars)")
                         break
                     else:
@@ -401,8 +402,118 @@ class WeddingScraper:
             # Skip single numbers or very short strings
             if re.match(r'^[\d\s]+$', line):
                 continue
+            # Skip registry/shop-related content that pollutes travel pages
+            registry_indicators = ['needs 1 of', 'shop registry', 'gift providers',
+                                   'our wish list', 'filter/sort', 'price low to high',
+                                   'price high to low', 'cash fund', 'honeymoon fund',
+                                   'gift any amount', 'purchased', 'add to cart',
+                                   'target™', 'threshold™', 'brightroom™', 'amazon.com']
+            if any(indicator in line.lower() for indicator in registry_indicators):
+                continue
+            # Skip lines that look like product listings (price patterns)
+            if re.match(r'^\$[\d,]+\.?\d*$', line):
+                continue
             cleaned.append(line)
         return '\n'.join(cleaned)
+
+    def _extract_main_content(self, soup: BeautifulSoup, page_name: str) -> str:
+        """Extract main content from a page, excluding sidebars and widgets.
+
+        This is especially important for The Knot which has persistent registry
+        sidebars that pollute the content extraction.
+        """
+        # Make a copy of soup to avoid modifying the original
+        from copy import copy
+        soup_copy = BeautifulSoup(str(soup), 'html.parser')
+
+        # Remove known non-content elements (registry sidebars, footers, etc.)
+        selectors_to_remove = [
+            '[data-testid*="registry"]',  # Registry widgets
+            '[class*="registry"]',
+            '[class*="Registry"]',
+            '[class*="sidebar"]',
+            '[class*="Sidebar"]',
+            '[class*="gift-list"]',
+            '[class*="GiftList"]',
+            '[class*="wishlist"]',
+            '[class*="WishList"]',
+            'aside',  # Sidebars
+            '[role="complementary"]',  # Accessibility sidebars
+            'footer',
+            '[class*="footer"]',
+            '[class*="Footer"]',
+            '[class*="cookie"]',
+            '[class*="Cookie"]',
+            '[class*="consent"]',
+            '[class*="Consent"]',
+            '[class*="modal"]',
+            '[class*="Modal"]',
+            '[class*="popup"]',
+            '[class*="Popup"]',
+        ]
+
+        for selector in selectors_to_remove:
+            try:
+                for elem in soup_copy.select(selector):
+                    elem.decompose()
+            except Exception:
+                pass  # Some selectors might not match
+
+        # For travel/accommodation pages, look for specific content areas
+        travel_keywords = ['travel', 'hotel', 'accommod', 'stay', 'lodging', 'where to stay',
+                          'room block', 'book your room', 'reserv']
+        if any(kw in page_name.lower() for kw in ['travel', 'accommodations', 'hotels']):
+            # Try to find the main travel content section
+            main_content = None
+
+            # Look for sections with travel-related content
+            for section in soup_copy.find_all(['main', 'article', 'section', 'div']):
+                section_text = section.get_text(strip=True).lower()
+                section_class = ' '.join(section.get('class', [])).lower()
+                section_id = (section.get('id') or '').lower()
+
+                # Check if this section has travel content
+                has_travel_keywords = any(kw in section_text[:500] for kw in travel_keywords)
+                is_travel_section = any(kw in section_class or kw in section_id for kw in travel_keywords)
+
+                if has_travel_keywords or is_travel_section:
+                    # Make sure it's actual content, not just a nav link
+                    if len(section_text) > 100:
+                        main_content = section.get_text(separator="\n", strip=True)
+                        logger.info(f"Found travel section with {len(main_content)} chars")
+                        break
+
+            if main_content:
+                return self._clean_page_text(main_content)[:5000]
+
+        # For Q&A/FAQ pages, look for question/answer content
+        if any(kw in page_name.lower() for kw in ['q-a', 'qa', 'faq']):
+            qa_content = []
+            # Look for FAQ-style elements
+            for elem in soup_copy.find_all(['details', 'summary', 'dt', 'dd']):
+                qa_content.append(elem.get_text(strip=True))
+
+            # Also look for elements with FAQ-like classes
+            for selector in ['[class*="faq"]', '[class*="Faq"]', '[class*="question"]',
+                           '[class*="Question"]', '[class*="answer"]', '[class*="Answer"]']:
+                try:
+                    for elem in soup_copy.select(selector):
+                        text = elem.get_text(separator="\n", strip=True)
+                        if text and text not in qa_content:
+                            qa_content.append(text)
+                except Exception:
+                    pass
+
+            if qa_content:
+                return self._clean_page_text('\n'.join(qa_content))[:5000]
+
+        # Default: try to find the main content area
+        main_elem = soup_copy.find('main') or soup_copy.find('[role="main"]')
+        if main_elem:
+            return self._clean_page_text(main_elem.get_text(separator="\n", strip=True))[:5000]
+
+        # Fallback: get all text but clean it aggressively
+        return self._clean_page_text(soup_copy.get_text(separator="\n", strip=True))[:5000]
 
     async def _scrape_the_knot(self, soup: BeautifulSoup, url: str, json_ld: Dict, subpage_content: Dict[str, str] = None) -> Dict[str, Any]:
         """Scrape The Knot wedding website with enhanced extraction."""
