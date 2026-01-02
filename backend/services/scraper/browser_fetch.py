@@ -168,9 +168,35 @@ class StealthBrowser:
             except Exception:
                 pass  # Continue even if selector wait fails
 
+            # For travel pages, wait for hotel/accommodation content to appear
+            url_lower = url.lower()
+            if any(kw in url_lower for kw in ['/travel', '/accommodations', '/hotels']):
+                logger.info("Travel page detected - waiting for hotel content to load")
+                # Try to wait for content that looks like hotel info
+                hotel_selectors = [
+                    'text=/hotel/i',
+                    'text=/check-in/i',
+                    'text=/booking/i',
+                    'text=/room/i',
+                    '[class*="hotel"]',
+                    '[class*="accommodation"]',
+                    '[class*="travel"]',
+                ]
+                for selector in hotel_selectors:
+                    try:
+                        await page.wait_for_selector(selector, timeout=3000)
+                        logger.info(f"Found hotel content with selector: {selector}")
+                        break
+                    except Exception:
+                        continue
+                # Extra wait after content appears for full render
+                await asyncio.sleep(2)
+
             # Scroll to trigger lazy loading
             try:
                 await page.evaluate("window.scrollTo(0, document.body.scrollHeight / 2)")
+                await asyncio.sleep(0.5)
+                await page.evaluate("window.scrollTo(0, document.body.scrollHeight)")
                 await asyncio.sleep(0.5)
                 await page.evaluate("window.scrollTo(0, 0)")
                 await asyncio.sleep(0.5)
