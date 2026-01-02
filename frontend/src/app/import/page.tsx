@@ -296,6 +296,13 @@ export default function ImportPage() {
                   </div>
                 </div>
 
+                {/* Retry/Manual Entry Notice */}
+                <div className="p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                  <p className="text-sm text-blue-800 text-center">
+                    Something missing or doesn&apos;t look right? Try scanning again, or continue and add missing details from your dashboard.
+                  </p>
+                </div>
+
                 {/* Events List */}
                 {preview.events && preview.events.length > 0 && (
                   <div className="border border-gray-200 rounded-lg overflow-hidden">

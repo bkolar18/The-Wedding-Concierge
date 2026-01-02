@@ -2,6 +2,7 @@
 import re
 import json
 import logging
+import asyncio
 from typing import Dict, Any, Optional, List
 from urllib.parse import urlparse, urljoin
 from datetime import datetime
@@ -280,17 +281,28 @@ class WeddingScraper:
             subpage_content = {}
             logger.info(f"Will scrape {len(subpages)} subpages: {subpages}")
 
+            # Critical subpages that should be retried if they fail
+            critical_pages = ["travel", "accommodations", "hotels", "q-a", "qa", "faq", "schedule"]
+
             for subpage_url in subpages:
-                logger.info(f"Fetching subpage: {subpage_url}")
-                subpage_html = await self._fetch_page(subpage_url)
-                if subpage_html:
-                    subpage_soup = BeautifulSoup(subpage_html, "html.parser")
-                    # Extract the page type from URL
-                    page_name = urlparse(subpage_url).path.split("/")[-1] or "subpage"
-                    subpage_content[page_name] = subpage_soup.get_text(separator="\n", strip=True)[:5000]
-                    logger.info(f"Successfully scraped subpage: {page_name} ({len(subpage_content[page_name])} chars)")
-                else:
-                    logger.warning(f"Failed to fetch subpage: {subpage_url}")
+                page_name = urlparse(subpage_url).path.split("/")[-1] or "subpage"
+                is_critical = any(critical in page_name.lower() for critical in critical_pages)
+                max_attempts = 3 if is_critical else 1
+
+                for attempt in range(max_attempts):
+                    logger.info(f"Fetching subpage: {subpage_url} (attempt {attempt + 1}/{max_attempts})")
+                    subpage_html = await self._fetch_page(subpage_url)
+                    if subpage_html:
+                        subpage_soup = BeautifulSoup(subpage_html, "html.parser")
+                        subpage_content[page_name] = subpage_soup.get_text(separator="\n", strip=True)[:5000]
+                        logger.info(f"Successfully scraped subpage: {page_name} ({len(subpage_content[page_name])} chars)")
+                        break
+                    else:
+                        if attempt < max_attempts - 1:
+                            logger.warning(f"Failed to fetch {page_name}, retrying in 2 seconds...")
+                            await asyncio.sleep(2)
+                        else:
+                            logger.warning(f"Failed to fetch subpage after {max_attempts} attempts: {subpage_url}")
 
             # Diagnostic logging for subpage content
             logger.info(f"Subpage content keys: {list(subpage_content.keys())}")
