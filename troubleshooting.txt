@@ -1,550 +1,150 @@
-2026-01-02T19:09:25.273683115Z INFO:     71.191.62.74:0 - "GET /api/auth/me HTTP/1.1" 200 OK
-2026-01-02T19:09:26.094261271Z 2026-01-02 19:09:26,093 - services.scraper.browser_fetch - INFO - Browser fetch status: 200
-2026-01-02T19:09:31.16459929Z INFO:     71.191.62.74:0 - "OPTIONS /api/scrape HTTP/1.1" 200 OK
-2026-01-02T19:09:31.462205843Z INFO:     71.191.62.74:0 - "POST /api/scrape HTTP/1.1" 307 Temporary Redirect
-2026-01-02T19:09:31.594948712Z INFO:     71.191.62.74:0 - "OPTIONS /api/scrape/ HTTP/1.1" 200 OK
-2026-01-02T19:09:32.565054074Z 2026-01-02 19:09:32,564 - services.scraper.scraper - INFO - Scraping https://www.theknot.com/us/hanna-sommer-and-parker-stewart-jan-2026 (platform: the_knot)
-2026-01-02T19:09:32.565164546Z 2026-01-02 19:09:32,564 - services.scraper.scraper - INFO - Using browser for https://www.theknot.com/us/hanna-sommer-and-parker-stewart-jan-2026 (known to require it)
-2026-01-02T19:09:32.565188607Z 2026-01-02 19:09:32,565 - services.scraper.browser_fetch - INFO - Starting stealth browser...
-2026-01-02T19:09:36.993545708Z 2026-01-02 19:09:36,993 - services.scraper.browser_fetch - INFO - Browser fetch successful: 545055 chars
-2026-01-02T19:09:39.597468971Z 2026-01-02 19:09:39,597 - services.scraper.scraper - INFO - Will scrape 6 subpages: ['https://www.theknot.com/us/hanna-sommer-and-parker-stewart-jan-2026/our-story', 'https://www.theknot.com/us/hanna-sommer-and-parker-stewart-jan-2026/wedding-party', 'https://www.theknot.com/us/hanna-sommer-and-parker-stewart-jan-2026/q-a', 'https://www.theknot.com/us/hanna-sommer-and-parker-stewart-jan-2026/travel', 'https://www.theknot.com/us/hanna-sommer-and-parker-stewart-jan-2026/registry', 'https://www.theknot.com/us/hanna-sommer-and-parker-stewart-jan-2026/rsvp']
-2026-01-02T19:09:39.597527212Z 2026-01-02 19:09:39,597 - services.scraper.scraper - INFO - Fetching batch 1: 3 pages
-2026-01-02T19:09:39.68915394Z 2026-01-02 19:09:39,688 - services.scraper.scraper - INFO - Fetching subpage: https://www.theknot.com/us/hanna-sommer-and-parker-stewart-jan-2026/our-story (wait=2.0s)
-2026-01-02T19:09:39.689178751Z 2026-01-02 19:09:39,688 - services.scraper.scraper - INFO - Using browser for https://www.theknot.com/us/hanna-sommer-and-parker-stewart-jan-2026/our-story (known to require it)
-2026-01-02T19:09:39.690206614Z 2026-01-02 19:09:39,690 - services.scraper.scraper - INFO - Fetching subpage: https://www.theknot.com/us/hanna-sommer-and-parker-stewart-jan-2026/wedding-party (wait=2.0s)
-2026-01-02T19:09:39.690295996Z 2026-01-02 19:09:39,690 - services.scraper.scraper - INFO - Using browser for https://www.theknot.com/us/hanna-sommer-and-parker-stewart-jan-2026/wedding-party (known to require it)
-2026-01-02T19:09:39.690950101Z 2026-01-02 19:09:39,690 - services.scraper.scraper - INFO - Fetching subpage: https://www.theknot.com/us/hanna-sommer-and-parker-stewart-jan-2026/q-a (wait=2.0s)
-2026-01-02T19:09:39.691024493Z 2026-01-02 19:09:39,690 - services.scraper.scraper - INFO - Using browser for https://www.theknot.com/us/hanna-sommer-and-parker-stewart-jan-2026/q-a (known to require it)
-2026-01-02T19:09:39.691828001Z 2026-01-02 19:09:39,691 - apscheduler.scheduler - DEBUG - Looking for jobs to run
-2026-01-02T19:09:39.692074856Z 2026-01-02 19:09:39,691 - apscheduler.scheduler - DEBUG - Next wakeup is due at 2026-01-02 19:14:38.596437+00:00 (in 298.904470 seconds)
-2026-01-02T19:09:39.692279071Z 2026-01-02 19:09:39,692 - apscheduler.executors.default - WARNING - Run time of job "process_fixed_schedules (trigger: interval[0:05:00], next run at: 2026-01-02 19:14:38 UTC)" was missed by 0:00:01.095679
-2026-01-02T19:09:42.792203757Z 2026-01-02 19:09:42,792 - services.scraper.browser_fetch - INFO - Fetching with stealth browser: https://www.theknot.com/us/hanna-sommer-and-parker-stewart-jan-2026/wedding-party
-2026-01-02T19:09:42.793324542Z 2026-01-02 19:09:42,793 - services.scraper.browser_fetch - INFO - Fetching with stealth browser: https://www.theknot.com/us/hanna-sommer-and-parker-stewart-jan-2026/our-story
-2026-01-02T19:09:42.794769094Z 2026-01-02 19:09:42,794 - services.scraper.browser_fetch - INFO - Fetching with stealth browser: https://www.theknot.com/us/hanna-sommer-and-parker-stewart-jan-2026/q-a
-2026-01-02T19:09:43.963572395Z 2026-01-02 19:09:43,963 - services.scraper.browser_fetch - INFO - Stealth browser started with viewport 1911x889
-2026-01-02T19:09:45.060443428Z 2026-01-02 19:09:45,060 - services.scraper.browser_fetch - INFO - Fetching with stealth browser: https://www.theknot.com/us/hanna-sommer-and-parker-stewart-jan-2026
-2026-01-02T19:09:57.761614Z 2026-01-02 19:09:57,761 - services.scraper.browser_fetch - INFO - Browser fetch status: 200
-2026-01-02T19:10:07.461085539Z 2026-01-02 19:10:07,459 - services.scraper.browser_fetch - INFO - Browser fetch successful: 544622 chars
-2026-01-02T19:10:09.161846633Z 2026-01-02 19:10:09,158 - services.scraper.scraper - INFO - Will scrape 6 subpages: ['https://www.theknot.com/us/hanna-sommer-and-parker-stewart-jan-2026/our-story', 'https://www.theknot.com/us/hanna-sommer-and-parker-stewart-jan-2026/wedding-party', 'https://www.theknot.com/us/hanna-sommer-and-parker-stewart-jan-2026/q-a', 'https://www.theknot.com/us/hanna-sommer-and-parker-stewart-jan-2026/travel', 'https://www.theknot.com/us/hanna-sommer-and-parker-stewart-jan-2026/registry', 'https://www.theknot.com/us/hanna-sommer-and-parker-stewart-jan-2026/rsvp']
-2026-01-02T19:10:09.161866563Z 2026-01-02 19:10:09,159 - services.scraper.scraper - INFO - Fetching batch 1: 3 pages
-2026-01-02T19:10:09.161872294Z 2026-01-02 19:10:09,159 - services.scraper.scraper - INFO - Fetching subpage: https://www.theknot.com/us/hanna-sommer-and-parker-stewart-jan-2026/our-story (wait=2.0s)
-2026-01-02T19:10:09.161877424Z 2026-01-02 19:10:09,159 - services.scraper.scraper - INFO - Using browser for https://www.theknot.com/us/hanna-sommer-and-parker-stewart-jan-2026/our-story (known to require it)
-2026-01-02T19:10:09.161881354Z 2026-01-02 19:10:09,160 - services.scraper.scraper - INFO - Fetching subpage: https://www.theknot.com/us/hanna-sommer-and-parker-stewart-jan-2026/wedding-party (wait=2.0s)
-2026-01-02T19:10:09.161885054Z 2026-01-02 19:10:09,160 - services.scraper.scraper - INFO - Using browser for https://www.theknot.com/us/hanna-sommer-and-parker-stewart-jan-2026/wedding-party (known to require it)
-2026-01-02T19:10:09.258304084Z 2026-01-02 19:10:09,256 - services.scraper.scraper - INFO - Fetching subpage: https://www.theknot.com/us/hanna-sommer-and-parker-stewart-jan-2026/q-a (wait=2.0s)
-2026-01-02T19:10:09.259629515Z 2026-01-02 19:10:09,256 - services.scraper.scraper - INFO - Using browser for https://www.theknot.com/us/hanna-sommer-and-parker-stewart-jan-2026/q-a (known to require it)
-2026-01-02T19:10:09.901528058Z 2026-01-02 19:10:09,901 - services.scraper.browser_fetch - INFO - Browser fetch status: 200
-2026-01-02T19:10:09.902012529Z 2026-01-02 19:10:09,901 - services.scraper.browser_fetch - INFO - Browser fetch status: 200
-2026-01-02T19:10:12.857351311Z 2026-01-02 19:10:12,856 - services.scraper.browser_fetch - INFO - Fetching with stealth browser: https://www.theknot.com/us/hanna-sommer-and-parker-stewart-jan-2026/wedding-party
-2026-01-02T19:10:12.859972511Z 2026-01-02 19:10:12,858 - services.scraper.browser_fetch - INFO - Fetching with stealth browser: https://www.theknot.com/us/hanna-sommer-and-parker-stewart-jan-2026/q-a
-2026-01-02T19:10:13.563792693Z 2026-01-02 19:10:13,562 - services.scraper.browser_fetch - INFO - Fetching with stealth browser: https://www.theknot.com/us/hanna-sommer-and-parker-stewart-jan-2026/our-story
-2026-01-02T19:10:14.18898135Z 2026-01-02 19:10:14,089 - services.scraper.browser_fetch - INFO - Browser fetch status: 200
-2026-01-02T19:10:19.401060384Z INFO:     Shutting down
-2026-01-02T19:10:19.501702465Z INFO:     Waiting for background tasks to complete. (CTRL+C to force quit)
-2026-01-02T19:10:40.356911782Z 2026-01-02 19:10:40,356 - services.scraper.browser_fetch - INFO - Browser fetch status: 200
-2026-01-02T19:10:40.356929872Z 2026-01-02 19:10:40,356 - services.scraper.browser_fetch - INFO - Browser fetch status: 200
-2026-01-02T19:10:47.956064629Z 2026-01-02 19:10:47,955 - services.scraper.browser_fetch - INFO - Browser fetch status: 200
-2026-01-02T19:11:19.464273861Z 2026-01-02 19:11:19,463 - services.scraper.browser_fetch - INFO - Browser fetch successful: 554741 chars
-2026-01-02T19:11:30.564631498Z 2026-01-02 19:11:30,564 - services.scraper.scraper - INFO - Successfully scraped subpage: wedding-party (1075 chars)
-2026-01-02T19:11:30.756852204Z 2026-01-02 19:11:30,756 - services.scraper.browser_fetch - INFO - Browser fetch successful: 537099 chars
-2026-01-02T19:11:30.866665459Z 2026-01-02 19:11:30,866 - services.scraper.browser_fetch - INFO - Browser fetch successful: 513840 chars
-2026-01-02T19:11:38.165577805Z 2026-01-02 19:11:38,165 - services.scraper.scraper - INFO - Successfully scraped subpage: our-story (849 chars)
-2026-01-02T19:11:42.457787876Z 2026-01-02 19:11:42,457 - services.scraper.scraper - INFO - Successfully scraped subpage: q-a (473 chars)
-2026-01-02T19:11:42.45841241Z 2026-01-02 19:11:42,458 - services.scraper.scraper - INFO - Fetching batch 2: 3 pages
-2026-01-02T19:11:42.458622085Z 2026-01-02 19:11:42,458 - services.scraper.scraper - INFO - Fetching subpage: https://www.theknot.com/us/hanna-sommer-and-parker-stewart-jan-2026/travel (wait=3.0s)
-2026-01-02T19:11:42.458636675Z 2026-01-02 19:11:42,458 - services.scraper.scraper - INFO - Using browser for https://www.theknot.com/us/hanna-sommer-and-parker-stewart-jan-2026/travel (known to require it)
-2026-01-02T19:11:42.460818245Z 2026-01-02 19:11:42,460 - services.scraper.scraper - INFO - Fetching subpage: https://www.theknot.com/us/hanna-sommer-and-parker-stewart-jan-2026/registry (wait=2.0s)
-2026-01-02T19:11:42.460832145Z 2026-01-02 19:11:42,460 - services.scraper.scraper - INFO - Using browser for https://www.theknot.com/us/hanna-sommer-and-parker-stewart-jan-2026/registry (known to require it)
-2026-01-02T19:11:42.462061793Z 2026-01-02 19:11:42,461 - services.scraper.scraper - INFO - Fetching subpage: https://www.theknot.com/us/hanna-sommer-and-parker-stewart-jan-2026/rsvp (wait=2.0s)
-2026-01-02T19:11:42.462075944Z 2026-01-02 19:11:42,461 - services.scraper.scraper - INFO - Using browser for https://www.theknot.com/us/hanna-sommer-and-parker-stewart-jan-2026/rsvp (known to require it)
-2026-01-02T19:11:44.262035782Z 2026-01-02 19:11:44,260 - services.scraper.browser_fetch - INFO - Fetching with stealth browser: https://www.theknot.com/us/hanna-sommer-and-parker-stewart-jan-2026/rsvp
-2026-01-02T19:11:44.262640515Z 2026-01-02 19:11:44,262 - services.scraper.browser_fetch - INFO - Fetching with stealth browser: https://www.theknot.com/us/hanna-sommer-and-parker-stewart-jan-2026/travel
-2026-01-02T19:11:44.367634331Z 2026-01-02 19:11:44,367 - services.scraper.browser_fetch - INFO - Fetching with stealth browser: https://www.theknot.com/us/hanna-sommer-and-parker-stewart-jan-2026/registry
-2026-01-02T19:12:09.659531344Z 2026-01-02 19:12:09,658 - services.scraper.browser_fetch - INFO - Browser fetch status: 200
-2026-01-02T19:12:09.659551175Z 2026-01-02 19:12:09,659 - services.scraper.browser_fetch - INFO - Browser fetch status: 200
-2026-01-02T19:12:12.556831161Z 2026-01-02 19:12:12,556 - services.scraper.browser_fetch - INFO - Browser fetch status: 200
-2026-01-02T19:12:12.756097659Z 2026-01-02 19:12:12,755 - services.scraper.browser_fetch - INFO - Travel page detected - waiting for hotel content to load
-2026-01-02T19:12:47.758556953Z 2026-01-02 19:12:47,758 - services.scraper.browser_fetch - INFO - Browser fetch successful: 511289 chars
-2026-01-02T19:12:48.056407961Z 2026-01-02 19:12:48,056 - services.scraper.browser_fetch - INFO - Browser fetch successful: 473301 chars
-2026-01-02T19:12:56.057964997Z 2026-01-02 19:12:56,057 - services.scraper.scraper - INFO - Successfully scraped subpage: registry (628 chars)
-2026-01-02T19:12:59.558967846Z 2026-01-02 19:12:59,558 - services.scraper.scraper - INFO - Successfully scraped subpage: rsvp (399 chars)
-2026-01-02T19:13:00.361851968Z 2026-01-02 19:13:00,361 - services.scraper.browser_fetch - INFO - Browser fetch successful: 518939 chars
-2026-01-02T19:13:05.060387317Z 2026-01-02 19:13:05,060 - services.scraper.scraper - INFO - Found phone number in section
-2026-01-02T19:13:05.156718437Z 2026-01-02 19:13:05,156 - services.scraper.scraper - INFO - Found address pattern in section
-2026-01-02T19:13:05.157071835Z 2026-01-02 19:13:05,156 - services.scraper.scraper - INFO - Found check-in/check-out in section
-2026-01-02T19:13:05.157463034Z 2026-01-02 19:13:05,157 - services.scraper.scraper - INFO - New best travel section: score=25, length=1184
-2026-01-02T19:13:05.157783271Z 2026-01-02 19:13:05,157 - services.scraper.scraper - INFO - Found phone number in section
-2026-01-02T19:13:05.157972495Z 2026-01-02 19:13:05,157 - services.scraper.scraper - INFO - Found address pattern in section
-2026-01-02T19:13:05.158113868Z 2026-01-02 19:13:05,158 - services.scraper.scraper - INFO - Found check-in/check-out in section
-2026-01-02T19:13:05.158353474Z 2026-01-02 19:13:05,158 - services.scraper.scraper - INFO - Found phone number in section
-2026-01-02T19:13:05.158539548Z 2026-01-02 19:13:05,158 - services.scraper.scraper - INFO - Found address pattern in section
-2026-01-02T19:13:05.158809574Z 2026-01-02 19:13:05,158 - services.scraper.scraper - INFO - Found check-in/check-out in section
-2026-01-02T19:13:05.159135461Z 2026-01-02 19:13:05,158 - services.scraper.scraper - INFO - Found phone number in section
-2026-01-02T19:13:05.160288317Z 2026-01-02 19:13:05,158 - services.scraper.scraper - INFO - Found address pattern in section
-2026-01-02T19:13:05.161120286Z 2026-01-02 19:13:05,160 - services.scraper.scraper - INFO - Found check-in/check-out in section
-2026-01-02T19:13:05.166034616Z 2026-01-02 19:13:05,165 - services.scraper.scraper - INFO - Found phone number in section
-2026-01-02T19:13:05.166052016Z 2026-01-02 19:13:05,165 - services.scraper.scraper - INFO - Found address pattern in section
-2026-01-02T19:13:05.166054976Z 2026-01-02 19:13:05,165 - services.scraper.scraper - INFO - Found check-in/check-out in section
-2026-01-02T19:13:05.166784163Z 2026-01-02 19:13:05,165 - services.scraper.scraper - INFO - Found phone number in section
-2026-01-02T19:13:05.166794523Z 2026-01-02 19:13:05,165 - services.scraper.scraper - INFO - Found address pattern in section
-2026-01-02T19:13:05.166797323Z 2026-01-02 19:13:05,165 - services.scraper.scraper - INFO - Found check-in/check-out in section
-2026-01-02T19:13:05.166799853Z 2026-01-02 19:13:05,165 - services.scraper.scraper - INFO - Found phone number in section
-2026-01-02T19:13:05.166802493Z 2026-01-02 19:13:05,165 - services.scraper.scraper - INFO - Found address pattern in section
-2026-01-02T19:13:05.166804863Z 2026-01-02 19:13:05,165 - services.scraper.scraper - INFO - Found check-in/check-out in section
-2026-01-02T19:13:05.166808113Z 2026-01-02 19:13:05,165 - services.scraper.scraper - INFO - New best travel section: score=26, length=419
-2026-01-02T19:13:05.166810803Z 2026-01-02 19:13:05,165 - services.scraper.scraper - INFO - Found phone number in section
-2026-01-02T19:13:05.166813344Z 2026-01-02 19:13:05,165 - services.scraper.scraper - INFO - Found address pattern in section
-2026-01-02T19:13:05.166815873Z 2026-01-02 19:13:05,165 - services.scraper.scraper - INFO - Found address pattern in section
-2026-01-02T19:13:05.166818853Z 2026-01-02 19:13:05,165 - services.scraper.scraper - INFO - Found phone number in section
-2026-01-02T19:13:05.166912976Z 2026-01-02 19:13:05,165 - services.scraper.scraper - INFO - Found check-in/check-out in section
-2026-01-02T19:13:05.166917296Z 2026-01-02 19:13:05,166 - services.scraper.scraper - INFO - Found phone number in section
-2026-01-02T19:13:05.166920116Z 2026-01-02 19:13:05,166 - services.scraper.scraper - INFO - Found address pattern in section
-2026-01-02T19:13:05.166922556Z 2026-01-02 19:13:05,166 - services.scraper.scraper - INFO - Found check-in/check-out in section
-2026-01-02T19:13:05.166925576Z 2026-01-02 19:13:05,166 - services.scraper.scraper - INFO - New best travel section: score=27, length=485
-2026-01-02T19:13:05.166928046Z 2026-01-02 19:13:05,166 - services.scraper.scraper - INFO - Found phone number in section
-2026-01-02T19:13:05.166940846Z 2026-01-02 19:13:05,166 - services.scraper.scraper - INFO - Found address pattern in section
-2026-01-02T19:13:05.166943546Z 2026-01-02 19:13:05,166 - services.scraper.scraper - INFO - Found address pattern in section
-2026-01-02T19:13:05.166945847Z 2026-01-02 19:13:05,166 - services.scraper.scraper - INFO - Found phone number in section
-2026-01-02T19:13:05.166948107Z 2026-01-02 19:13:05,166 - services.scraper.scraper - INFO - Found check-in/check-out in section
-2026-01-02T19:13:05.166991117Z 2026-01-02 19:13:05,166 - services.scraper.scraper - INFO - Using travel section with score 27
-2026-01-02T19:13:05.166993877Z 2026-01-02 19:13:05,166 - services.scraper.scraper - INFO - Successfully scraped subpage: travel (483 chars)
-2026-01-02T19:13:05.16797501Z 2026-01-02 19:13:05,167 - services.scraper.scraper - INFO - Subpage content keys: ['our-story', 'wedding-party', 'q-a', 'travel', 'registry', 'rsvp']
-2026-01-02T19:13:05.16798581Z 2026-01-02 19:13:05,167 - services.scraper.scraper - INFO - Subpage 'our-story' preview: Hanna Sommer and Parker Stewart's Wedding Website - The Knot The Knot The Knot The Knot The Knot The Knot The Bump XO Group The Knot Worldwide credit-...
-2026-01-02T19:13:05.169054774Z 2026-01-02 19:13:05,167 - services.scraper.scraper - INFO - Subpage 'wedding-party' preview: Hanna Sommer and Parker Stewart's Wedding Website - The Knot The Knot The Knot The Knot The Knot The Knot The Bump XO Group The Knot Worldwide credit-...
-2026-01-02T19:13:05.169066564Z 2026-01-02 19:13:05,167 - services.scraper.scraper - INFO - Subpage 'q-a' preview: Am I allowed to bring a plus-one? We are not allowing additional plus-ones to our wedding, as we'd like to keep the guests list just to those who know...
-2026-01-02T19:13:05.169069694Z 2026-01-02 19:13:05,167 - services.scraper.scraper - INFO - Subpage 'travel' preview: Courtyard Pittsburgh University Center 100 Lytton Ave, Pittsburgh, PA 15213, USA (412) 682-6200 Check-In: Friday, January 30, 2026 Check-Out: Sunday, ...
-2026-01-02T19:13:05.169072184Z 2026-01-02 19:13:05,168 - services.scraper.scraper - INFO - Subpage 'registry' preview: Hanna Sommer and Parker Stewart's Wedding Website - The Knot The Knot The Knot The Knot The Knot The Knot The Bump XO Group The Knot Worldwide credit-...
-2026-01-02T19:13:05.169074634Z 2026-01-02 19:13:05,168 - services.scraper.scraper - INFO - Subpage 'rsvp' preview: Hanna Sommer and Parker Stewart's Wedding Website - The Knot The Knot The Knot The Knot The Knot The Knot The Bump XO Group The Knot Worldwide credit-...
-2026-01-02T19:13:05.757799944Z 2026-01-02 19:13:05,756 - services.scraper.scraper - INFO - full_text total length: 5242 chars
-2026-01-02T19:13:05.757819835Z 2026-01-02 19:13:05,756 - services.scraper.scraper - INFO - Contains TRAVEL marker: True
-2026-01-02T19:13:05.757823605Z 2026-01-02 19:13:05,756 - services.scraper.scraper - INFO - Travel content preview: === TRAVEL PAGE ===
-2026-01-02T19:13:05.757827245Z Courtyard Pittsburgh University Center
-2026-01-02T19:13:05.757829945Z 100 Lytton Ave, Pittsburgh, PA 15213, USA
-2026-01-02T19:13:05.757832645Z (412) 682-6200
-2026-01-02T19:13:05.757835275Z Check-In:
-2026-01-02T19:13:05.757838685Z Friday, January 30, 2026
-2026-01-02T19:13:05.757841345Z Check-Out:
-2026-01-02T19:13:05.757843916Z Sunday, February 1, 2026
-2026-01-02T19:13:05.757846576Z Use the link below for booking a room at the Courtyard University Center! Notes about this hotel:
-2026-01-02T19:13:05.757849336Z -Book before 12
-2026-01-02T19:13:05.757852516Z 2026-01-02 19:13:05,756 - services.scraper.data_mapper - INFO - Initializing Claude client with API key: sk-ant-api03-GTsaIEA...
-2026-01-02T19:13:06.660645938Z 2026-01-02 19:13:06,660 - services.scraper.data_mapper - INFO - Text to Claude: 5242 chars
-2026-01-02T19:13:06.660884813Z 2026-01-02 19:13:06,660 - services.scraper.data_mapper - INFO - Contains 'hotel': True
-2026-01-02T19:13:06.660905664Z 2026-01-02 19:13:06,660 - services.scraper.data_mapper - INFO - Contains 'travel': True
-2026-01-02T19:13:06.660908784Z 2026-01-02 19:13:06,660 - services.scraper.data_mapper - INFO - Contains 'accommod': True
-2026-01-02T19:13:06.85696224Z 2026-01-02 19:13:06,856 - anthropic._base_client - DEBUG - Request options: {'method': 'post', 'url': '/v1/messages', 'timeout': Timeout(connect=5.0, read=600, write=600, pool=600), 'files': None, 'idempotency_key': 'stainless-python-retry-6ab8b122-58f1-468d-b6bd-ada04c7d2b8b', 'json_data': {'max_tokens': 2000, 'messages': [{'role': 'user', 'content': 'Extract structured wedding information from this wedding website content.\n\nCRITICAL: Look carefully for hotel/accommodation information. It typically appears:\n- In sections marked "=== TRAVEL PAGE ===" or similar\n- Near keywords like "where to stay", "hotel", "room block", "accommodations", "lodging"\n- With booking codes, special rates, group names, or reservation links\n\nReturn a JSON object with the following fields (use null for missing data):\n\n{\n    "partner1_name": "First partner\'s full name",\n    "partner2_name": "Second partner\'s full name",\n    "wedding_date": "YYYY-MM-DD format or null",\n    "wedding_time": "HH:MM AM/PM format or null",\n    "dress_code": "Dress code description or null",\n    "ceremony_venue_name": "Ceremony venue name or null",\n    "ceremony_venue_address": "Full address or null",\n    "reception_venue_name": "Reception venue name (if different from ceremony) or null",\n    "reception_venue_address": "Full address or null",\n    "reception_time": "HH:MM AM/PM format or null",\n    "events": [\n        {\n            "event_name": "e.g. Rehearsal Dinner, Welcome Party",\n            "event_date": "YYYY-MM-DD or null",\n            "event_time": "HH:MM AM/PM or null",\n            "venue_name": "venue name or null",\n            "venue_address": "address or null",\n            "description": "description or null",\n            "dress_code": "dress code or null"\n        }\n    ],\n    "accommodations": [\n        {\n            "hotel_name": "Hotel name (e.g. Marriott, Hilton, Hampton Inn)",\n            "address": "Full address or null",\n            "phone": "Phone number or null",\n            "booking_url": "Booking URL or null",\n            "has_room_block": true/false,\n            "room_block_name": "Block name (e.g. \'Smith-Jones Wedding\') or null",\n            "room_block_code": "Booking code or null",\n            "room_block_rate": "Rate description (e.g. \'$159/night\') or null",\n            "room_block_deadline": "Deadline date or null",\n            "notes": "Additional notes like amenities, distance to venue, shuttle info, etc."\n        }\n    ],\n    "faqs": [\n        {\n            "question": "Question text",\n            "answer": "Answer text",\n            "category": "Category like Travel, Attire, etc. or null"\n        }\n    ],\n    "additional_notes": "Any other important info or null"\n}\n\nEXTRACTION PRIORITIES:\n1. Partner names - usually in format "Name1 & Name2" or "Name1 and Name2"\n2. HOTELS/ACCOMMODATIONS - Look in TRAVEL PAGE sections for hotel names, addresses, room block codes, rates\n3. Events - rehearsal dinner, welcome party, ceremony, reception, brunch\n4. Q&A or FAQ sections\n\nReturn ONLY valid JSON, no explanation.\n\nWebsite content:\nHanna Sommer and Parker Stewart\'s Wedding Website - The Knot\nHanna & Parker\n1.31.2026 • Pittsburgh, Pennsylvania\n29 Days To Go!\nHanna & Parker\n1.31.2026 • Pittsburgh, Pennsylvania\n29 Days To Go!\nHome\nOur Story\nPhotos\nWedding Party\nQ + A\nTravel\nRegistry\nRSVP\nMenu Button\nHome\nOur Story\nPhotos\nWedding Party\nQ + A\nTravel\nRegistry\nRSVP\nH&P\nJanuary 31, 2026\nPittsburgh\nPennsylvania\nRSVP\nWedding Day\n1.31.2026\n3:00 PM–10:00 PM\nPittsburgh, PA, 15213\nAttire:\nFormal\n3:00 PM\n–3:45 PM\nCeremony\nHeinz Memorial Chapel\nSouth Bellefield Avenue, Pittsburgh, PA, 15213, United States\nAttire:\nFormal\n4:00 PM\n–11:00 PM\nReception\nSoldiers & Sailors Memorial Hall & Museum\n4141 Fifth Ave, Pittsburgh, PA, 15213\nAttire:\nFormal\nCocktail Hour: 4 pm - 5 pm\nReception: 5 pm - 10 pm\nHome\nOur Story\nPhotos\nWedding Party\nQ + A\nTravel\nRegistry\nRSVP\nH&P\n1.31.2026\nCreated on The Knot\nGetting married?\nCreate your wedding website for free.\nThe Knot\nThe Knot\nThe Knot\nThe Knot\nThe Knot\nThe Bump\nXO Group\nThe Knot Worldwide\ncredit-card\ndeliver-time\narrow_down_2\narrow_left_2\narrow_right_2\narrow_up_2\ncamera_2\ncaret_down_2\ncaret_left_2\ncaret_right_2\ncaret_up_2\ncart_2\nchat_2\ndiscount_2\ndownload_2\nheart_2\nemail_2\nphone_2\nsearch_2\n\n=== TRAVEL PAGE ===\nCourtyard Pittsburgh University Center\n100 Lytton Ave, Pittsburgh, PA 15213, USA\n(412) 682-6200\nCheck-In:\nFriday, January 30, 2026\nCheck-Out:\nSunday, February 1, 2026\nUse the link below for booking a room at the Courtyard University Center! Notes about this hotel:\n-Book before 12/30/2025 for discounted room rate\n-Check in time is between 2:00 PM to 4:00 PM depending on when room is available\n-Parking is $29/night\nPlease let Hanna or Parker know if you have any questions!\nWebsite\n\n=== Q-A PAGE ===\nAm I allowed to bring a plus-one?\nWe are not allowing additional plus-ones to our wedding, as we\'d like to keep the guests list just to those who know us well (unless you were given a plus-one on your invitation already). We hope you understand!\nAm I allowed to bring my children?\nUnfortunately, we will only be able to accommodate the children of our immediate family. WE APOLOGIZE FOR THE INCONVENIENCE!\nWhere should I park?\nParker, I hardly know her.\n(info to come soon)\n\n=== OUR-STORY PAGE ===\nHanna Sommer and Parker Stewart\'s Wedding Website - The Knot\nThe Knot\nThe Knot\nThe Knot\nThe Knot\nThe Knot\nThe Bump\nXO Group\nThe Knot Worldwide\ncredit-card\ndeliver-time\narrow_down_2\narrow_left_2\narrow_right_2\narrow_up_2\ncamera_2\ncaret_down_2\ncaret_left_2\ncaret_right_2\ncaret_up_2\ncart_2\nchat_2\ndiscount_2\ndownload_2\nheart_2\nemail_2\nphone_2\nsearch_2\nHanna & Parker\n1.31.2026 • Pittsburgh, Pennsylvania\n29 Days To Go!\nHanna & Parker\n1.31.2026 • Pittsburgh, Pennsylvania\n29 Days To Go!\nHome\nOur Story\nPhotos\nWedding Party\nQ + A\nTravel\nRegistry\nRSVP\nMenu Button\nHome\nOur Story\nPhotos\nWedding Party\nQ + A\nTravel\nRegistry\nRSVP\nOur Story\nSeptember 29, 2019\nNovember 15, 2019\nJanuary 01, 2021\nAugust 24, 2021\nSeptember 04, 2021\nJuly 23, 2022\nSeptember 12, 2022\nOctober 23, 2022\nDecember 25, 2022\nApril 07, 2023\nApril 28, 2023\nJanuary 06, 2024\nAugust 24, 2024\n\n=== WEDDING-PARTY PAGE ===\nHanna Sommer and Parker Stewart\'s Wedding Website - The Knot\nThe Knot\nThe Knot\nThe Knot\nThe Knot\nThe Knot\nThe Bump\nXO Group\nThe Knot Worldwide\ncredit-card\ndeliver-time\narrow_down_2\narrow_left_2\narrow_right_2\narrow_up_2\ncamera_2\ncaret_down_2\ncaret_left_2\ncaret_right_2\ncaret_up_2\ncart_2\nchat_2\ndiscount_2\ndownload_2\nheart_2\nemail_2\nphone_2\nsearch_2\nHanna & Parker\n1.31.2026 • Pittsburgh, Pennsylvania\n29 Days To Go!\nHanna & Parker\n1.31.2026 • Pittsburgh, Pennsylvania\n29 Days To Go!\nHome\nOur Story\nPhotos\nWedding Party\nQ + A\nTravel\nRegistry\nRSVP\nMenu Button\nHome\nOur Story\nPhotos\nWedding Party\nQ + A\nTravel\nRegistry\nRSVP\nWedding Party\nBridesmaids\nMelinda "Mindy" Tommarello\n- Maid of Honor / Ride or Die\nSarah Demchak\n- Bridesmaid\nSara Frey\n- Bridesmaid\nJane Miller\n- Bridesmaid\nZoë Sommer\n- Bridesmaid\nSarah Thomas\n- Bridesmaid\nShayna Stewart\n- Bridesmaid\nGroomsmen\nMatthew Tommarello\n- Best Man\nTrevor Stewart\n- Groomsman\nJuin Sommer\n- Groomsman\nJoseph Cunningham\n- Groomsman\nMatthew "Kuhn" Kuhn\n- Groomsman\nAustin "Derb" Derbis\n- Groomsman\nJustin "Bird" Farwell\n- Groomsman\n\n=== REGISTRY PAGE ===\nHanna Sommer and Parker Stewart\'s Wedding Website - The Knot\nThe Knot\nThe Knot\nThe Knot\nThe Knot\nThe Knot\nThe Bump\nXO Group\nThe Knot Worldwide\ncredit-card\ndeliver-time\narrow_down_2\narrow_left_2\narrow_right_2\narrow_up_2\ncamera_2\ncaret_down_2\ncaret_left_2\ncaret_right_2\ncaret_up_2\ncart_2\nchat_2\ndiscount_2\ndownload_2\nheart_2\nemail_2\nphone_2\nsearch_2\nHanna & Parker\n1.31.2026 • Pittsburgh, Pennsylvania\n29 Days To Go!\nHanna & Parker\n1.31.2026 • Pittsburgh, Pennsylvania\n29 Days To Go!\nHome\nOur Story\nPhotos\nWedding Party\nQ + A\nTravel\nRegistry\nRSVP\nMenu Button\nHome\nOur Story\nPhotos\nWedding Party\nQ + A\nTravel\nRegistry\nRSVP\nRegistry\n\n=== RSVP PAGE ===\nHanna Sommer and Parker Stewart\'s Wedding Website - The Knot\nThe Knot\nThe Knot\nThe Knot\nThe Knot\nThe Knot\nThe Bump\nXO Group\nThe Knot Worldwide\ncredit-card\ndeliver-time\narrow_down_2\narrow_left_2\narrow_right_2\narrow_up_2\ncamera_2\ncaret_down_2\ncaret_left_2\ncaret_right_2\ncaret_up_2\ncart_2\nchat_2\ndiscount_2\ndownload_2\nheart_2\nemail_2\nphone_2\nsearch_2\nYou need to enable JavaScript to run this app.\nRSVP'}], 'model': 'claude-sonnet-4-20250514'}}
-2026-01-02T19:13:06.957392412Z 2026-01-02 19:13:06,956 - anthropic._base_client - DEBUG - Sending HTTP Request: POST https://api.anthropic.com/v1/messages
-2026-01-02T19:13:07.060112215Z 2026-01-02 19:13:07,059 - httpcore.connection - DEBUG - connect_tcp.started host='api.anthropic.com' port=443 local_address=None timeout=5.0 socket_options=[(1, 9, True), (6, 5, 60), (6, 6, 5), (6, 4, 60)]
-2026-01-02T19:13:07.257633874Z 2026-01-02 19:13:07,257 - httpcore.connection - DEBUG - connect_tcp.complete return_value=<httpcore._backends.anyio.AnyIOStream object at 0x70c1f0e32660>
-2026-01-02T19:13:07.257823848Z 2026-01-02 19:13:07,257 - httpcore.connection - DEBUG - start_tls.started ssl_context=<ssl.SSLContext object at 0x70c1f1dd39b0> server_hostname='api.anthropic.com' timeout=5.0
-2026-01-02T19:13:07.268065818Z 2026-01-02 19:13:07,267 - httpcore.connection - DEBUG - start_tls.complete return_value=<httpcore._backends.anyio.AnyIOStream object at 0x70c1f0e1df90>
-2026-01-02T19:13:07.268418686Z 2026-01-02 19:13:07,268 - httpcore.http11 - DEBUG - send_request_headers.started request=<Request [b'POST']>
-2026-01-02T19:13:07.268914146Z 2026-01-02 19:13:07,268 - httpcore.http11 - DEBUG - send_request_headers.complete
-2026-01-02T19:13:07.268950397Z 2026-01-02 19:13:07,268 - httpcore.http11 - DEBUG - send_request_body.started request=<Request [b'POST']>
-2026-01-02T19:13:07.269223293Z 2026-01-02 19:13:07,269 - httpcore.http11 - DEBUG - send_request_body.complete
-2026-01-02T19:13:07.355864496Z 2026-01-02 19:13:07,355 - httpcore.http11 - DEBUG - receive_response_headers.started request=<Request [b'POST']>
-2026-01-02T19:13:17.54995092Z 2026-01-02 19:13:17,549 - httpcore.http11 - DEBUG - receive_response_headers.complete return_value=(b'HTTP/1.1', 200, b'OK', [(b'Date', b'Fri, 02 Jan 2026 19:13:17 GMT'), (b'Content-Type', b'application/json'), (b'Transfer-Encoding', b'chunked'), (b'Connection', b'keep-alive'), (b'anthropic-ratelimit-input-tokens-limit', b'30000'), (b'anthropic-ratelimit-input-tokens-remaining', b'28000'), (b'anthropic-ratelimit-input-tokens-reset', b'2026-01-02T19:13:12Z'), (b'anthropic-ratelimit-output-tokens-limit', b'8000'), (b'anthropic-ratelimit-output-tokens-remaining', b'7000'), (b'anthropic-ratelimit-output-tokens-reset', b'2026-01-02T19:13:24Z'), (b'anthropic-ratelimit-requests-limit', b'50'), (b'anthropic-ratelimit-requests-remaining', b'49'), (b'anthropic-ratelimit-requests-reset', b'2026-01-02T19:13:08Z'), (b'anthropic-ratelimit-tokens-limit', b'38000'), (b'anthropic-ratelimit-tokens-remaining', b'35000'), (b'anthropic-ratelimit-tokens-reset', b'2026-01-02T19:13:12Z'), (b'request-id', b'req_011CWj5oA32A3jjbU7YpKFCY'), (b'strict-transport-security', b'max-age=31536000; includeSubDomains; preload'), (b'anthropic-organization-id', b'e832d9b8-9193-4c08-83d0-9ade84d6cbbe'), (b'Server', b'cloudflare'), (b'x-envoy-upstream-service-time', b'10174'), (b'cf-cache-status', b'DYNAMIC'), (b'X-Robots-Tag', b'none'), (b'Content-Encoding', b'gzip'), (b'CF-RAY', b'9b7c92647f54ff19-PDX')])
-2026-01-02T19:13:17.550900001Z 2026-01-02 19:13:17,550 - httpx - INFO - HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 200 OK"
-2026-01-02T19:13:17.551119106Z 2026-01-02 19:13:17,551 - httpcore.http11 - DEBUG - receive_response_body.started request=<Request [b'POST']>
-2026-01-02T19:13:17.551513505Z 2026-01-02 19:13:17,551 - httpcore.http11 - DEBUG - receive_response_body.complete
-2026-01-02T19:13:17.551628058Z 2026-01-02 19:13:17,551 - httpcore.http11 - DEBUG - response_closed.started
-2026-01-02T19:13:17.55175628Z 2026-01-02 19:13:17,551 - httpcore.http11 - DEBUG - response_closed.complete
-2026-01-02T19:13:17.552034276Z 2026-01-02 19:13:17,551 - anthropic._base_client - DEBUG - HTTP Response: POST https://api.anthropic.com/v1/messages "200 OK" Headers({'date': 'Fri, 02 Jan 2026 19:13:17 GMT', 'content-type': 'application/json', 'transfer-encoding': 'chunked', 'connection': 'keep-alive', 'anthropic-ratelimit-input-tokens-limit': '30000', 'anthropic-ratelimit-input-tokens-remaining': '28000', 'anthropic-ratelimit-input-tokens-reset': '2026-01-02T19:13:12Z', 'anthropic-ratelimit-output-tokens-limit': '8000', 'anthropic-ratelimit-output-tokens-remaining': '7000', 'anthropic-ratelimit-output-tokens-reset': '2026-01-02T19:13:24Z', 'anthropic-ratelimit-requests-limit': '50', 'anthropic-ratelimit-requests-remaining': '49', 'anthropic-ratelimit-requests-reset': '2026-01-02T19:13:08Z', 'anthropic-ratelimit-tokens-limit': '38000', 'anthropic-ratelimit-tokens-remaining': '35000', 'anthropic-ratelimit-tokens-reset': '2026-01-02T19:13:12Z', 'request-id': 'req_011CWj5oA32A3jjbU7YpKFCY', 'strict-transport-security': 'max-age=31536000; includeSubDomains; preload', 'anthropic-organization-id': 'e832d9b8-9193-4c08-83d0-9ade84d6cbbe', 'server': 'cloudflare', 'x-envoy-upstream-service-time': '10174', 'cf-cache-status': 'DYNAMIC', 'x-robots-tag': 'none', 'content-encoding': 'gzip', 'cf-ray': '9b7c92647f54ff19-PDX'})
-2026-01-02T19:13:17.552094088Z 2026-01-02 19:13:17,552 - anthropic._base_client - DEBUG - request_id: req_011CWj5oA32A3jjbU7YpKFCY
-2026-01-02T19:13:17.572942455Z 2026-01-02 19:13:17,572 - services.scraper.data_mapper - INFO - Claude extracted: 1 accommodations
-2026-01-02T19:13:17.573437916Z 2026-01-02 19:13:17,572 - services.scraper.data_mapper - INFO - Accommodations: [{'hotel_name': 'Courtyard Pittsburgh University Center', 'address': '100 Lytton Ave, Pittsburgh, PA 15213, USA', 'phone': '(412) 682-6200', 'booking_url': None, 'has_room_block': True, 'room_block_name': None, 'room_block_code': None, 'room_block_rate': 'discounted room rate', 'room_block_deadline': '2025-12-30', 'notes': 'Check in time is between 2:00 PM to 4:00 PM depending on when room is available. Parking is $29/night. Check-In: Friday, January 30, 2026. Check-Out: Sunday, February 1, 2026.'}]
-2026-01-02T19:13:18.566261658Z 2026-01-02 19:13:18,566 - services.scraper.browser_fetch - INFO - Stealth browser closed
-2026-01-02T19:13:18.56680894Z INFO:     71.191.62.74:0 - "POST /api/scrape/ HTTP/1.1" 200 OK
-2026-01-02T19:14:11.864786114Z 2026-01-02 19:14:11,863 - apscheduler.scheduler - DEBUG - Looking for jobs to run
-2026-01-02T19:14:11.865567381Z 2026-01-02 19:14:11,863 - apscheduler.scheduler - DEBUG - Next wakeup is due at 2026-01-02 19:19:11.863452+00:00 (in 299.999767 seconds)
-2026-01-02T19:14:11.865576062Z 2026-01-02 19:14:11,863 - apscheduler.executors.default - INFO - Running job "process_fixed_schedules (trigger: interval[0:05:00], next run at: 2026-01-02 19:19:11 UTC)" (scheduled at 2026-01-02 19:14:11.863452+00:00)
-2026-01-02T19:14:11.865580662Z 2026-01-02 19:14:11,864 - services.sms.jobs - INFO - Running process_fixed_schedules job
-2026-01-02T19:14:11.882060901Z 2026-01-02 19:14:11,881 - apscheduler.executors.default - INFO - Job "process_fixed_schedules (trigger: interval[0:05:00], next run at: 2026-01-02 19:19:11 UTC)" executed successfully
-2026-01-02T19:14:18.23504004Z ==> Detected service running on port 10000
-2026-01-02T19:14:18.332935684Z ==> Docs on specifying a port: https://render.com/docs/web-services#port-binding
-2026-01-02T19:17:23.330268488Z INFO:     67.164.226.16:0 - "OPTIONS /api/auth/me HTTP/1.1" 200 OK
-2026-01-02T19:17:23.486460946Z INFO:     67.164.226.16:0 - "GET /api/auth/me HTTP/1.1" 200 OK
-2026-01-02T19:17:23.658332927Z INFO:     67.164.226.16:0 - "OPTIONS /api/wedding/me HTTP/1.1" 200 OK
-2026-01-02T19:17:23.83520539Z INFO:     67.164.226.16:0 - "GET /api/wedding/me HTTP/1.1" 200 OK
-2026-01-02T19:17:29.326454387Z INFO:     67.164.226.16:0 - "OPTIONS /api/scrape HTTP/1.1" 200 OK
-2026-01-02T19:17:29.432589791Z INFO:     67.164.226.16:0 - "POST /api/scrape HTTP/1.1" 307 Temporary Redirect
-2026-01-02T19:17:29.512450245Z INFO:     67.164.226.16:0 - "OPTIONS /api/scrape/ HTTP/1.1" 200 OK
-2026-01-02T19:17:29.85953873Z 2026-01-02 19:17:29,859 - services.scraper.scraper - INFO - Scraping https://www.theknot.com/us/hanna-sommer-and-parker-stewart-jan-2026 (platform: the_knot)
-2026-01-02T19:17:29.859557011Z 2026-01-02 19:17:29,859 - services.scraper.scraper - INFO - Using browser for https://www.theknot.com/us/hanna-sommer-and-parker-stewart-jan-2026 (known to require it)
-2026-01-02T19:17:29.859673313Z 2026-01-02 19:17:29,859 - services.scraper.browser_fetch - INFO - Starting stealth browser...
-2026-01-02T19:17:35.659479802Z 2026-01-02 19:17:35,659 - services.scraper.browser_fetch - INFO - Stealth browser started with viewport 1418x1022
-2026-01-02T19:17:36.460527465Z 2026-01-02 19:17:36,460 - services.scraper.browser_fetch - INFO - Fetching with stealth browser: https://www.theknot.com/us/hanna-sommer-and-parker-stewart-jan-2026
-2026-01-02T19:17:46.164283452Z 2026-01-02 19:17:46,164 - services.scraper.browser_fetch - INFO - Browser fetch status: 200
-2026-01-02T19:17:54.656084998Z 2026-01-02 19:17:54,655 - services.scraper.browser_fetch - INFO - Browser fetch successful: 544388 chars
-2026-01-02T19:17:56.657993516Z 2026-01-02 19:17:56,657 - services.scraper.scraper - INFO - Will scrape 6 subpages: ['https://www.theknot.com/us/hanna-sommer-and-parker-stewart-jan-2026/our-story', 'https://www.theknot.com/us/hanna-sommer-and-parker-stewart-jan-2026/wedding-party', 'https://www.theknot.com/us/hanna-sommer-and-parker-stewart-jan-2026/q-a', 'https://www.theknot.com/us/hanna-sommer-and-parker-stewart-jan-2026/travel', 'https://www.theknot.com/us/hanna-sommer-and-parker-stewart-jan-2026/registry', 'https://www.theknot.com/us/hanna-sommer-and-parker-stewart-jan-2026/rsvp']
-2026-01-02T19:17:56.658012896Z 2026-01-02 19:17:56,657 - services.scraper.scraper - INFO - Fetching batch 1: 3 pages
-2026-01-02T19:17:56.659617112Z 2026-01-02 19:17:56,658 - services.scraper.scraper - INFO - Fetching subpage: https://www.theknot.com/us/hanna-sommer-and-parker-stewart-jan-2026/our-story (wait=2.0s)
-2026-01-02T19:17:56.659813637Z 2026-01-02 19:17:56,659 - services.scraper.scraper - INFO - Using browser for https://www.theknot.com/us/hanna-sommer-and-parker-stewart-jan-2026/our-story (known to require it)
-2026-01-02T19:17:56.661143036Z 2026-01-02 19:17:56,660 - services.scraper.scraper - INFO - Fetching subpage: https://www.theknot.com/us/hanna-sommer-and-parker-stewart-jan-2026/wedding-party (wait=2.0s)
-2026-01-02T19:17:56.661201848Z 2026-01-02 19:17:56,660 - services.scraper.scraper - INFO - Using browser for https://www.theknot.com/us/hanna-sommer-and-parker-stewart-jan-2026/wedding-party (known to require it)
-2026-01-02T19:17:56.661864973Z 2026-01-02 19:17:56,661 - services.scraper.scraper - INFO - Fetching subpage: https://www.theknot.com/us/hanna-sommer-and-parker-stewart-jan-2026/q-a (wait=2.0s)
-2026-01-02T19:17:56.662334313Z 2026-01-02 19:17:56,661 - services.scraper.scraper - INFO - Using browser for https://www.theknot.com/us/hanna-sommer-and-parker-stewart-jan-2026/q-a (known to require it)
-2026-01-02T19:18:00.156669495Z 2026-01-02 19:18:00,156 - services.scraper.browser_fetch - INFO - Fetching with stealth browser: https://www.theknot.com/us/hanna-sommer-and-parker-stewart-jan-2026/q-a
-2026-01-02T19:18:00.182050775Z 2026-01-02 19:18:00,181 - services.scraper.browser_fetch - INFO - Fetching with stealth browser: https://www.theknot.com/us/hanna-sommer-and-parker-stewart-jan-2026/wedding-party
-2026-01-02T19:18:00.257191939Z 2026-01-02 19:18:00,256 - services.scraper.browser_fetch - INFO - Fetching with stealth browser: https://www.theknot.com/us/hanna-sommer-and-parker-stewart-jan-2026/our-story
-2026-01-02T19:18:24.657222125Z 2026-01-02 19:18:24,657 - services.scraper.browser_fetch - INFO - Browser fetch status: 200
-2026-01-02T19:18:24.657444339Z 2026-01-02 19:18:24,657 - services.scraper.browser_fetch - INFO - Browser fetch status: 200
-2026-01-02T19:18:25.056554559Z 2026-01-02 19:18:25,056 - services.scraper.browser_fetch - INFO - Browser fetch status: 200
-2026-01-02T19:19:11.864466192Z 2026-01-02 19:19:11,864 - apscheduler.scheduler - DEBUG - Looking for jobs to run
-2026-01-02T19:19:11.865038805Z 2026-01-02 19:19:11,864 - apscheduler.scheduler - DEBUG - Next wakeup is due at 2026-01-02 19:24:11.863452+00:00 (in 299.998550 seconds)
-2026-01-02T19:19:11.866652591Z 2026-01-02 19:19:11,866 - apscheduler.executors.default - INFO - Running job "process_fixed_schedules (trigger: interval[0:05:00], next run at: 2026-01-02 19:24:11 UTC)" (scheduled at 2026-01-02 19:19:11.863452+00:00)
-2026-01-02T19:19:11.956902585Z 2026-01-02 19:19:11,956 - services.sms.jobs - INFO - Running process_fixed_schedules job
-2026-01-02T19:19:12.0583584Z 2026-01-02 19:19:12,058 - apscheduler.executors.default - INFO - Job "process_fixed_schedules (trigger: interval[0:05:00], next run at: 2026-01-02 19:24:11 UTC)" executed successfully
-2026-01-02T19:19:16.657998189Z 2026-01-02 19:19:16,657 - services.scraper.browser_fetch - INFO - Browser fetch successful: 555465 chars
-2026-01-02T19:19:27.359431948Z 2026-01-02 19:19:27,359 - services.scraper.scraper - INFO - Successfully scraped subpage: wedding-party (1075 chars)
-2026-01-02T19:19:27.95617789Z 2026-01-02 19:19:27,955 - services.scraper.browser_fetch - INFO - Browser fetch successful: 515523 chars
-2026-01-02T19:19:28.966094218Z 2026-01-02 19:19:28,965 - services.scraper.browser_fetch - INFO - Browser fetch successful: 537534 chars
-2026-01-02T19:19:33.363867193Z 2026-01-02 19:19:33,363 - services.scraper.scraper - INFO - Successfully scraped subpage: q-a (473 chars)
-2026-01-02T19:19:38.26377132Z 2026-01-02 19:19:38,263 - services.scraper.scraper - INFO - Successfully scraped subpage: our-story (849 chars)
-2026-01-02T19:19:38.362387902Z 2026-01-02 19:19:38,362 - services.scraper.scraper - INFO - Fetching batch 2: 3 pages
-2026-01-02T19:19:38.362664208Z 2026-01-02 19:19:38,362 - services.scraper.scraper - INFO - Fetching subpage: https://www.theknot.com/us/hanna-sommer-and-parker-stewart-jan-2026/travel (wait=3.0s)
-2026-01-02T19:19:38.362681558Z 2026-01-02 19:19:38,362 - services.scraper.scraper - INFO - Using browser for https://www.theknot.com/us/hanna-sommer-and-parker-stewart-jan-2026/travel (known to require it)
-2026-01-02T19:19:38.363957907Z 2026-01-02 19:19:38,363 - services.scraper.scraper - INFO - Fetching subpage: https://www.theknot.com/us/hanna-sommer-and-parker-stewart-jan-2026/registry (wait=2.0s)
-2026-01-02T19:19:38.363984787Z 2026-01-02 19:19:38,363 - services.scraper.scraper - INFO - Using browser for https://www.theknot.com/us/hanna-sommer-and-parker-stewart-jan-2026/registry (known to require it)
-2026-01-02T19:19:38.365018151Z 2026-01-02 19:19:38,364 - services.scraper.scraper - INFO - Fetching subpage: https://www.theknot.com/us/hanna-sommer-and-parker-stewart-jan-2026/rsvp (wait=2.0s)
-2026-01-02T19:19:38.365034521Z 2026-01-02 19:19:38,364 - services.scraper.scraper - INFO - Using browser for https://www.theknot.com/us/hanna-sommer-and-parker-stewart-jan-2026/rsvp (known to require it)
-2026-01-02T19:19:47.457849791Z 2026-01-02 19:19:47,457 - services.scraper.browser_fetch - INFO - Fetching with stealth browser: https://www.theknot.com/us/hanna-sommer-and-parker-stewart-jan-2026/travel
-2026-01-02T19:19:47.458859974Z 2026-01-02 19:19:47,458 - services.scraper.browser_fetch - INFO - Fetching with stealth browser: https://www.theknot.com/us/hanna-sommer-and-parker-stewart-jan-2026/rsvp
-2026-01-02T19:19:47.459942348Z 2026-01-02 19:19:47,459 - services.scraper.browser_fetch - INFO - Fetching with stealth browser: https://www.theknot.com/us/hanna-sommer-and-parker-stewart-jan-2026/registry
-2026-01-02T19:20:07.856933984Z 2026-01-02 19:20:07,856 - services.scraper.browser_fetch - INFO - Browser fetch status: 200
-2026-01-02T19:20:07.857028846Z 2026-01-02 19:20:07,856 - services.scraper.browser_fetch - INFO - Browser fetch status: 200
-2026-01-02T19:20:10.860898845Z 2026-01-02 19:20:10,857 - services.scraper.browser_fetch - INFO - Travel page detected - waiting for hotel content to load
-2026-01-02T19:20:12.457520464Z 2026-01-02 19:20:12,457 - services.scraper.browser_fetch - INFO - Browser fetch status: 200
-2026-01-02T19:20:48.574340842Z 2026-01-02 19:20:48,574 - services.scraper.browser_fetch - INFO - Browser fetch successful: 473302 chars
-2026-01-02T19:20:54.65966421Z 2026-01-02 19:20:54,659 - services.scraper.scraper - INFO - Successfully scraped subpage: rsvp (399 chars)
-2026-01-02T19:20:58.360928227Z 2026-01-02 19:20:58,360 - services.scraper.browser_fetch - INFO - Browser fetch successful: 518940 chars
-2026-01-02T19:21:03.668967593Z 2026-01-02 19:21:03,668 - services.scraper.scraper - INFO - Found phone number in section
-2026-01-02T19:21:03.668996403Z 2026-01-02 19:21:03,668 - services.scraper.scraper - INFO - Found address pattern in section
-2026-01-02T19:21:03.669025194Z 2026-01-02 19:21:03,668 - services.scraper.scraper - INFO - Found check-in/check-out in section
-2026-01-02T19:21:03.669125017Z 2026-01-02 19:21:03,669 - services.scraper.scraper - INFO - New best travel section: score=25, length=1184
-2026-01-02T19:21:03.669224749Z 2026-01-02 19:21:03,669 - services.scraper.scraper - INFO - Found phone number in section
-2026-01-02T19:21:03.669247709Z 2026-01-02 19:21:03,669 - services.scraper.scraper - INFO - Found address pattern in section
-2026-01-02T19:21:03.6692994Z 2026-01-02 19:21:03,669 - services.scraper.scraper - INFO - Found check-in/check-out in section
-2026-01-02T19:21:03.669412893Z 2026-01-02 19:21:03,669 - services.scraper.scraper - INFO - Found phone number in section
-2026-01-02T19:21:03.669424893Z 2026-01-02 19:21:03,669 - services.scraper.scraper - INFO - Found address pattern in section
-2026-01-02T19:21:03.669484094Z 2026-01-02 19:21:03,669 - services.scraper.scraper - INFO - Found check-in/check-out in section
-2026-01-02T19:21:03.669579647Z 2026-01-02 19:21:03,669 - services.scraper.scraper - INFO - Found phone number in section
-2026-01-02T19:21:03.669596747Z 2026-01-02 19:21:03,669 - services.scraper.scraper - INFO - Found address pattern in section
-2026-01-02T19:21:03.669641248Z 2026-01-02 19:21:03,669 - services.scraper.scraper - INFO - Found check-in/check-out in section
-2026-01-02T19:21:03.756144438Z 2026-01-02 19:21:03,755 - services.scraper.scraper - INFO - Found phone number in section
-2026-01-02T19:21:03.781715502Z 2026-01-02 19:21:03,756 - services.scraper.scraper - INFO - Found address pattern in section
-2026-01-02T19:21:03.781727942Z 2026-01-02 19:21:03,756 - services.scraper.scraper - INFO - Found check-in/check-out in section
-2026-01-02T19:21:03.781795934Z 2026-01-02 19:21:03,756 - services.scraper.scraper - INFO - Found phone number in section
-2026-01-02T19:21:03.781815144Z 2026-01-02 19:21:03,756 - services.scraper.scraper - INFO - Found address pattern in section
-2026-01-02T19:21:03.781819204Z 2026-01-02 19:21:03,756 - services.scraper.scraper - INFO - Found check-in/check-out in section
-2026-01-02T19:21:03.781834054Z 2026-01-02 19:21:03,756 - services.scraper.scraper - INFO - Found phone number in section
-2026-01-02T19:21:03.781838094Z 2026-01-02 19:21:03,756 - services.scraper.scraper - INFO - Found address pattern in section
-2026-01-02T19:21:03.781841925Z 2026-01-02 19:21:03,756 - services.scraper.scraper - INFO - Found check-in/check-out in section
-2026-01-02T19:21:03.781846375Z 2026-01-02 19:21:03,756 - services.scraper.scraper - INFO - New best travel section: score=26, length=419
-2026-01-02T19:21:03.781850195Z 2026-01-02 19:21:03,756 - services.scraper.scraper - INFO - Found phone number in section
-2026-01-02T19:21:03.781853625Z 2026-01-02 19:21:03,756 - services.scraper.scraper - INFO - Found address pattern in section
-2026-01-02T19:21:03.781857105Z 2026-01-02 19:21:03,756 - services.scraper.scraper - INFO - Found address pattern in section
-2026-01-02T19:21:03.781860155Z 2026-01-02 19:21:03,756 - services.scraper.scraper - INFO - Found phone number in section
-2026-01-02T19:21:03.781863125Z 2026-01-02 19:21:03,756 - services.scraper.scraper - INFO - Found check-in/check-out in section
-2026-01-02T19:21:03.781866595Z 2026-01-02 19:21:03,756 - services.scraper.scraper - INFO - Found phone number in section
-2026-01-02T19:21:03.781870025Z 2026-01-02 19:21:03,756 - services.scraper.scraper - INFO - Found address pattern in section
-2026-01-02T19:21:03.781873035Z 2026-01-02 19:21:03,756 - services.scraper.scraper - INFO - Found check-in/check-out in section
-2026-01-02T19:21:03.781876115Z 2026-01-02 19:21:03,756 - services.scraper.scraper - INFO - New best travel section: score=27, length=485
-2026-01-02T19:21:03.781879106Z 2026-01-02 19:21:03,757 - services.scraper.scraper - INFO - Found phone number in section
-2026-01-02T19:21:03.781881995Z 2026-01-02 19:21:03,757 - services.scraper.scraper - INFO - Found address pattern in section
-2026-01-02T19:21:03.781884876Z 2026-01-02 19:21:03,757 - services.scraper.scraper - INFO - Found address pattern in section
-2026-01-02T19:21:03.781887836Z 2026-01-02 19:21:03,757 - services.scraper.scraper - INFO - Found phone number in section
-2026-01-02T19:21:03.781890766Z 2026-01-02 19:21:03,757 - services.scraper.scraper - INFO - Found check-in/check-out in section
-2026-01-02T19:21:03.781893696Z 2026-01-02 19:21:03,757 - services.scraper.scraper - INFO - Using travel section with score 27
-2026-01-02T19:21:03.781896556Z 2026-01-02 19:21:03,757 - services.scraper.scraper - INFO - Successfully scraped subpage: travel (483 chars)
-2026-01-02T19:21:13.9632436Z 2026-01-02 19:21:13,963 - services.scraper.browser_fetch - INFO - Browser fetch successful: 512600 chars
-2026-01-02T19:21:18.559531435Z 2026-01-02 19:21:18,559 - services.scraper.scraper - INFO - Successfully scraped subpage: registry (628 chars)
-2026-01-02T19:21:18.559656948Z 2026-01-02 19:21:18,559 - services.scraper.scraper - INFO - Subpage content keys: ['our-story', 'wedding-party', 'q-a', 'travel', 'registry', 'rsvp']
-2026-01-02T19:21:18.559705779Z 2026-01-02 19:21:18,559 - services.scraper.scraper - INFO - Subpage 'our-story' preview: Hanna Sommer and Parker Stewart's Wedding Website - The Knot The Knot The Knot The Knot The Knot The Knot The Bump XO Group The Knot Worldwide credit-...
-2026-01-02T19:21:18.559775591Z 2026-01-02 19:21:18,559 - services.scraper.scraper - INFO - Subpage 'wedding-party' preview: Hanna Sommer and Parker Stewart's Wedding Website - The Knot The Knot The Knot The Knot The Knot The Knot The Bump XO Group The Knot Worldwide credit-...
-2026-01-02T19:21:18.559847662Z 2026-01-02 19:21:18,559 - services.scraper.scraper - INFO - Subpage 'q-a' preview: Am I allowed to bring a plus-one? We are not allowing additional plus-ones to our wedding, as we'd like to keep the guests list just to those who know...
-2026-01-02T19:21:18.559899213Z 2026-01-02 19:21:18,559 - services.scraper.scraper - INFO - Subpage 'travel' preview: Courtyard Pittsburgh University Center 100 Lytton Ave, Pittsburgh, PA 15213, USA (412) 682-6200 Check-In: Friday, January 30, 2026 Check-Out: Sunday, ...
-2026-01-02T19:21:18.559912914Z 2026-01-02 19:21:18,559 - services.scraper.scraper - INFO - Subpage 'registry' preview: Hanna Sommer and Parker Stewart's Wedding Website - The Knot The Knot The Knot The Knot The Knot The Knot The Bump XO Group The Knot Worldwide credit-...
-2026-01-02T19:21:18.559940494Z 2026-01-02 19:21:18,559 - services.scraper.scraper - INFO - Subpage 'rsvp' preview: Hanna Sommer and Parker Stewart's Wedding Website - The Knot The Knot The Knot The Knot The Knot The Knot The Bump XO Group The Knot Worldwide credit-...
-2026-01-02T19:21:18.669227456Z 2026-01-02 19:21:18,669 - services.scraper.scraper - INFO - full_text total length: 5242 chars
-2026-01-02T19:21:18.669246846Z 2026-01-02 19:21:18,669 - services.scraper.scraper - INFO - Contains TRAVEL marker: True
-2026-01-02T19:21:18.670045474Z 2026-01-02 19:21:18,669 - services.scraper.scraper - INFO - Travel content preview: === TRAVEL PAGE ===
-2026-01-02T19:21:18.670054624Z Courtyard Pittsburgh University Center
-2026-01-02T19:21:18.670056774Z 100 Lytton Ave, Pittsburgh, PA 15213, USA
-2026-01-02T19:21:18.670058594Z (412) 682-6200
-2026-01-02T19:21:18.670061005Z Check-In:
-2026-01-02T19:21:18.670064754Z Friday, January 30, 2026
-2026-01-02T19:21:18.670068055Z Check-Out:
-2026-01-02T19:21:18.670070885Z Sunday, February 1, 2026
-2026-01-02T19:21:18.670073935Z Use the link below for booking a room at the Courtyard University Center! Notes about this hotel:
-2026-01-02T19:21:18.670076725Z -Book before 12
-2026-01-02T19:21:18.670080415Z 2026-01-02 19:21:18,669 - services.scraper.data_mapper - INFO - Initializing Claude client with API key: sk-ant-api03-GTsaIEA...
-2026-01-02T19:21:18.970315359Z 2026-01-02 19:21:18,970 - services.scraper.data_mapper - INFO - Text to Claude: 5242 chars
-2026-01-02T19:21:18.970427011Z 2026-01-02 19:21:18,970 - services.scraper.data_mapper - INFO - Contains 'hotel': True
-2026-01-02T19:21:18.970432671Z 2026-01-02 19:21:18,970 - services.scraper.data_mapper - INFO - Contains 'travel': True
-2026-01-02T19:21:18.970502473Z 2026-01-02 19:21:18,970 - services.scraper.data_mapper - INFO - Contains 'accommod': True
-2026-01-02T19:21:18.985861168Z 2026-01-02 19:21:18,984 - anthropic._base_client - DEBUG - Request options: {'method': 'post', 'url': '/v1/messages', 'timeout': Timeout(connect=5.0, read=600, write=600, pool=600), 'files': None, 'idempotency_key': 'stainless-python-retry-16120719-2857-4638-b585-548e135adbb1', 'json_data': {'max_tokens': 2000, 'messages': [{'role': 'user', 'content': 'Extract structured wedding information from this wedding website content.\n\nCRITICAL: Look carefully for hotel/accommodation information. It typically appears:\n- In sections marked "=== TRAVEL PAGE ===" or similar\n- Near keywords like "where to stay", "hotel", "room block", "accommodations", "lodging"\n- With booking codes, special rates, group names, or reservation links\n\nReturn a JSON object with the following fields (use null for missing data):\n\n{\n    "partner1_name": "First partner\'s full name",\n    "partner2_name": "Second partner\'s full name",\n    "wedding_date": "YYYY-MM-DD format or null",\n    "wedding_time": "HH:MM AM/PM format or null",\n    "dress_code": "Dress code description or null",\n    "ceremony_venue_name": "Ceremony venue name or null",\n    "ceremony_venue_address": "Full address or null",\n    "reception_venue_name": "Reception venue name (if different from ceremony) or null",\n    "reception_venue_address": "Full address or null",\n    "reception_time": "HH:MM AM/PM format or null",\n    "events": [\n        {\n            "event_name": "e.g. Rehearsal Dinner, Welcome Party",\n            "event_date": "YYYY-MM-DD or null",\n            "event_time": "HH:MM AM/PM or null",\n            "venue_name": "venue name or null",\n            "venue_address": "address or null",\n            "description": "description or null",\n            "dress_code": "dress code or null"\n        }\n    ],\n    "accommodations": [\n        {\n            "hotel_name": "Hotel name (e.g. Marriott, Hilton, Hampton Inn)",\n            "address": "Full address or null",\n            "phone": "Phone number or null",\n            "booking_url": "Booking URL or null",\n            "has_room_block": true/false,\n            "room_block_name": "Block name (e.g. \'Smith-Jones Wedding\') or null",\n            "room_block_code": "Booking code or null",\n            "room_block_rate": "Rate description (e.g. \'$159/night\') or null",\n            "room_block_deadline": "Deadline date or null",\n            "notes": "Additional notes like amenities, distance to venue, shuttle info, etc."\n        }\n    ],\n    "faqs": [\n        {\n            "question": "Question text",\n            "answer": "Answer text",\n            "category": "Category like Travel, Attire, etc. or null"\n        }\n    ],\n    "additional_notes": "Any other important info or null"\n}\n\nEXTRACTION PRIORITIES:\n1. Partner names - usually in format "Name1 & Name2" or "Name1 and Name2"\n2. HOTELS/ACCOMMODATIONS - Look in TRAVEL PAGE sections for hotel names, addresses, room block codes, rates\n3. Events - rehearsal dinner, welcome party, ceremony, reception, brunch\n4. Q&A or FAQ sections\n\nReturn ONLY valid JSON, no explanation.\n\nWebsite content:\nHanna Sommer and Parker Stewart\'s Wedding Website - The Knot\nHanna & Parker\n1.31.2026 • Pittsburgh, Pennsylvania\n29 Days To Go!\nHanna & Parker\n1.31.2026 • Pittsburgh, Pennsylvania\n29 Days To Go!\nHome\nOur Story\nPhotos\nWedding Party\nQ + A\nTravel\nRegistry\nRSVP\nMenu Button\nHome\nOur Story\nPhotos\nWedding Party\nQ + A\nTravel\nRegistry\nRSVP\nH&P\nJanuary 31, 2026\nPittsburgh\nPennsylvania\nRSVP\nWedding Day\n1.31.2026\n3:00 PM–10:00 PM\nPittsburgh, PA, 15213\nAttire:\nFormal\n3:00 PM\n–3:45 PM\nCeremony\nHeinz Memorial Chapel\nSouth Bellefield Avenue, Pittsburgh, PA, 15213, United States\nAttire:\nFormal\n4:00 PM\n–11:00 PM\nReception\nSoldiers & Sailors Memorial Hall & Museum\n4141 Fifth Ave, Pittsburgh, PA, 15213\nAttire:\nFormal\nCocktail Hour: 4 pm - 5 pm\nReception: 5 pm - 10 pm\nHome\nOur Story\nPhotos\nWedding Party\nQ + A\nTravel\nRegistry\nRSVP\nH&P\n1.31.2026\nCreated on The Knot\nGetting married?\nCreate your wedding website for free.\ncredit-card\ndeliver-time\narrow_down_2\narrow_left_2\narrow_right_2\narrow_up_2\ncamera_2\ncaret_down_2\ncaret_left_2\ncaret_right_2\ncaret_up_2\ncart_2\nchat_2\ndiscount_2\ndownload_2\nheart_2\nemail_2\nphone_2\nsearch_2\nThe Knot\nThe Knot\nThe Knot\nThe Knot\nThe Knot\nThe Bump\nXO Group\nThe Knot Worldwide\n\n=== TRAVEL PAGE ===\nCourtyard Pittsburgh University Center\n100 Lytton Ave, Pittsburgh, PA 15213, USA\n(412) 682-6200\nCheck-In:\nFriday, January 30, 2026\nCheck-Out:\nSunday, February 1, 2026\nUse the link below for booking a room at the Courtyard University Center! Notes about this hotel:\n-Book before 12/30/2025 for discounted room rate\n-Check in time is between 2:00 PM to 4:00 PM depending on when room is available\n-Parking is $29/night\nPlease let Hanna or Parker know if you have any questions!\nWebsite\n\n=== Q-A PAGE ===\nAm I allowed to bring a plus-one?\nWe are not allowing additional plus-ones to our wedding, as we\'d like to keep the guests list just to those who know us well (unless you were given a plus-one on your invitation already). We hope you understand!\nAm I allowed to bring my children?\nUnfortunately, we will only be able to accommodate the children of our immediate family. WE APOLOGIZE FOR THE INCONVENIENCE!\nWhere should I park?\nParker, I hardly know her.\n(info to come soon)\n\n=== OUR-STORY PAGE ===\nHanna Sommer and Parker Stewart\'s Wedding Website - The Knot\nThe Knot\nThe Knot\nThe Knot\nThe Knot\nThe Knot\nThe Bump\nXO Group\nThe Knot Worldwide\ncredit-card\ndeliver-time\narrow_down_2\narrow_left_2\narrow_right_2\narrow_up_2\ncamera_2\ncaret_down_2\ncaret_left_2\ncaret_right_2\ncaret_up_2\ncart_2\nchat_2\ndiscount_2\ndownload_2\nheart_2\nemail_2\nphone_2\nsearch_2\nHanna & Parker\n1.31.2026 • Pittsburgh, Pennsylvania\n29 Days To Go!\nHanna & Parker\n1.31.2026 • Pittsburgh, Pennsylvania\n29 Days To Go!\nHome\nOur Story\nPhotos\nWedding Party\nQ + A\nTravel\nRegistry\nRSVP\nMenu Button\nHome\nOur Story\nPhotos\nWedding Party\nQ + A\nTravel\nRegistry\nRSVP\nOur Story\nSeptember 29, 2019\nNovember 15, 2019\nJanuary 01, 2021\nAugust 24, 2021\nSeptember 04, 2021\nJuly 23, 2022\nSeptember 12, 2022\nOctober 23, 2022\nDecember 25, 2022\nApril 07, 2023\nApril 28, 2023\nJanuary 06, 2024\nAugust 24, 2024\n\n=== WEDDING-PARTY PAGE ===\nHanna Sommer and Parker Stewart\'s Wedding Website - The Knot\nThe Knot\nThe Knot\nThe Knot\nThe Knot\nThe Knot\nThe Bump\nXO Group\nThe Knot Worldwide\ncredit-card\ndeliver-time\narrow_down_2\narrow_left_2\narrow_right_2\narrow_up_2\ncamera_2\ncaret_down_2\ncaret_left_2\ncaret_right_2\ncaret_up_2\ncart_2\nchat_2\ndiscount_2\ndownload_2\nheart_2\nemail_2\nphone_2\nsearch_2\nHanna & Parker\n1.31.2026 • Pittsburgh, Pennsylvania\n29 Days To Go!\nHanna & Parker\n1.31.2026 • Pittsburgh, Pennsylvania\n29 Days To Go!\nHome\nOur Story\nPhotos\nWedding Party\nQ + A\nTravel\nRegistry\nRSVP\nMenu Button\nHome\nOur Story\nPhotos\nWedding Party\nQ + A\nTravel\nRegistry\nRSVP\nWedding Party\nBridesmaids\nMelinda "Mindy" Tommarello\n- Maid of Honor / Ride or Die\nSarah Demchak\n- Bridesmaid\nSara Frey\n- Bridesmaid\nJane Miller\n- Bridesmaid\nZoë Sommer\n- Bridesmaid\nSarah Thomas\n- Bridesmaid\nShayna Stewart\n- Bridesmaid\nGroomsmen\nMatthew Tommarello\n- Best Man\nTrevor Stewart\n- Groomsman\nJuin Sommer\n- Groomsman\nJoseph Cunningham\n- Groomsman\nMatthew "Kuhn" Kuhn\n- Groomsman\nAustin "Derb" Derbis\n- Groomsman\nJustin "Bird" Farwell\n- Groomsman\n\n=== REGISTRY PAGE ===\nHanna Sommer and Parker Stewart\'s Wedding Website - The Knot\nThe Knot\nThe Knot\nThe Knot\nThe Knot\nThe Knot\nThe Bump\nXO Group\nThe Knot Worldwide\ncredit-card\ndeliver-time\narrow_down_2\narrow_left_2\narrow_right_2\narrow_up_2\ncamera_2\ncaret_down_2\ncaret_left_2\ncaret_right_2\ncaret_up_2\ncart_2\nchat_2\ndiscount_2\ndownload_2\nheart_2\nemail_2\nphone_2\nsearch_2\nHanna & Parker\n1.31.2026 • Pittsburgh, Pennsylvania\n29 Days To Go!\nHanna & Parker\n1.31.2026 • Pittsburgh, Pennsylvania\n29 Days To Go!\nHome\nOur Story\nPhotos\nWedding Party\nQ + A\nTravel\nRegistry\nRSVP\nMenu Button\nHome\nOur Story\nPhotos\nWedding Party\nQ + A\nTravel\nRegistry\nRSVP\nRegistry\n\n=== RSVP PAGE ===\nHanna Sommer and Parker Stewart\'s Wedding Website - The Knot\nThe Knot\nThe Knot\nThe Knot\nThe Knot\nThe Knot\nThe Bump\nXO Group\nThe Knot Worldwide\ncredit-card\ndeliver-time\narrow_down_2\narrow_left_2\narrow_right_2\narrow_up_2\ncamera_2\ncaret_down_2\ncaret_left_2\ncaret_right_2\ncaret_up_2\ncart_2\nchat_2\ndiscount_2\ndownload_2\nheart_2\nemail_2\nphone_2\nsearch_2\nYou need to enable JavaScript to run this app.\nRSVP'}], 'model': 'claude-sonnet-4-20250514'}}
-2026-01-02T19:21:19.057690839Z 2026-01-02 19:21:19,055 - anthropic._base_client - DEBUG - Sending HTTP Request: POST https://api.anthropic.com/v1/messages
-2026-01-02T19:21:19.05776537Z 2026-01-02 19:21:19,056 - httpcore.connection - DEBUG - connect_tcp.started host='api.anthropic.com' port=443 local_address=None timeout=5.0 socket_options=[(1, 9, True), (6, 5, 60), (6, 6, 5), (6, 4, 60)]
-2026-01-02T19:21:19.072755106Z 2026-01-02 19:21:19,072 - httpcore.connection - DEBUG - connect_tcp.complete return_value=<httpcore._backends.anyio.AnyIOStream object at 0x70c1e37a7250>
-2026-01-02T19:21:19.072775877Z 2026-01-02 19:21:19,072 - httpcore.connection - DEBUG - start_tls.started ssl_context=<ssl.SSLContext object at 0x70c1e3f263c0> server_hostname='api.anthropic.com' timeout=5.0
-2026-01-02T19:21:19.082781101Z 2026-01-02 19:21:19,082 - httpcore.connection - DEBUG - start_tls.complete return_value=<httpcore._backends.anyio.AnyIOStream object at 0x70c1e3585350>
-2026-01-02T19:21:19.083639621Z 2026-01-02 19:21:19,083 - httpcore.http11 - DEBUG - send_request_headers.started request=<Request [b'POST']>
-2026-01-02T19:21:19.083722883Z 2026-01-02 19:21:19,083 - httpcore.http11 - DEBUG - send_request_headers.complete
-2026-01-02T19:21:19.083754903Z 2026-01-02 19:21:19,083 - httpcore.http11 - DEBUG - send_request_body.started request=<Request [b'POST']>
-2026-01-02T19:21:19.084163662Z 2026-01-02 19:21:19,083 - httpcore.http11 - DEBUG - send_request_body.complete
-2026-01-02T19:21:19.084170582Z 2026-01-02 19:21:19,084 - httpcore.http11 - DEBUG - receive_response_headers.started request=<Request [b'POST']>
-2026-01-02T19:21:30.069468246Z 2026-01-02 19:21:30,069 - httpcore.http11 - DEBUG - receive_response_headers.complete return_value=(b'HTTP/1.1', 200, b'OK', [(b'Date', b'Fri, 02 Jan 2026 19:21:30 GMT'), (b'Content-Type', b'application/json'), (b'Transfer-Encoding', b'chunked'), (b'Connection', b'keep-alive'), (b'anthropic-ratelimit-input-tokens-limit', b'30000'), (b'anthropic-ratelimit-input-tokens-remaining', b'28000'), (b'anthropic-ratelimit-input-tokens-reset', b'2026-01-02T19:21:24Z'), (b'anthropic-ratelimit-output-tokens-limit', b'8000'), (b'anthropic-ratelimit-output-tokens-remaining', b'7000'), (b'anthropic-ratelimit-output-tokens-reset', b'2026-01-02T19:21:37Z'), (b'anthropic-ratelimit-requests-limit', b'50'), (b'anthropic-ratelimit-requests-remaining', b'49'), (b'anthropic-ratelimit-requests-reset', b'2026-01-02T19:21:20Z'), (b'anthropic-ratelimit-tokens-limit', b'38000'), (b'anthropic-ratelimit-tokens-remaining', b'35000'), (b'anthropic-ratelimit-tokens-reset', b'2026-01-02T19:21:24Z'), (b'request-id', b'req_011CWj6RQpmZpwpvG41bGAHJ'), (b'strict-transport-security', b'max-age=31536000; includeSubDomains; preload'), (b'anthropic-organization-id', b'e832d9b8-9193-4c08-83d0-9ade84d6cbbe'), (b'Server', b'cloudflare'), (b'x-envoy-upstream-service-time', b'10890'), (b'cf-cache-status', b'DYNAMIC'), (b'X-Robots-Tag', b'none'), (b'Content-Encoding', b'gzip'), (b'CF-RAY', b'9b7c9e664dcfefde-PDX')])
-2026-01-02T19:21:30.069895995Z 2026-01-02 19:21:30,069 - httpx - INFO - HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 200 OK"
-2026-01-02T19:21:30.070089379Z 2026-01-02 19:21:30,070 - httpcore.http11 - DEBUG - receive_response_body.started request=<Request [b'POST']>
-2026-01-02T19:21:30.070489268Z 2026-01-02 19:21:30,070 - httpcore.http11 - DEBUG - receive_response_body.complete
-2026-01-02T19:21:30.070596901Z 2026-01-02 19:21:30,070 - httpcore.http11 - DEBUG - response_closed.started
-2026-01-02T19:21:30.070707904Z 2026-01-02 19:21:30,070 - httpcore.http11 - DEBUG - response_closed.complete
-2026-01-02T19:21:30.070978819Z 2026-01-02 19:21:30,070 - anthropic._base_client - DEBUG - HTTP Response: POST https://api.anthropic.com/v1/messages "200 OK" Headers({'date': 'Fri, 02 Jan 2026 19:21:30 GMT', 'content-type': 'application/json', 'transfer-encoding': 'chunked', 'connection': 'keep-alive', 'anthropic-ratelimit-input-tokens-limit': '30000', 'anthropic-ratelimit-input-tokens-remaining': '28000', 'anthropic-ratelimit-input-tokens-reset': '2026-01-02T19:21:24Z', 'anthropic-ratelimit-output-tokens-limit': '8000', 'anthropic-ratelimit-output-tokens-remaining': '7000', 'anthropic-ratelimit-output-tokens-reset': '2026-01-02T19:21:37Z', 'anthropic-ratelimit-requests-limit': '50', 'anthropic-ratelimit-requests-remaining': '49', 'anthropic-ratelimit-requests-reset': '2026-01-02T19:21:20Z', 'anthropic-ratelimit-tokens-limit': '38000', 'anthropic-ratelimit-tokens-remaining': '35000', 'anthropic-ratelimit-tokens-reset': '2026-01-02T19:21:24Z', 'request-id': 'req_011CWj6RQpmZpwpvG41bGAHJ', 'strict-transport-security': 'max-age=31536000; includeSubDomains; preload', 'anthropic-organization-id': 'e832d9b8-9193-4c08-83d0-9ade84d6cbbe', 'server': 'cloudflare', 'x-envoy-upstream-service-time': '10890', 'cf-cache-status': 'DYNAMIC', 'x-robots-tag': 'none', 'content-encoding': 'gzip', 'cf-ray': '9b7c9e664dcfefde-PDX'})
-2026-01-02T19:21:30.071054781Z 2026-01-02 19:21:30,070 - anthropic._base_client - DEBUG - request_id: req_011CWj6RQpmZpwpvG41bGAHJ
-2026-01-02T19:21:30.071677385Z 2026-01-02 19:21:30,071 - services.scraper.data_mapper - INFO - Claude extracted: 1 accommodations
-2026-01-02T19:21:30.071722676Z 2026-01-02 19:21:30,071 - services.scraper.data_mapper - INFO - Accommodations: [{'hotel_name': 'Courtyard Pittsburgh University Center', 'address': '100 Lytton Ave, Pittsburgh, PA 15213, USA', 'phone': '(412) 682-6200', 'booking_url': None, 'has_room_block': True, 'room_block_name': None, 'room_block_code': None, 'room_block_rate': 'discounted room rate', 'room_block_deadline': '2025-12-30', 'notes': 'Check in time is between 2:00 PM to 4:00 PM depending on when room is available. Parking is $29/night. Check-In: Friday, January 30, 2026. Check-Out: Sunday, February 1, 2026.'}]
-2026-01-02T19:21:30.919200376Z 2026-01-02 19:21:30,918 - services.scraper.browser_fetch - INFO - Stealth browser closed
-2026-01-02T19:21:30.919964503Z INFO:     67.164.226.16:0 - "POST /api/scrape/ HTTP/1.1" 200 OK
-2026-01-02T19:24:11.866018865Z 2026-01-02 19:24:11,865 - apscheduler.scheduler - DEBUG - Looking for jobs to run
-2026-01-02T19:24:11.86668016Z 2026-01-02 19:24:11,866 - apscheduler.scheduler - DEBUG - Next wakeup is due at 2026-01-02 19:29:11.863452+00:00 (in 299.997328 seconds)
-2026-01-02T19:24:11.866711441Z 2026-01-02 19:24:11,866 - apscheduler.executors.default - INFO - Running job "process_fixed_schedules (trigger: interval[0:05:00], next run at: 2026-01-02 19:29:11 UTC)" (scheduled at 2026-01-02 19:24:11.863452+00:00)
-2026-01-02T19:24:11.866716361Z 2026-01-02 19:24:11,866 - services.sms.jobs - INFO - Running process_fixed_schedules job
-2026-01-02T19:24:11.871336175Z 2026-01-02 19:24:11,871 - apscheduler.executors.default - INFO - Running job "retry_failed_messages (trigger: interval[0:15:00], next run at: 2026-01-02 19:39:11 UTC)" (scheduled at 2026-01-02 19:24:11.863565+00:00)
-2026-01-02T19:24:11.871508508Z 2026-01-02 19:24:11,871 - services.sms.jobs - INFO - Running retry_failed_messages job
-2026-01-02T19:24:11.878579627Z 2026-01-02 19:24:11,878 - apscheduler.executors.default - INFO - Job "process_fixed_schedules (trigger: interval[0:05:00], next run at: 2026-01-02 19:29:11 UTC)" executed successfully
-2026-01-02T19:24:11.899792533Z 2026-01-02 19:24:11,899 - httpcore.connection - DEBUG - close.started
-2026-01-02T19:24:11.899923266Z 2026-01-02 19:24:11,899 - httpcore.connection - DEBUG - close.complete
-2026-01-02T19:24:12.060033369Z 2026-01-02 19:24:11,982 - apscheduler.executors.default - ERROR - Job "retry_failed_messages (trigger: interval[0:15:00], next run at: 2026-01-02 19:39:11 UTC)" raised an exception
-2026-01-02T19:24:12.060052069Z Traceback (most recent call last):
-2026-01-02T19:24:12.060057159Z   File "/opt/render/project/src/.venv/lib/python3.13/site-packages/sqlalchemy/dialects/postgresql/asyncpg.py", line 526, in _prepare_and_execute
-2026-01-02T19:24:12.060061579Z     prepared_stmt, attributes = await adapt_connection._prepare(
-2026-01-02T19:24:12.060065729Z                                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-2026-01-02T19:24:12.060069649Z         operation, self._invalidate_schema_cache_asof
-2026-01-02T19:24:12.060073769Z         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-2026-01-02T19:24:12.060077479Z     )
-2026-01-02T19:24:12.060081239Z     ^
-2026-01-02T19:24:12.06008508Z   File "/opt/render/project/src/.venv/lib/python3.13/site-packages/sqlalchemy/dialects/postgresql/asyncpg.py", line 773, in _prepare
-2026-01-02T19:24:12.06008888Z     prepared_stmt = await self._connection.prepare(
-2026-01-02T19:24:12.06009267Z                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-2026-01-02T19:24:12.06010329Z         operation, name=self._prepared_statement_name_func()
-2026-01-02T19:24:12.06010633Z         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-2026-01-02T19:24:12.06010904Z     )
-2026-01-02T19:24:12.06011171Z     ^
-2026-01-02T19:24:12.06011492Z   File "/opt/render/project/src/.venv/lib/python3.13/site-packages/asyncpg/connection.py", line 638, in prepare
-2026-01-02T19:24:12.06011865Z     return await self._prepare(
-2026-01-02T19:24:12.06012094Z            ^^^^^^^^^^^^^^^^^^^^
-2026-01-02T19:24:12.06012432Z     ...<4 lines>...
-2026-01-02T19:24:12.0601266Z     )
-2026-01-02T19:24:12.060129561Z     ^
-2026-01-02T19:24:12.060131871Z   File "/opt/render/project/src/.venv/lib/python3.13/site-packages/asyncpg/connection.py", line 657, in _prepare
-2026-01-02T19:24:12.060134341Z     stmt = await self._get_statement(
-2026-01-02T19:24:12.060136671Z            ^^^^^^^^^^^^^^^^^^^^^^^^^^
-2026-01-02T19:24:12.060139261Z     ...<5 lines>...
-2026-01-02T19:24:12.060141521Z     )
-2026-01-02T19:24:12.060143821Z     ^
-2026-01-02T19:24:12.060146711Z   File "/opt/render/project/src/.venv/lib/python3.13/site-packages/asyncpg/connection.py", line 443, in _get_statement
-2026-01-02T19:24:12.060148871Z     statement = await self._protocol.prepare(
-2026-01-02T19:24:12.060151191Z                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-2026-01-02T19:24:12.060153461Z     ...<5 lines>...
-2026-01-02T19:24:12.060155591Z     )
-2026-01-02T19:24:12.060157811Z     ^
-2026-01-02T19:24:12.060160051Z   File "asyncpg/protocol/protocol.pyx", line 165, in prepare
-2026-01-02T19:24:12.060162871Z asyncpg.exceptions.UndefinedColumnError: column message_logs.retry_count does not exist
-2026-01-02T19:24:12.060164931Z 
-2026-01-02T19:24:12.060167721Z The above exception was the direct cause of the following exception:
-2026-01-02T19:24:12.060169801Z 
-2026-01-02T19:24:12.060171981Z Traceback (most recent call last):
-2026-01-02T19:24:12.060174282Z   File "/opt/render/project/src/.venv/lib/python3.13/site-packages/sqlalchemy/engine/base.py", line 1967, in _exec_single_context
-2026-01-02T19:24:12.060176632Z     self.dialect.do_execute(
-2026-01-02T19:24:12.060178832Z     ~~~~~~~~~~~~~~~~~~~~~~~^
-2026-01-02T19:24:12.060181172Z         cursor, str_statement, effective_parameters, context
-2026-01-02T19:24:12.060183502Z         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-2026-01-02T19:24:12.060185782Z     )
-2026-01-02T19:24:12.060188152Z     ^
-2026-01-02T19:24:12.060190992Z   File "/opt/render/project/src/.venv/lib/python3.13/site-packages/sqlalchemy/engine/default.py", line 952, in do_execute
-2026-01-02T19:24:12.060193452Z     cursor.execute(statement, parameters)
-2026-01-02T19:24:12.060195682Z     ~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^
-2026-01-02T19:24:12.060197922Z   File "/opt/render/project/src/.venv/lib/python3.13/site-packages/sqlalchemy/dialects/postgresql/asyncpg.py", line 585, in execute
-2026-01-02T19:24:12.060200202Z     self._adapt_connection.await_(
-2026-01-02T19:24:12.060202552Z     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^
-2026-01-02T19:24:12.060204772Z         self._prepare_and_execute(operation, parameters)
-2026-01-02T19:24:12.060206992Z         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-2026-01-02T19:24:12.060209242Z     )
-2026-01-02T19:24:12.060211342Z     ^
-2026-01-02T19:24:12.060213613Z   File "/opt/render/project/src/.venv/lib/python3.13/site-packages/sqlalchemy/util/_concurrency_py3k.py", line 132, in await_only
-2026-01-02T19:24:12.060215993Z     return current.parent.switch(awaitable)  # type: ignore[no-any-return,attr-defined] # noqa: E501
-2026-01-02T19:24:12.060218202Z            ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^
-2026-01-02T19:24:12.060225753Z   File "/opt/render/project/src/.venv/lib/python3.13/site-packages/sqlalchemy/util/_concurrency_py3k.py", line 196, in greenlet_spawn
-2026-01-02T19:24:12.060228293Z     value = await result
-2026-01-02T19:24:12.060230533Z             ^^^^^^^^^^^^
-2026-01-02T19:24:12.060232843Z   File "/opt/render/project/src/.venv/lib/python3.13/site-packages/sqlalchemy/dialects/postgresql/asyncpg.py", line 563, in _prepare_and_execute
-2026-01-02T19:24:12.060235183Z     self._handle_exception(error)
-2026-01-02T19:24:12.060237373Z     ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^
-2026-01-02T19:24:12.060239533Z   File "/opt/render/project/src/.venv/lib/python3.13/site-packages/sqlalchemy/dialects/postgresql/asyncpg.py", line 513, in _handle_exception
-2026-01-02T19:24:12.060245533Z     self._adapt_connection._handle_exception(error)
-2026-01-02T19:24:12.060247943Z     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^
-2026-01-02T19:24:12.060250243Z   File "/opt/render/project/src/.venv/lib/python3.13/site-packages/sqlalchemy/dialects/postgresql/asyncpg.py", line 797, in _handle_exception
-2026-01-02T19:24:12.060252503Z     raise translated_error from error
-2026-01-02T19:24:12.060255023Z sqlalchemy.dialects.postgresql.asyncpg.AsyncAdapt_asyncpg_dbapi.ProgrammingError: <class 'asyncpg.exceptions.UndefinedColumnError'>: column message_logs.retry_count does not exist
-2026-01-02T19:24:12.060257043Z 
-2026-01-02T19:24:12.060269184Z The above exception was the direct cause of the following exception:
-2026-01-02T19:24:12.060271794Z 
-2026-01-02T19:24:12.060274074Z Traceback (most recent call last):
-2026-01-02T19:24:12.060276384Z   File "/opt/render/project/src/.venv/lib/python3.13/site-packages/apscheduler/executors/base.py", line 181, in run_coroutine_job
-2026-01-02T19:24:12.060278714Z     retval = await job.func(*job.args, **job.kwargs)
-2026-01-02T19:24:12.060280844Z              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-2026-01-02T19:24:12.060283254Z   File "/opt/render/project/src/backend/services/sms/jobs.py", line 217, in retry_failed_messages
-2026-01-02T19:24:12.060285494Z     result = await db.execute(stmt)
-2026-01-02T19:24:12.060287684Z              ^^^^^^^^^^^^^^^^^^^^^^
-2026-01-02T19:24:12.060290084Z   File "/opt/render/project/src/.venv/lib/python3.13/site-packages/sqlalchemy/ext/asyncio/session.py", line 449, in execute
-2026-01-02T19:24:12.060292434Z     result = await greenlet_spawn(
-2026-01-02T19:24:12.060294664Z              ^^^^^^^^^^^^^^^^^^^^^
-2026-01-02T19:24:12.060296914Z     ...<6 lines>...
-2026-01-02T19:24:12.060299164Z     )
-2026-01-02T19:24:12.060301455Z     ^
-2026-01-02T19:24:12.060303644Z   File "/opt/render/project/src/.venv/lib/python3.13/site-packages/sqlalchemy/util/_concurrency_py3k.py", line 201, in greenlet_spawn
-2026-01-02T19:24:12.060305855Z     result = context.throw(*sys.exc_info())
-2026-01-02T19:24:12.060308344Z   File "/opt/render/project/src/.venv/lib/python3.13/site-packages/sqlalchemy/orm/session.py", line 2351, in execute
-2026-01-02T19:24:12.060310625Z     return self._execute_internal(
-2026-01-02T19:24:12.060313115Z            ~~~~~~~~~~~~~~~~~~~~~~^
-2026-01-02T19:24:12.060315315Z         statement,
-2026-01-02T19:24:12.060317455Z         ^^^^^^^^^^
-2026-01-02T19:24:12.060319575Z     ...<4 lines>...
-2026-01-02T19:24:12.060321625Z         _add_event=_add_event,
-2026-01-02T19:24:12.060323785Z         ^^^^^^^^^^^^^^^^^^^^^^
-2026-01-02T19:24:12.060326005Z     )
-2026-01-02T19:24:12.060328255Z     ^
-2026-01-02T19:24:12.060330575Z   File "/opt/render/project/src/.venv/lib/python3.13/site-packages/sqlalchemy/orm/session.py", line 2249, in _execute_internal
-2026-01-02T19:24:12.060332795Z     result: Result[Any] = compile_state_cls.orm_execute_statement(
-2026-01-02T19:24:12.060339555Z                           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^
-2026-01-02T19:24:12.060342055Z         self,
-2026-01-02T19:24:12.060344345Z         ^^^^^
-2026-01-02T19:24:12.060346485Z     ...<4 lines>...
-2026-01-02T19:24:12.060348776Z         conn,
-2026-01-02T19:24:12.060350876Z         ^^^^^
-2026-01-02T19:24:12.060352956Z     )
-2026-01-02T19:24:12.060355906Z     ^
-2026-01-02T19:24:12.060358176Z   File "/opt/render/project/src/.venv/lib/python3.13/site-packages/sqlalchemy/orm/context.py", line 306, in orm_execute_statement
-2026-01-02T19:24:12.060360396Z     result = conn.execute(
-2026-01-02T19:24:12.060362646Z         statement, params or {}, execution_options=execution_options
-2026-01-02T19:24:12.060364866Z     )
-2026-01-02T19:24:12.060367446Z   File "/opt/render/project/src/.venv/lib/python3.13/site-packages/sqlalchemy/engine/base.py", line 1419, in execute
-2026-01-02T19:24:12.060369666Z     return meth(
-2026-01-02T19:24:12.060371926Z         self,
-2026-01-02T19:24:12.060374166Z         distilled_parameters,
-2026-01-02T19:24:12.060376386Z         execution_options or NO_OPTIONS,
-2026-01-02T19:24:12.060378536Z     )
-2026-01-02T19:24:12.060380666Z   File "/opt/render/project/src/.venv/lib/python3.13/site-packages/sqlalchemy/sql/elements.py", line 527, in _execute_on_connection
-2026-01-02T19:24:12.060382846Z     return connection._execute_clauseelement(
-2026-01-02T19:24:12.060385166Z            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^
-2026-01-02T19:24:12.060387526Z         self, distilled_params, execution_options
-2026-01-02T19:24:12.060389786Z         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-2026-01-02T19:24:12.060392037Z     )
-2026-01-02T19:24:12.060394266Z     ^
-2026-01-02T19:24:12.060396557Z   File "/opt/render/project/src/.venv/lib/python3.13/site-packages/sqlalchemy/engine/base.py", line 1641, in _execute_clauseelement
-2026-01-02T19:24:12.060398827Z     ret = self._execute_context(
-2026-01-02T19:24:12.060401057Z         dialect,
-2026-01-02T19:24:12.060403377Z     ...<8 lines>...
-2026-01-02T19:24:12.060405687Z         cache_hit=cache_hit,
-2026-01-02T19:24:12.060408137Z     )
-2026-01-02T19:24:12.060411077Z   File "/opt/render/project/src/.venv/lib/python3.13/site-packages/sqlalchemy/engine/base.py", line 1846, in _execute_context
-2026-01-02T19:24:12.060413677Z     return self._exec_single_context(
-2026-01-02T19:24:12.060416107Z            ~~~~~~~~~~~~~~~~~~~~~~~~~^
-2026-01-02T19:24:12.060418497Z         dialect, context, statement, parameters
-2026-01-02T19:24:12.060421027Z         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-2026-01-02T19:24:12.060423507Z     )
-2026-01-02T19:24:12.060426097Z     ^
-2026-01-02T19:24:12.060428617Z   File "/opt/render/project/src/.venv/lib/python3.13/site-packages/sqlalchemy/engine/base.py", line 1986, in _exec_single_context
-2026-01-02T19:24:12.060431007Z     self._handle_dbapi_exception(
-2026-01-02T19:24:12.060433257Z     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~^
-2026-01-02T19:24:12.060435547Z         e, str_statement, effective_parameters, cursor, context
-2026-01-02T19:24:12.060437867Z         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-2026-01-02T19:24:12.060440107Z     )
-2026-01-02T19:24:12.060442407Z     ^
-2026-01-02T19:24:12.060444768Z   File "/opt/render/project/src/.venv/lib/python3.13/site-packages/sqlalchemy/engine/base.py", line 2363, in _handle_dbapi_exception
-2026-01-02T19:24:12.060447078Z     raise sqlalchemy_exception.with_traceback(exc_info[2]) from e
-2026-01-02T19:24:12.060449358Z   File "/opt/render/project/src/.venv/lib/python3.13/site-packages/sqlalchemy/engine/base.py", line 1967, in _exec_single_context
-2026-01-02T19:24:12.060456098Z     self.dialect.do_execute(
-2026-01-02T19:24:12.060458668Z     ~~~~~~~~~~~~~~~~~~~~~~~^
-2026-01-02T19:24:12.060460898Z         cursor, str_statement, effective_parameters, context
-2026-01-02T19:24:12.060463248Z         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-2026-01-02T19:24:12.060465488Z     )
-2026-01-02T19:24:12.060467808Z     ^
-2026-01-02T19:24:12.060469998Z   File "/opt/render/project/src/.venv/lib/python3.13/site-packages/sqlalchemy/engine/default.py", line 952, in do_execute
-2026-01-02T19:24:12.060472258Z     cursor.execute(statement, parameters)
-2026-01-02T19:24:12.060474598Z     ~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^
-2026-01-02T19:24:12.060491799Z   File "/opt/render/project/src/.venv/lib/python3.13/site-packages/sqlalchemy/dialects/postgresql/asyncpg.py", line 585, in execute
-2026-01-02T19:24:12.060494589Z     self._adapt_connection.await_(
-2026-01-02T19:24:12.060496979Z     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^
-2026-01-02T19:24:12.060499269Z         self._prepare_and_execute(operation, parameters)
-2026-01-02T19:24:12.060501429Z         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-2026-01-02T19:24:12.060503839Z     )
-2026-01-02T19:24:12.060506079Z     ^
-2026-01-02T19:24:12.060508349Z   File "/opt/render/project/src/.venv/lib/python3.13/site-packages/sqlalchemy/util/_concurrency_py3k.py", line 132, in await_only
-2026-01-02T19:24:12.060510729Z     return current.parent.switch(awaitable)  # type: ignore[no-any-return,attr-defined] # noqa: E501
-2026-01-02T19:24:12.060512899Z            ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^
-2026-01-02T19:24:12.06056035Z   File "/opt/render/project/src/.venv/lib/python3.13/site-packages/sqlalchemy/util/_concurrency_py3k.py", line 196, in greenlet_spawn
-2026-01-02T19:24:12.06056473Z     value = await result
-2026-01-02T19:24:12.06056765Z             ^^^^^^^^^^^^
-2026-01-02T19:24:12.06057027Z   File "/opt/render/project/src/.venv/lib/python3.13/site-packages/sqlalchemy/dialects/postgresql/asyncpg.py", line 563, in _prepare_and_execute
-2026-01-02T19:24:12.060572621Z     self._handle_exception(error)
-2026-01-02T19:24:12.060575061Z     ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^
-2026-01-02T19:24:12.060577421Z   File "/opt/render/project/src/.venv/lib/python3.13/site-packages/sqlalchemy/dialects/postgresql/asyncpg.py", line 513, in _handle_exception
-2026-01-02T19:24:12.060579821Z     self._adapt_connection._handle_exception(error)
-2026-01-02T19:24:12.060581981Z     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^
-2026-01-02T19:24:12.060584151Z   File "/opt/render/project/src/.venv/lib/python3.13/site-packages/sqlalchemy/dialects/postgresql/asyncpg.py", line 797, in _handle_exception
-2026-01-02T19:24:12.060586341Z     raise translated_error from error
-2026-01-02T19:24:12.060588831Z sqlalchemy.exc.ProgrammingError: (sqlalchemy.dialects.postgresql.asyncpg.ProgrammingError) <class 'asyncpg.exceptions.UndefinedColumnError'>: column message_logs.retry_count does not exist
-2026-01-02T19:24:12.060681233Z [SQL: SELECT message_logs.id, message_logs.wedding_id, message_logs.guest_id, message_logs.scheduled_message_id, message_logs.phone_number, message_logs.message_content, message_logs.twilio_sid, message_logs.status, message_logs.error_code, message_logs.error_message, message_logs.retry_count, message_logs.created_at, message_logs.sent_at, message_logs.delivered_at 
-2026-01-02T19:24:12.060686153Z FROM message_logs 
-2026-01-02T19:24:12.060688853Z WHERE message_logs.status = $1::VARCHAR AND message_logs.retry_count < $2::INTEGER]
-2026-01-02T19:24:12.060691243Z [parameters: ('failed', 3)]
-2026-01-02T19:24:12.060694013Z (Background on this error at: https://sqlalche.me/e/20/f405)
-2026-01-02T19:24:32.051033103Z ==> Setting WEB_CONCURRENCY=1 by default, based on available CPUs in the instance
-2026-01-02T19:24:32.094294112Z ==> Deploying...
-2026-01-02T19:25:20.540314928Z INFO:     67.164.226.16:0 - "OPTIONS /api/scrape/import HTTP/1.1" 200 OK
-2026-01-02T19:25:20.865834862Z INFO:     67.164.226.16:0 - "POST /api/scrape/import HTTP/1.1" 200 OK
-2026-01-02T19:25:21.891358319Z ==> Running 'uvicorn main:app --host 0.0.0.0 --port 10000'
-2026-01-02T19:25:24.291498071Z 2026-01-02 19:25:24,291 - main - ERROR - === MAIN.PY STARTING ===
-2026-01-02T19:25:25.798840492Z INFO:     67.164.226.16:0 - "GET /api/auth/me HTTP/1.1" 200 OK
-2026-01-02T19:25:25.964857467Z INFO:     67.164.226.16:0 - "GET /api/wedding/me HTTP/1.1" 200 OK
-2026-01-02T19:25:43.448594532Z ==> No open ports detected, continuing to scan...
-2026-01-02T19:25:43.558300501Z ==> Docs on specifying a port: https://render.com/docs/web-services#port-binding
-2026-01-02T19:25:44.180417549Z INFO:     Started server process [60]
-2026-01-02T19:25:44.180480093Z INFO:     Waiting for application startup.
-2026-01-02T19:25:45.065506234Z 2026-01-02 19:25:45,065 - main - INFO - Database tables initialized
-2026-01-02T19:25:45.289738577Z 2026-01-02 19:25:45,289 - main - INFO - Demo wedding already exists
-2026-01-02T19:25:46.413201426Z 2026-01-02 19:25:46,412 - tzlocal - DEBUG - /etc/timezone found, contents:
-2026-01-02T19:25:46.413223817Z  Etc/UTC
-2026-01-02T19:25:46.413228538Z 
-2026-01-02T19:25:46.413569607Z 2026-01-02 19:25:46,413 - tzlocal - DEBUG - /etc/localtime found
-2026-01-02T19:25:46.414511761Z 2026-01-02 19:25:46,414 - tzlocal - DEBUG - 2 found:
-2026-01-02T19:25:46.414522212Z  {'/etc/timezone': 'Etc/UTC', '/etc/localtime is a symlink to': 'Etc/UTC'}
-2026-01-02T19:25:46.415000079Z 2026-01-02 19:25:46,414 - apscheduler.scheduler - INFO - Adding job tentatively -- it will be properly scheduled when the scheduler starts
-2026-01-02T19:25:46.4151872Z 2026-01-02 19:25:46,415 - apscheduler.scheduler - INFO - Adding job tentatively -- it will be properly scheduled when the scheduler starts
-2026-01-02T19:25:46.415304046Z 2026-01-02 19:25:46,415 - apscheduler.scheduler - INFO - Adding job tentatively -- it will be properly scheduled when the scheduler starts
-2026-01-02T19:25:46.417153422Z 2026-01-02 19:25:46,416 - apscheduler.scheduler - INFO - Added job "process_relative_schedules" to job store "default"
-2026-01-02T19:25:46.417164283Z 2026-01-02 19:25:46,416 - apscheduler.scheduler - INFO - Added job "process_fixed_schedules" to job store "default"
-2026-01-02T19:25:46.417168363Z 2026-01-02 19:25:46,416 - apscheduler.scheduler - INFO - Added job "retry_failed_messages" to job store "default"
-2026-01-02T19:25:46.417172893Z 2026-01-02 19:25:46,417 - apscheduler.scheduler - INFO - Scheduler started
-2026-01-02T19:25:46.417177004Z 2026-01-02 19:25:46,417 - main - INFO - SMS scheduler initialized with 3 background jobs
-2026-01-02T19:25:46.417425188Z 2026-01-02 19:25:46,417 - apscheduler.scheduler - DEBUG - Looking for jobs to run
-2026-01-02T19:25:46.417520333Z 2026-01-02 19:25:46,417 - apscheduler.scheduler - DEBUG - Next wakeup is due at 2026-01-02 19:30:46.414967+00:00 (in 299.997567 seconds)
-2026-01-02T19:25:46.417629539Z INFO:     Application startup complete.
-2026-01-02T19:25:46.417964019Z INFO:     Uvicorn running on http://0.0.0.0:10000 (Press CTRL+C to quit)
-2026-01-02T19:25:47.424696041Z INFO:     127.0.0.1:60652 - "HEAD / HTTP/1.1" 404 Not Found
-2026-01-02T19:25:54.943791744Z ==> Your service is live 🎉
-2026-01-02T19:25:54.976004423Z ==> 
-2026-01-02T19:25:55.009410802Z ==> ///////////////////////////////////////////////////////////
-2026-01-02T19:25:55.04793362Z ==> 
-2026-01-02T19:25:55.126579916Z ==> Available at your primary URL https://wedding-concierge-api.onrender.com
-2026-01-02T19:25:55.166612755Z ==> 
-2026-01-02T19:25:55.200265253Z ==> ///////////////////////////////////////////////////////////
-2026-01-02T19:25:56.306838551Z INFO:     34.82.41.62:0 - "GET / HTTP/1.1" 404 Not Found
-2026-01-02T19:26:54.814502598Z INFO:     Shutting down
-2026-01-02T19:26:54.915083025Z INFO:     Waiting for application shutdown.
-2026-01-02T19:26:54.91533357Z 2026-01-02 19:26:54,915 - main - INFO - SMS scheduler shut down
-2026-01-02T19:26:54.915565766Z 2026-01-02 19:26:54,915 - apscheduler.scheduler - INFO - Scheduler has been shut down
-2026-01-02T19:26:54.915661188Z INFO:     Application shutdown complete.
-2026-01-02T19:26:54.915783911Z INFO:     Finished server process [57]
+2026-01-02T19:40:56.667210876Z ==> ///////////////////////////////////////////////////////////
+2026-01-02T19:40:57.633672308Z INFO:     35.230.45.39:0 - "GET / HTTP/1.1" 404 Not Found
+2026-01-02T19:41:56.233874533Z INFO:     Shutting down
+2026-01-02T19:41:56.334242913Z INFO:     Waiting for application shutdown.
+2026-01-02T19:41:56.334434037Z 2026-01-02 19:41:56,334 - main - INFO - SMS scheduler shut down
+2026-01-02T19:41:56.334600171Z 2026-01-02 19:41:56,334 - apscheduler.scheduler - INFO - Scheduler has been shut down
+2026-01-02T19:41:56.334663762Z INFO:     Application shutdown complete.
+2026-01-02T19:41:56.334758254Z INFO:     Finished server process [57]
+2026-01-02T19:42:39.278902893Z ==> Setting WEB_CONCURRENCY=1 by default, based on available CPUs in the instance
+2026-01-02T19:42:39.295193192Z ==> Deploying...
+2026-01-02T19:43:45.425673728Z ==> No open ports detected, continuing to scan...
+2026-01-02T19:43:45.509093118Z ==> Docs on specifying a port: https://render.com/docs/web-services#port-binding
+2026-01-02T19:44:05.471928732Z 2026-01-02 19:44:05,471 - tzlocal - DEBUG - /etc/timezone found, contents:
+2026-01-02T19:44:05.471940963Z  Etc/UTC
+2026-01-02T19:44:05.471944133Z 
+2026-01-02T19:44:05.47231051Z 2026-01-02 19:44:05,472 - tzlocal - DEBUG - /etc/localtime found
+2026-01-02T19:44:05.473377322Z 2026-01-02 19:44:05,473 - tzlocal - DEBUG - 2 found:
+2026-01-02T19:44:05.473391113Z  {'/etc/timezone': 'Etc/UTC', '/etc/localtime is a symlink to': 'Etc/UTC'}
+2026-01-02T19:44:05.473842652Z 2026-01-02 19:44:05,473 - apscheduler.scheduler - INFO - Adding job tentatively -- it will be properly scheduled when the scheduler starts
+2026-01-02T19:44:05.473976395Z 2026-01-02 19:44:05,473 - apscheduler.scheduler - INFO - Adding job tentatively -- it will be properly scheduled when the scheduler starts
+2026-01-02T19:44:05.474086337Z 2026-01-02 19:44:05,474 - apscheduler.scheduler - INFO - Adding job tentatively -- it will be properly scheduled when the scheduler starts
+2026-01-02T19:44:05.477401446Z 2026-01-02 19:44:05,477 - apscheduler.scheduler - INFO - Added job "process_relative_schedules" to job store "default"
+2026-01-02T19:44:05.477536299Z 2026-01-02 19:44:05,477 - apscheduler.scheduler - INFO - Added job "process_fixed_schedules" to job store "default"
+2026-01-02T19:44:05.4776038Z 2026-01-02 19:44:05,477 - apscheduler.scheduler - INFO - Added job "retry_failed_messages" to job store "default"
+2026-01-02T19:44:05.477654621Z 2026-01-02 19:44:05,477 - apscheduler.scheduler - INFO - Scheduler started
+2026-01-02T19:44:05.477717692Z 2026-01-02 19:44:05,477 - main - INFO - SMS scheduler initialized with 3 background jobs
+2026-01-02T19:44:05.477996678Z 2026-01-02 19:44:05,477 - apscheduler.scheduler - DEBUG - Looking for jobs to run
+2026-01-02T19:44:05.47808196Z 2026-01-02 19:44:05,477 - apscheduler.scheduler - DEBUG - Next wakeup is due at 2026-01-02 19:49:05.473812+00:00 (in 299.995837 seconds)
+2026-01-02T19:44:05.478184802Z INFO:     Application startup complete.
+2026-01-02T19:44:05.478497728Z INFO:     Uvicorn running on http://0.0.0.0:10000 (Press CTRL+C to quit)
+2026-01-02T19:44:05.874578931Z INFO:     127.0.0.1:57078 - "HEAD / HTTP/1.1" 404 Not Found
+2026-01-02T19:44:10.118511595Z ==> Your service is live 🎉
+2026-01-02T19:44:10.155586583Z ==> 
+2026-01-02T19:44:10.185758572Z ==> ///////////////////////////////////////////////////////////
+2026-01-02T19:44:10.216207271Z ==> 
+2026-01-02T19:44:10.244476569Z ==> Available at your primary URL https://wedding-concierge-api.onrender.com
+2026-01-02T19:44:10.273187958Z ==> 
+2026-01-02T19:44:10.301306087Z ==> ///////////////////////////////////////////////////////////
+2026-01-02T19:44:12.732049303Z INFO:     35.230.45.39:0 - "GET / HTTP/1.1" 404 Not Found
+2026-01-02T19:45:10.017504318Z INFO:     Shutting down
+2026-01-02T19:45:10.117951053Z INFO:     Waiting for application shutdown.
+2026-01-02T19:45:10.118142405Z 2026-01-02 19:45:10,118 - main - INFO - SMS scheduler shut down
+2026-01-02T19:45:10.118302075Z 2026-01-02 19:45:10,118 - apscheduler.scheduler - INFO - Scheduler has been shut down
+2026-01-02T19:45:10.118362469Z INFO:     Application shutdown complete.
+2026-01-02T19:45:10.118462886Z INFO:     Finished server process [59]
+2026-01-02T19:45:45.193100916Z INFO:     71.191.62.74:0 - "OPTIONS /api/auth/me HTTP/1.1" 200 OK
+2026-01-02T19:45:45.34765939Z INFO:     71.191.62.74:0 - "GET /api/auth/me HTTP/1.1" 200 OK
+2026-01-02T19:45:53.079797318Z INFO:     71.191.62.74:0 - "OPTIONS /api/scrape HTTP/1.1" 200 OK
+2026-01-02T19:45:53.213443998Z INFO:     71.191.62.74:0 - "POST /api/scrape HTTP/1.1" 307 Temporary Redirect
+2026-01-02T19:45:53.339224186Z INFO:     71.191.62.74:0 - "OPTIONS /api/scrape/ HTTP/1.1" 200 OK
+2026-01-02T19:45:53.960516037Z 2026-01-02 19:45:53,960 - services.scraper.scraper - INFO - Scraping https://www.theknot.com/us/hanna-sommer-and-parker-stewart-jan-2026 (platform: the_knot)
+2026-01-02T19:45:53.960554508Z 2026-01-02 19:45:53,960 - services.scraper.scraper - INFO - Using browser for https://www.theknot.com/us/hanna-sommer-and-parker-stewart-jan-2026 (known to require it)
+2026-01-02T19:45:53.960695171Z 2026-01-02 19:45:53,960 - services.scraper.browser_fetch - INFO - Starting stealth browser...
+2026-01-02T19:46:01.06789392Z 2026-01-02 19:46:01,067 - services.scraper.browser_fetch - INFO - Stealth browser started with viewport 1299x1067
+2026-01-02T19:46:02.972791363Z 2026-01-02 19:46:02,972 - services.scraper.browser_fetch - INFO - Fetching with stealth browser: https://www.theknot.com/us/hanna-sommer-and-parker-stewart-jan-2026
+2026-01-02T19:46:13.261087643Z 2026-01-02 19:46:13,260 - services.scraper.browser_fetch - INFO - Browser fetch status: 200
+2026-01-02T19:46:21.76078288Z 2026-01-02 19:46:21,760 - services.scraper.browser_fetch - INFO - Browser fetch successful: 544650 chars
+2026-01-02T19:46:24.254174714Z 2026-01-02 19:46:24,253 - services.scraper.scraper - INFO - Will scrape 6 subpages: ['https://www.theknot.com/us/hanna-sommer-and-parker-stewart-jan-2026/our-story', 'https://www.theknot.com/us/hanna-sommer-and-parker-stewart-jan-2026/wedding-party', 'https://www.theknot.com/us/hanna-sommer-and-parker-stewart-jan-2026/q-a', 'https://www.theknot.com/us/hanna-sommer-and-parker-stewart-jan-2026/travel', 'https://www.theknot.com/us/hanna-sommer-and-parker-stewart-jan-2026/registry', 'https://www.theknot.com/us/hanna-sommer-and-parker-stewart-jan-2026/rsvp']
+2026-01-02T19:46:24.254201944Z 2026-01-02 19:46:24,254 - services.scraper.scraper - INFO - Fetching 6 subpages with 2 browser workers
+2026-01-02T19:46:24.254272385Z 2026-01-02 19:46:24,254 - services.scraper.scraper - INFO - Processing batch: pages 1-6
+2026-01-02T19:46:24.25447117Z 2026-01-02 19:46:24,254 - services.scraper.browser_fetch - INFO - Starting stealth browser...
+2026-01-02T19:46:24.256165425Z 2026-01-02 19:46:24,256 - services.scraper.browser_fetch - INFO - Starting stealth browser...
+2026-01-02T19:46:34.159334797Z 2026-01-02 19:46:34,159 - services.scraper.browser_fetch - INFO - Stealth browser started with viewport 1482x919
+2026-01-02T19:46:34.159704925Z 2026-01-02 19:46:34,159 - services.scraper.scraper - INFO - Browser worker 1 started
+2026-01-02T19:46:34.159719935Z 2026-01-02 19:46:34,159 - services.scraper.scraper - INFO - Worker 1 fetching: our-story (wait=2.0s)
+2026-01-02T19:46:34.16042539Z 2026-01-02 19:46:34,160 - services.scraper.browser_fetch - INFO - Stealth browser started with viewport 1480x900
+2026-01-02T19:46:34.160469181Z 2026-01-02 19:46:34,160 - services.scraper.scraper - INFO - Browser worker 2 started
+2026-01-02T19:46:34.160539592Z 2026-01-02 19:46:34,160 - services.scraper.scraper - INFO - Worker 2 fetching: wedding-party (wait=2.0s)
+2026-01-02T19:46:36.456199246Z 2026-01-02 19:46:36,455 - services.scraper.browser_fetch - INFO - Fetching with stealth browser: https://www.theknot.com/us/hanna-sommer-and-parker-stewart-jan-2026/wedding-party
+2026-01-02T19:46:36.457674036Z 2026-01-02 19:46:36,457 - services.scraper.browser_fetch - INFO - Fetching with stealth browser: https://www.theknot.com/us/hanna-sommer-and-parker-stewart-jan-2026/our-story
+2026-01-02T19:47:21.959838111Z 2026-01-02 19:47:21,957 - services.scraper.browser_fetch - ERROR - Browser fetch error for https://www.theknot.com/us/hanna-sommer-and-parker-stewart-jan-2026/our-story: Page.goto: Timeout 45000ms exceeded.
+2026-01-02T19:47:21.959861531Z Call log:
+2026-01-02T19:47:21.959882571Z   - navigating to "https://www.theknot.com/us/hanna-sommer-and-parker-stewart-jan-2026/our-story", waiting until "domcontentloaded"
+2026-01-02T19:47:21.959887421Z 
+2026-01-02T19:47:21.961181839Z 2026-01-02 19:47:21,961 - services.scraper.browser_fetch - ERROR - Browser fetch error for https://www.theknot.com/us/hanna-sommer-and-parker-stewart-jan-2026/wedding-party: Page.goto: Timeout 45000ms exceeded.
+2026-01-02T19:47:21.961193979Z Call log:
+2026-01-02T19:47:21.961198019Z   - navigating to "https://www.theknot.com/us/hanna-sommer-and-parker-stewart-jan-2026/wedding-party", waiting until "domcontentloaded"
+2026-01-02T19:47:21.961200839Z 
+2026-01-02T19:47:24.365946222Z 2026-01-02 19:47:24,364 - services.scraper.scraper - WARNING - Worker 1 failed: our-story
+2026-01-02T19:47:24.366073855Z 2026-01-02 19:47:24,365 - services.scraper.scraper - INFO - Worker 1 fetching: q-a (wait=2.0s)
+2026-01-02T19:47:24.45360265Z 2026-01-02 19:47:24,453 - services.scraper.scraper - WARNING - Worker 2 failed: wedding-party
+2026-01-02T19:47:24.453701982Z 2026-01-02 19:47:24,453 - services.scraper.scraper - INFO - Worker 2 fetching: travel (wait=3.0s)
+2026-01-02T19:47:26.562643283Z 2026-01-02 19:47:26,561 - services.scraper.browser_fetch - INFO - Fetching with stealth browser: https://www.theknot.com/us/hanna-sommer-and-parker-stewart-jan-2026/travel
+2026-01-02T19:47:26.563660524Z 2026-01-02 19:47:26,563 - services.scraper.browser_fetch - INFO - Fetching with stealth browser: https://www.theknot.com/us/hanna-sommer-and-parker-stewart-jan-2026/q-a
+2026-01-02T19:48:12.538126711Z 2026-01-02 19:48:12,524 - services.scraper.browser_fetch - ERROR - Browser fetch error for https://www.theknot.com/us/hanna-sommer-and-parker-stewart-jan-2026/q-a: Page.goto: Timeout 45000ms exceeded.
+2026-01-02T19:48:12.538148721Z Call log:
+2026-01-02T19:48:12.538180932Z   - navigating to "https://www.theknot.com/us/hanna-sommer-and-parker-stewart-jan-2026/q-a", waiting until "domcontentloaded"
+2026-01-02T19:48:12.538185492Z 
+2026-01-02T19:48:12.578440187Z 2026-01-02 19:48:12,577 - services.scraper.browser_fetch - ERROR - Browser fetch error for https://www.theknot.com/us/hanna-sommer-and-parker-stewart-jan-2026/travel: Page.goto: Timeout 45000ms exceeded.
+2026-01-02T19:48:12.583865799Z Call log:
+2026-01-02T19:48:12.583875039Z   - navigating to "https://www.theknot.com/us/hanna-sommer-and-parker-stewart-jan-2026/travel", waiting until "domcontentloaded"
+2026-01-02T19:48:12.583879279Z 
+2026-01-02T19:48:15.524206094Z 2026-01-02 19:48:15,508 - services.scraper.scraper - WARNING - Worker 1 failed: q-a
+2026-01-02T19:48:15.537455999Z 2026-01-02 19:48:15,537 - services.scraper.scraper - INFO - Worker 1 fetching: registry (wait=2.0s)
+2026-01-02T19:48:15.620322247Z 2026-01-02 19:48:15,620 - services.scraper.scraper - WARNING - Worker 2 failed: travel
+2026-01-02T19:48:15.620407909Z 2026-01-02 19:48:15,620 - services.scraper.scraper - INFO - Worker 2 fetching: rsvp (wait=2.0s)
+2026-01-02T19:48:20.015930611Z 2026-01-02 19:48:20,013 - services.scraper.browser_fetch - INFO - Fetching with stealth browser: https://www.theknot.com/us/hanna-sommer-and-parker-stewart-jan-2026/registry
+2026-01-02T19:48:20.054668784Z 2026-01-02 19:48:20,053 - services.scraper.browser_fetch - INFO - Fetching with stealth browser: https://www.theknot.com/us/hanna-sommer-and-parker-stewart-jan-2026/rsvp
+2026-01-02T19:49:05.752869023Z 2026-01-02 19:49:05,663 - apscheduler.scheduler - DEBUG - Looking for jobs to run
+2026-01-02T19:49:05.755249843Z 2026-01-02 19:49:05,755 - apscheduler.scheduler - DEBUG - Next wakeup is due at 2026-01-02 19:54:05.473812+00:00 (in 299.719357 seconds)
+2026-01-02T19:49:05.758129582Z 2026-01-02 19:49:05,757 - apscheduler.executors.default - INFO - Running job "process_fixed_schedules (trigger: interval[0:05:00], next run at: 2026-01-02 19:54:05 UTC)" (scheduled at 2026-01-02 19:49:05.473812+00:00)
+2026-01-02T19:49:05.758203184Z 2026-01-02 19:49:05,758 - services.sms.jobs - INFO - Running process_fixed_schedules job
+2026-01-02T19:49:05.856257706Z 2026-01-02 19:49:05,855 - services.scraper.browser_fetch - ERROR - Browser fetch error for https://www.theknot.com/us/hanna-sommer-and-parker-stewart-jan-2026/registry: Page.goto: Timeout 45000ms exceeded.
+2026-01-02T19:49:05.856276377Z Call log:
+2026-01-02T19:49:05.856282427Z   - navigating to "https://www.theknot.com/us/hanna-sommer-and-parker-stewart-jan-2026/registry", waiting until "domcontentloaded"
+2026-01-02T19:49:05.856287387Z 
+2026-01-02T19:49:05.85739513Z 2026-01-02 19:49:05,857 - services.scraper.browser_fetch - ERROR - Browser fetch error for https://www.theknot.com/us/hanna-sommer-and-parker-stewart-jan-2026/rsvp: Page.goto: Timeout 45000ms exceeded.
+2026-01-02T19:49:05.85740781Z Call log:
+2026-01-02T19:49:05.85741227Z   - navigating to "https://www.theknot.com/us/hanna-sommer-and-parker-stewart-jan-2026/rsvp", waiting until "domcontentloaded"
+2026-01-02T19:49:05.857414561Z 
+2026-01-02T19:49:05.958485206Z 2026-01-02 19:49:05,957 - apscheduler.executors.default - INFO - Job "process_fixed_schedules (trigger: interval[0:05:00], next run at: 2026-01-02 19:54:05 UTC)" executed successfully
+2026-01-02T19:49:07.861286381Z 2026-01-02 19:49:07,856 - services.scraper.scraper - WARNING - Worker 1 failed: registry
+2026-01-02T19:49:08.05516414Z 2026-01-02 19:49:08,054 - services.scraper.scraper - WARNING - Worker 2 failed: rsvp
+2026-01-02T19:49:09.558701118Z 2026-01-02 19:49:09,558 - services.scraper.browser_fetch - INFO - Stealth browser closed
+2026-01-02T19:49:09.558833341Z 2026-01-02 19:49:09,558 - services.scraper.scraper - INFO - Browser worker 2 closed
+2026-01-02T19:49:09.558987094Z 2026-01-02 19:49:09,558 - services.scraper.browser_fetch - INFO - Stealth browser closed
+2026-01-02T19:49:09.559134167Z 2026-01-02 19:49:09,559 - services.scraper.scraper - INFO - Browser worker 1 closed
+2026-01-02T19:49:09.559301501Z 2026-01-02 19:49:09,559 - services.scraper.scraper - INFO - Subpage content keys: []
+2026-01-02T19:49:09.6687796Z 2026-01-02 19:49:09,668 - services.scraper.scraper - INFO - full_text total length: 1196 chars
+2026-01-02T19:49:09.66879566Z 2026-01-02 19:49:09,668 - services.scraper.scraper - INFO - Contains TRAVEL marker: False
+2026-01-02T19:49:09.753064758Z 2026-01-02 19:49:09,752 - services.scraper.data_mapper - INFO - Initializing Claude client with API key: sk-ant-api03-GTsaIEA...
+2026-01-02T19:49:09.957472385Z 2026-01-02 19:49:09,957 - services.scraper.data_mapper - INFO - Text to Claude: 1196 chars
+2026-01-02T19:49:09.957505226Z 2026-01-02 19:49:09,957 - services.scraper.data_mapper - INFO - Contains 'hotel': False
+2026-01-02T19:49:09.957512176Z 2026-01-02 19:49:09,957 - services.scraper.data_mapper - INFO - Contains 'travel': False
+2026-01-02T19:49:09.957571677Z 2026-01-02 19:49:09,957 - services.scraper.data_mapper - INFO - Contains 'accommod': False
+2026-01-02T19:49:09.967044123Z 2026-01-02 19:49:09,966 - anthropic._base_client - DEBUG - Request options: {'method': 'post', 'url': '/v1/messages', 'timeout': Timeout(connect=5.0, read=600, write=600, pool=600), 'files': None, 'idempotency_key': 'stainless-python-retry-d31ea7a8-11cb-4758-ba10-b13edcf03cde', 'json_data': {'max_tokens': 2000, 'messages': [{'role': 'user', 'content': 'Extract structured wedding information from this wedding website content.\n\nCRITICAL: Look carefully for hotel/accommodation information. It typically appears:\n- In sections marked "=== TRAVEL PAGE ===" or similar\n- Near keywords like "where to stay", "hotel", "room block", "accommodations", "lodging"\n- With booking codes, special rates, group names, or reservation links\n\nReturn a JSON object with the following fields (use null for missing data):\n\n{\n    "partner1_name": "First partner\'s full name",\n    "partner2_name": "Second partner\'s full name",\n    "wedding_date": "YYYY-MM-DD format or null",\n    "wedding_time": "HH:MM AM/PM format or null",\n    "dress_code": "Dress code description or null",\n    "ceremony_venue_name": "Ceremony venue name or null",\n    "ceremony_venue_address": "Full address or null",\n    "reception_venue_name": "Reception venue name (if different from ceremony) or null",\n    "reception_venue_address": "Full address or null",\n    "reception_time": "HH:MM AM/PM format or null",\n    "events": [\n        {\n            "event_name": "e.g. Rehearsal Dinner, Welcome Party",\n            "event_date": "YYYY-MM-DD or null",\n            "event_time": "HH:MM AM/PM or null",\n            "venue_name": "venue name or null",\n            "venue_address": "address or null",\n            "description": "description or null",\n            "dress_code": "dress code or null"\n        }\n    ],\n    "accommodations": [\n        {\n            "hotel_name": "Hotel name (e.g. Marriott, Hilton, Hampton Inn)",\n            "address": "Full address or null",\n            "phone": "Phone number or null",\n            "booking_url": "Booking URL or null",\n            "has_room_block": true/false,\n            "room_block_name": "Block name (e.g. \'Smith-Jones Wedding\') or null",\n            "room_block_code": "Booking code or null",\n            "room_block_rate": "Rate description (e.g. \'$159/night\') or null",\n            "room_block_deadline": "Deadline date or null",\n            "notes": "Additional notes like amenities, distance to venue, shuttle info, etc."\n        }\n    ],\n    "faqs": [\n        {\n            "question": "Question text",\n            "answer": "Answer text",\n            "category": "Category like Travel, Attire, etc. or null"\n        }\n    ],\n    "additional_notes": "Any other important info or null"\n}\n\nEXTRACTION PRIORITIES:\n1. Partner names - usually in format "Name1 & Name2" or "Name1 and Name2"\n2. HOTELS/ACCOMMODATIONS - Look in TRAVEL PAGE sections for hotel names, addresses, room block codes, rates\n3. Events - rehearsal dinner, welcome party, ceremony, reception, brunch\n4. Q&A or FAQ sections\n\nReturn ONLY valid JSON, no explanation.\n\nWebsite content:\nHanna Sommer and Parker Stewart\'s Wedding Website - The Knot\nHanna & Parker\n1.31.2026 • Pittsburgh, Pennsylvania\n29 Days To Go!\nHanna & Parker\n1.31.2026 • Pittsburgh, Pennsylvania\n29 Days To Go!\nHome\nOur Story\nPhotos\nWedding Party\nQ + A\nTravel\nRegistry\nRSVP\nMenu Button\nHome\nOur Story\nPhotos\nWedding Party\nQ + A\nTravel\nRegistry\nRSVP\nH&P\nJanuary 31, 2026\nPittsburgh\nPennsylvania\nRSVP\nWedding Day\n1.31.2026\n3:00 PM–10:00 PM\nPittsburgh, PA, 15213\nAttire:\nFormal\n3:00 PM\n–3:45 PM\nCeremony\nHeinz Memorial Chapel\nSouth Bellefield Avenue, Pittsburgh, PA, 15213, United States\nAttire:\nFormal\n4:00 PM\n–11:00 PM\nReception\nSoldiers & Sailors Memorial Hall & Museum\n4141 Fifth Ave, Pittsburgh, PA, 15213\nAttire:\nFormal\nCocktail Hour: 4 pm - 5 pm\nReception: 5 pm - 10 pm\nHome\nOur Story\nPhotos\nWedding Party\nQ + A\nTravel\nRegistry\nRSVP\nH&P\n1.31.2026\nCreated on The Knot\nGetting married?\nCreate your wedding website for free.\nThe Knot\nThe Knot\nThe Knot\nThe Knot\nThe Knot\nThe Bump\nXO Group\nThe Knot Worldwide\ncredit-card\ndeliver-time\narrow_down_2\narrow_left_2\narrow_right_2\narrow_up_2\ncamera_2\ncaret_down_2\ncaret_left_2\ncaret_right_2\ncaret_up_2\ncart_2\nchat_2\ndiscount_2\ndownload_2\nheart_2\nemail_2\nphone_2\nsearch_2'}], 'model': 'claude-sonnet-4-20250514'}}
+2026-01-02T19:49:09.967721387Z 2026-01-02 19:49:09,967 - anthropic._base_client - DEBUG - Sending HTTP Request: POST https://api.anthropic.com/v1/messages
+2026-01-02T19:49:10.167852556Z 2026-01-02 19:49:10,167 - httpcore.connection - DEBUG - connect_tcp.started host='api.anthropic.com' port=443 local_address=None timeout=5.0 socket_options=[(1, 9, True), (6, 5, 60), (6, 6, 5), (6, 4, 60)]
+2026-01-02T19:49:10.262770174Z 2026-01-02 19:49:10,262 - httpcore.connection - DEBUG - connect_tcp.complete return_value=<httpcore._backends.anyio.AnyIOStream object at 0x71f290188ad0>
+2026-01-02T19:49:10.262827285Z 2026-01-02 19:49:10,262 - httpcore.connection - DEBUG - start_tls.started ssl_context=<ssl.SSLContext object at 0x71f290423410> server_hostname='api.anthropic.com' timeout=5.0
+2026-01-02T19:49:10.273089647Z 2026-01-02 19:49:10,272 - httpcore.connection - DEBUG - start_tls.complete return_value=<httpcore._backends.anyio.AnyIOStream object at 0x71f2900e6210>
+2026-01-02T19:49:10.273414794Z 2026-01-02 19:49:10,273 - httpcore.http11 - DEBUG - send_request_headers.started request=<Request [b'POST']>
+2026-01-02T19:49:10.273840183Z 2026-01-02 19:49:10,273 - httpcore.http11 - DEBUG - send_request_headers.complete
+2026-01-02T19:49:10.273884354Z 2026-01-02 19:49:10,273 - httpcore.http11 - DEBUG - send_request_body.started request=<Request [b'POST']>
+2026-01-02T19:49:10.274151909Z 2026-01-02 19:49:10,274 - httpcore.http11 - DEBUG - send_request_body.complete
+2026-01-02T19:49:10.27419101Z 2026-01-02 19:49:10,274 - httpcore.http11 - DEBUG - receive_response_headers.started request=<Request [b'POST']>
+2026-01-02T19:49:14.657005037Z ==> Detected service running on port 10000
+2026-01-02T19:49:14.76064873Z ==> Docs on specifying a port: https://render.com/docs/web-services#port-binding
+2026-01-02T19:49:16.183474189Z 2026-01-02 19:49:16,174 - httpcore.http11 - DEBUG - receive_response_headers.complete return_value=(b'HTTP/1.1', 200, b'OK', [(b'Date', b'Fri, 02 Jan 2026 19:49:16 GMT'), (b'Content-Type', b'application/json'), (b'Transfer-Encoding', b'chunked'), (b'Connection', b'keep-alive'), (b'anthropic-ratelimit-input-tokens-limit', b'30000'), (b'anthropic-ratelimit-input-tokens-remaining', b'29000'), (b'anthropic-ratelimit-input-tokens-reset', b'2026-01-02T19:49:13Z'), (b'anthropic-ratelimit-output-tokens-limit', b'8000'), (b'anthropic-ratelimit-output-tokens-remaining', b'7000'), (b'anthropic-ratelimit-output-tokens-reset', b'2026-01-02T19:49:20Z'), (b'anthropic-ratelimit-requests-limit', b'50'), (b'anthropic-ratelimit-requests-remaining', b'49'), (b'anthropic-ratelimit-requests-reset', b'2026-01-02T19:49:11Z'), (b'anthropic-ratelimit-tokens-limit', b'38000'), (b'anthropic-ratelimit-tokens-remaining', b'36000'), (b'anthropic-ratelimit-tokens-reset', b'2026-01-02T19:49:13Z'), (b'request-id', b'req_011CWj8Ybojt6F2i1gNLuRDG'), (b'strict-transport-security', b'max-age=31536000; includeSubDomains; preload'), (b'anthropic-organization-id', b'e832d9b8-9193-4c08-83d0-9ade84d6cbbe'), (b'Server', b'cloudflare'), (b'x-envoy-upstream-service-time', b'5807'), (b'cf-cache-status', b'DYNAMIC'), (b'X-Robots-Tag', b'none'), (b'Content-Encoding', b'gzip'), (b'CF-RAY', b'9b7cc7333e405eec-PDX')])
+2026-01-02T19:49:16.198061702Z 2026-01-02 19:49:16,175 - httpx - INFO - HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 200 OK"
+2026-01-02T19:49:16.198071272Z 2026-01-02 19:49:16,176 - httpcore.http11 - DEBUG - receive_response_body.started request=<Request [b'POST']>
+2026-01-02T19:49:16.198075892Z 2026-01-02 19:49:16,176 - httpcore.http11 - DEBUG - receive_response_body.complete
+2026-01-02T19:49:16.198079912Z 2026-01-02 19:49:16,176 - httpcore.http11 - DEBUG - response_closed.started
+2026-01-02T19:49:16.198083442Z 2026-01-02 19:49:16,176 - httpcore.http11 - DEBUG - response_closed.complete
+2026-01-02T19:49:16.198088022Z 2026-01-02 19:49:16,176 - anthropic._base_client - DEBUG - HTTP Response: POST https://api.anthropic.com/v1/messages "200 OK" Headers({'date': 'Fri, 02 Jan 2026 19:49:16 GMT', 'content-type': 'application/json', 'transfer-encoding': 'chunked', 'connection': 'keep-alive', 'anthropic-ratelimit-input-tokens-limit': '30000', 'anthropic-ratelimit-input-tokens-remaining': '29000', 'anthropic-ratelimit-input-tokens-reset': '2026-01-02T19:49:13Z', 'anthropic-ratelimit-output-tokens-limit': '8000', 'anthropic-ratelimit-output-tokens-remaining': '7000', 'anthropic-ratelimit-output-tokens-reset': '2026-01-02T19:49:20Z', 'anthropic-ratelimit-requests-limit': '50', 'anthropic-ratelimit-requests-remaining': '49', 'anthropic-ratelimit-requests-reset': '2026-01-02T19:49:11Z', 'anthropic-ratelimit-tokens-limit': '38000', 'anthropic-ratelimit-tokens-remaining': '36000', 'anthropic-ratelimit-tokens-reset': '2026-01-02T19:49:13Z', 'request-id': 'req_011CWj8Ybojt6F2i1gNLuRDG', 'strict-transport-security': 'max-age=31536000; includeSubDomains; preload', 'anthropic-organization-id': 'e832d9b8-9193-4c08-83d0-9ade84d6cbbe', 'server': 'cloudflare', 'x-envoy-upstream-service-time': '5807', 'cf-cache-status': 'DYNAMIC', 'x-robots-tag': 'none', 'content-encoding': 'gzip', 'cf-ray': '9b7cc7333e405eec-PDX'})
+2026-01-02T19:49:16.198091823Z 2026-01-02 19:49:16,177 - anthropic._base_client - DEBUG - request_id: req_011CWj8Ybojt6F2i1gNLuRDG
+2026-01-02T19:49:16.198140493Z 2026-01-02 19:49:16,188 - services.scraper.data_mapper - INFO - Claude extracted: 0 accommodations
+2026-01-02T19:49:16.198151204Z 2026-01-02 19:49:16,188 - services.scraper.data_mapper - WARNING - No accommodations extracted by Claude!
+2026-01-02T19:49:16.666983043Z INFO:     71.191.62.74:0 - "POST /api/scrape/ HTTP/1.1" 200 OK
+2026-01-02T19:49:16.666983083Z 2026-01-02 19:49:16,665 - services.scraper.browser_fetch - INFO - Stealth browser closed

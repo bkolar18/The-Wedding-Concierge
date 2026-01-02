@@ -290,75 +290,28 @@ class WeddingScraper:
             # Pages that need extra wait time for JS to render hotel/accommodation info
             slow_render_pages = ["travel", "accommodations", "hotels"]
 
-            async def browser_worker(worker_id: int, queue: asyncio.Queue, results: list):
-                """Worker that processes pages from queue using its own browser."""
-                browser = StealthBrowser()
+            # Use sequential fetching with the existing browser to avoid rate limiting
+            # Parallel browsers were causing all subpages to timeout
+            logger.info(f"Fetching {len(subpages)} subpages sequentially")
+
+            for subpage_url in subpages:
+                page_name = urlparse(subpage_url).path.split("/")[-1] or "subpage"
+                needs_extra_wait = any(slow in page_name.lower() for slow in slow_render_pages)
+                wait_time = 3.0 if needs_extra_wait else 2.0
+
+                logger.info(f"Fetching subpage: {page_name} (wait={wait_time}s)")
+
                 try:
-                    await browser.start()
-                    logger.info(f"Browser worker {worker_id} started")
-
-                    while True:
-                        try:
-                            subpage_url = queue.get_nowait()
-                        except asyncio.QueueEmpty:
-                            break
-
-                        page_name = urlparse(subpage_url).path.split("/")[-1] or "subpage"
-                        needs_extra_wait = any(slow in page_name.lower() for slow in slow_render_pages)
-                        wait_time = 3.0 if needs_extra_wait else 2.0
-
-                        logger.info(f"Worker {worker_id} fetching: {page_name} (wait={wait_time}s)")
-
-                        try:
-                            subpage_html = await browser.fetch_page(subpage_url, wait_time=wait_time)
-                            if subpage_html and not self._is_blocked_response(subpage_html):
-                                subpage_soup = BeautifulSoup(subpage_html, "html.parser")
-                                content = self._extract_main_content(subpage_soup, page_name)
-                                logger.info(f"Worker {worker_id} done: {page_name} ({len(content)} chars)")
-                                results.append((page_name, content))
-                            else:
-                                logger.warning(f"Worker {worker_id} failed: {page_name}")
-                                results.append((page_name, None))
-                        except Exception as e:
-                            logger.error(f"Worker {worker_id} error on {page_name}: {e}")
-                            results.append((page_name, None))
-
+                    subpage_html = await self._fetch_page(subpage_url, wait_time=wait_time)
+                    if subpage_html:
+                        subpage_soup = BeautifulSoup(subpage_html, "html.parser")
+                        content = self._extract_main_content(subpage_soup, page_name)
+                        logger.info(f"Successfully scraped subpage: {page_name} ({len(content)} chars)")
+                        subpage_content[page_name] = content
+                    else:
+                        logger.warning(f"Failed to fetch subpage: {page_name}")
                 except Exception as e:
-                    logger.error(f"Browser worker {worker_id} failed to start: {e}")
-                finally:
-                    await browser.close()
-                    logger.info(f"Browser worker {worker_id} closed")
-
-            # Worker pool: 2 browsers, each processes up to 3 pages per batch
-            MAX_WORKERS = 2
-            MAX_PAGES_PER_WORKER = 3
-
-            logger.info(f"Fetching {len(subpages)} subpages with {MAX_WORKERS} browser workers")
-
-            # Process in batches of MAX_WORKERS * MAX_PAGES_PER_WORKER
-            all_results = []
-            batch_size = MAX_WORKERS * MAX_PAGES_PER_WORKER  # 6 pages per round
-
-            for batch_start in range(0, len(subpages), batch_size):
-                batch_urls = subpages[batch_start:batch_start + batch_size]
-                logger.info(f"Processing batch: pages {batch_start + 1}-{batch_start + len(batch_urls)}")
-
-                # Create queue and fill with this batch's URLs
-                queue = asyncio.Queue()
-                for url in batch_urls:
-                    queue.put_nowait(url)
-
-                # Run workers in parallel
-                batch_results = []
-                await asyncio.gather(*[
-                    browser_worker(i + 1, queue, batch_results)
-                    for i in range(min(MAX_WORKERS, len(batch_urls)))
-                ])
-                all_results.extend(batch_results)
-
-            for page_name, content in all_results:
-                if content:
-                    subpage_content[page_name] = content
+                    logger.error(f"Error fetching subpage {page_name}: {e}")
 
             # Diagnostic logging for subpage content
             logger.info(f"Subpage content keys: {list(subpage_content.keys())}")

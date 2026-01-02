@@ -1037,8 +1037,8 @@ User clarified Oaklander is FIRST hotel, not second. WebFetch confirmed both hot
 
 **Fix:** Updated travel page handling:
 - Wait for `networkidle` state (React hydration complete)
-- Count phone numbers as proxy for hotel count
-- If <2 hotels found, wait 2 more seconds
-- Log hotel counts for debugging
+- Count addresses (STATE + ZIP pattern like "PA 15213") as proxy
+- If <2 addresses found, wait 2 more seconds
+- Log counts for debugging
 
 Pushed to deploy.
