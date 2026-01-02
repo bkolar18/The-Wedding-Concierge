@@ -49,6 +49,7 @@ class ScrapeResponse(BaseModel):
 class ImportRequest(BaseModel):
     """Request to import scraped data into a wedding."""
     url: str
+    data: Optional[dict] = None  # Pre-scraped structured data to avoid re-scraping
 
 
 class ImportResponse(BaseModel):
@@ -139,21 +140,28 @@ async def import_wedding_from_url(
         if payload:
             user_id = payload.get("sub")
 
-    scraper = WeddingScraper()
+    scraper = None
+    raw_data = None
 
     try:
-        # Scrape the website
-        raw_data = await scraper.scrape(request.url)
+        # Use pre-scraped data if provided, otherwise scrape
+        if request.data:
+            structured_data = request.data
+            raw_data = {}  # No raw data when using pre-scraped
+        else:
+            # Fallback: scrape the website (slower path)
+            scraper = WeddingScraper()
+            raw_data = await scraper.scrape(request.url)
 
-        if "error" in raw_data:
-            raise HTTPException(
-                status_code=400,
-                detail=raw_data["error"]
-            )
+            if "error" in raw_data:
+                raise HTTPException(
+                    status_code=400,
+                    detail=raw_data["error"]
+                )
 
-        # Map to structured wedding data
-        mapper = WeddingDataMapper()
-        structured_data = await mapper.extract_structured_data(raw_data)
+            # Map to structured wedding data
+            mapper = WeddingDataMapper()
+            structured_data = await mapper.extract_structured_data(raw_data)
 
         # Validate we have minimum required data
         partner1 = structured_data.get("partner1_name", "").strip()
@@ -270,4 +278,5 @@ async def import_wedding_from_url(
             detail=f"Failed to import wedding: {str(e)}"
         )
     finally:
-        await scraper.close()
+        if scraper:
+            await scraper.close()

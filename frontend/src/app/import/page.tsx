@@ -28,6 +28,7 @@ export default function ImportPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [preview, setPreview] = useState<ScrapePreview | null>(null);
+  const [scrapedData, setScrapedData] = useState<Record<string, unknown> | null>(null);
   const [platform, setPlatform] = useState<string | null>(null);
   const [importResult, setImportResult] = useState<ImportResponse | null>(null);
   const [scanProgress, setScanProgress] = useState(0);
@@ -73,6 +74,7 @@ export default function ImportPage() {
       // Small delay to show 100% before transitioning
       await new Promise(resolve => setTimeout(resolve, 500));
       setPreview(result.preview);
+      setScrapedData(result.data);  // Store scraped data to avoid re-scraping on import
       setPlatform(result.platform);
       setStep('preview');
     } catch (err) {
@@ -88,8 +90,8 @@ export default function ImportPage() {
     setIsLoading(true);
 
     try {
-      // Pass token if logged in to link wedding to user account
-      const result = await importWeddingFromUrl(url, token || undefined);
+      // Pass scraped data to avoid re-scraping, and token if logged in
+      const result = await importWeddingFromUrl(url, token || undefined, scrapedData || undefined);
       setImportResult(result);
       setStep('success');
     } catch (err) {
@@ -103,6 +105,7 @@ export default function ImportPage() {
     setStep('input');
     setUrl('');
     setPreview(null);
+    setScrapedData(null);
     setPlatform(null);
     setImportResult(null);
     setError(null);

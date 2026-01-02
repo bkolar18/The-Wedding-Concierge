@@ -1,38 +1,156 @@
-15:31:48.888 Running build in Washington, D.C., USA (East) – iad1
-15:31:48.889 Build machine configuration: 2 cores, 8 GB
-15:31:49.080 Cloning github.com/bkolar18/The-Wedding-Concierge (Branch: main, Commit: 57b3929)
-15:31:49.375 Cloning completed: 295.000ms
-15:31:49.972 Restored build cache from previous deployment (BKa2e4j9BvgFg528YBLKC3hw5YF2)
-15:31:50.608 Running "vercel build"
-15:31:51.032 Vercel CLI 50.1.3
-15:31:51.354 Installing dependencies...
-15:31:58.612 
-15:31:58.613 up to date in 7s
-15:31:58.613 
-15:31:58.613 142 packages are looking for funding
-15:31:58.613   run `npm fund` for details
-15:31:58.644 Detected Next.js version: 16.1.1
-15:31:58.649 Running "npm run build"
-15:31:58.753 
-15:31:58.754 > frontend@0.1.0 build
-15:31:58.754 > next build
-15:31:58.754 
-15:31:59.845 ▲ Next.js 16.1.1 (Turbopack)
-15:31:59.846 
-15:31:59.884   Creating an optimized production build ...
-15:32:06.544 ✓ Compiled successfully in 6.0s
-15:32:06.546   Running TypeScript ...
-15:32:11.203 Failed to compile.
-15:32:11.203 
-15:32:11.205 ./src/components/SMSManager.tsx:430:53
-15:32:11.205 Type error: 'msg.relative_days' is possibly 'null'.
-15:32:11.206 
-15:32:11.206 [0m [90m 428 |[39m                     ) [33m:[39m msg[33m.[39mstatus [33m===[39m [32m'scheduled'[39m [33m?[39m (
-15:32:11.206  [90m 429 |[39m                       msg[33m.[39mschedule_type [33m===[39m [32m'relative'[39m [33m?[39m (
-15:32:11.206 [31m[1m>[22m[39m[90m 430 |[39m                         [33m<[39m[33m>[39m{msg[33m.[39mrelative_days} days {msg[33m.[39mrelative_days [33m<[39m [35m0[39m [33m?[39m [32m'before'[39m [33m:[39m [32m'after'[39m} {msg[33m.[39mrelative_to[33m?[39m[33m.[39mreplace([32m'_'[39m[33m,[39m [32m' '[39m)}[33m<[39m[33m/[39m[33m>[39m
-15:32:11.206  [90m     |[39m                                                     [31m[1m^[22m[39m
-15:32:11.206  [90m 431 |[39m                       ) [33m:[39m (
-15:32:11.206  [90m 432 |[39m                         [33m<[39m[33m>[39m[33mScheduled[39m [36mfor[39m {[36mnew[39m [33mDate[39m(msg[33m.[39mscheduled_at[33m![39m)[33m.[39mtoLocaleDateString()}[33m<[39m[33m/[39m[33m>[39m
-15:32:11.206  [90m 433 |[39m                       )[0m
-15:32:11.236 Next.js build worker exited with code: 1 and signal: null
-15:32:11.268 Error: Command "npm run build" exited with 1
+All logs
+Search
+Search
+
+Jan 1, 9:13 PM - 9:17 PM
+EST
+
+
+
+Collecting certifi (from httpx->-r requirements.txt (line 18))
+  Using cached certifi-2025.11.12-py3-none-any.whl.metadata (2.5 kB)
+Collecting httpcore==1.* (from httpx->-r requirements.txt (line 18))
+  Using cached httpcore-1.0.9-py3-none-any.whl.metadata (21 kB)
+Collecting annotated-types>=0.6.0 (from pydantic[email]->-r requirements.txt (line 23))
+  Using cached annotated_types-0.7.0-py3-none-any.whl.metadata (15 kB)
+Collecting pydantic-core==2.41.5 (from pydantic[email]->-r requirements.txt (line 23))
+  Using cached pydantic_core-2.41.5-cp313-cp313-manylinux_2_17_x86_64.manylinux2014_x86_64.whl.metadata (7.3 kB)
+Collecting typing-inspection>=0.4.2 (from pydantic[email]->-r requirements.txt (line 23))
+  Using cached typing_inspection-0.4.2-py3-none-any.whl.metadata (2.6 kB)
+Collecting soupsieve>=1.6.1 (from beautifulsoup4->-r requirements.txt (line 17))
+  Using cached soupsieve-2.8.1-py3-none-any.whl.metadata (4.6 kB)
+Collecting pyee<14,>=13 (from playwright->-r requirements.txt (line 19))
+  Using cached pyee-13.0.0-py3-none-any.whl.metadata (2.9 kB)
+Collecting dnspython>=2.0.0 (from email-validator->-r requirements.txt (line 26))
+  Using cached dnspython-2.8.0-py3-none-any.whl.metadata (5.7 kB)
+Collecting ecdsa!=0.15 (from python-jose[cryptography]->-r requirements.txt (line 29))
+  Using cached ecdsa-0.19.1-py2.py3-none-any.whl.metadata (29 kB)
+Collecting rsa!=4.1.1,!=4.4,<5.0,>=4.0 (from python-jose[cryptography]->-r requirements.txt (line 29))
+  Using cached rsa-4.9.1-py3-none-any.whl.metadata (5.6 kB)
+Collecting pyasn1>=0.5.0 (from python-jose[cryptography]->-r requirements.txt (line 29))
+  Using cached pyasn1-0.6.1-py3-none-any.whl.metadata (8.4 kB)
+Collecting cryptography>=3.4.0 (from python-jose[cryptography]->-r requirements.txt (line 29))
+  Using cached cryptography-46.0.3-cp311-abi3-manylinux_2_34_x86_64.whl.metadata (5.7 kB)
+Collecting six>=1.5 (from python-dateutil->-r requirements.txt (line 34))
+  Using cached six-1.17.0-py2.py3-none-any.whl.metadata (1.7 kB)
+Collecting requests>=2.0.0 (from twilio->-r requirements.txt (line 37))
+  Using cached requests-2.32.5-py3-none-any.whl.metadata (4.9 kB)
+Collecting PyJWT<3.0.0,>=2.0.0 (from twilio->-r requirements.txt (line 37))
+  Using cached PyJWT-2.10.1-py3-none-any.whl.metadata (4.0 kB)
+Collecting aiohttp>=3.8.4 (from twilio->-r requirements.txt (line 37))
+  Using cached aiohttp-3.13.2-cp313-cp313-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl.metadata (8.1 kB)
+Collecting aiohttp-retry>=2.8.3 (from twilio->-r requirements.txt (line 37))
+  Using cached aiohttp_retry-2.9.1-py3-none-any.whl.metadata (8.8 kB)
+Collecting tzlocal>=3.0 (from apscheduler->-r requirements.txt (line 44))
+  Using cached tzlocal-5.3.1-py3-none-any.whl.metadata (7.6 kB)
+Collecting et-xmlfile (from openpyxl->-r requirements.txt (line 47))
+  Using cached et_xmlfile-2.0.0-py3-none-any.whl.metadata (2.7 kB)
+Collecting aiohappyeyeballs>=2.5.0 (from aiohttp>=3.8.4->twilio->-r requirements.txt (line 37))
+  Using cached aiohappyeyeballs-2.6.1-py3-none-any.whl.metadata (5.9 kB)
+Collecting aiosignal>=1.4.0 (from aiohttp>=3.8.4->twilio->-r requirements.txt (line 37))
+  Using cached aiosignal-1.4.0-py3-none-any.whl.metadata (3.7 kB)
+Collecting attrs>=17.3.0 (from aiohttp>=3.8.4->twilio->-r requirements.txt (line 37))
+  Using cached attrs-25.4.0-py3-none-any.whl.metadata (10 kB)
+Collecting frozenlist>=1.1.1 (from aiohttp>=3.8.4->twilio->-r requirements.txt (line 37))
+  Using cached frozenlist-1.8.0-cp313-cp313-manylinux1_x86_64.manylinux_2_28_x86_64.manylinux_2_5_x86_64.whl.metadata (20 kB)
+Collecting multidict<7.0,>=4.5 (from aiohttp>=3.8.4->twilio->-r requirements.txt (line 37))
+  Using cached multidict-6.7.0-cp313-cp313-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl.metadata (5.3 kB)
+Collecting propcache>=0.2.0 (from aiohttp>=3.8.4->twilio->-r requirements.txt (line 37))
+  Using cached propcache-0.4.1-cp313-cp313-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl.metadata (13 kB)
+Collecting yarl<2.0,>=1.17.0 (from aiohttp>=3.8.4->twilio->-r requirements.txt (line 37))
+  Using cached yarl-1.22.0-cp313-cp313-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl.metadata (75 kB)
+Collecting cffi>=2.0.0 (from cryptography>=3.4.0->python-jose[cryptography]->-r requirements.txt (line 29))
+  Using cached cffi-2.0.0-cp313-cp313-manylinux2014_x86_64.manylinux_2_17_x86_64.whl.metadata (2.6 kB)
+Collecting pycparser (from cffi>=2.0.0->cryptography>=3.4.0->python-jose[cryptography]->-r requirements.txt (line 29))
+  Using cached pycparser-2.23-py3-none-any.whl.metadata (993 bytes)
+Collecting charset_normalizer<4,>=2 (from requests>=2.0.0->twilio->-r requirements.txt (line 37))
+  Using cached charset_normalizer-3.4.4-cp313-cp313-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl.metadata (37 kB)
+Collecting urllib3<3,>=1.21.1 (from requests>=2.0.0->twilio->-r requirements.txt (line 37))
+  Using cached urllib3-2.6.2-py3-none-any.whl.metadata (6.6 kB)
+Collecting MarkupSafe>=0.9.2 (from Mako->alembic->-r requirements.txt (line 8))
+  Using cached markupsafe-3.0.3-cp313-cp313-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl.metadata (2.7 kB)
+Using cached fastapi-0.128.0-py3-none-any.whl (103 kB)
+Using cached starlette-0.50.0-py3-none-any.whl (74 kB)
+Using cached anyio-4.12.0-py3-none-any.whl (113 kB)
+Using cached uvicorn-0.40.0-py3-none-any.whl (68 kB)
+Using cached python_multipart-0.0.21-py3-none-any.whl (24 kB)
+Using cached sqlalchemy-2.0.45-cp313-cp313-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl (3.3 MB)
+Using cached alembic-1.17.2-py3-none-any.whl (248 kB)
+Using cached aiosqlite-0.22.1-py3-none-any.whl (17 kB)
+Using cached asyncpg-0.31.0-cp313-cp313-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl (3.5 MB)
+Using cached psycopg2_binary-2.9.11-cp313-cp313-manylinux2014_x86_64.manylinux_2_17_x86_64.whl (4.2 MB)
+Using cached anthropic-0.75.0-py3-none-any.whl (388 kB)
+Using cached httpx-0.28.1-py3-none-any.whl (73 kB)
+Using cached distro-1.9.0-py3-none-any.whl (20 kB)
+Using cached docstring_parser-0.17.0-py3-none-any.whl (36 kB)
+Using cached httpcore-1.0.9-py3-none-any.whl (78 kB)
+Using cached jiter-0.12.0-cp313-cp313-manylinux_2_17_x86_64.manylinux2014_x86_64.whl (361 kB)
+Using cached pydantic-2.12.5-py3-none-any.whl (463 kB)
+Using cached pydantic_core-2.41.5-cp313-cp313-manylinux_2_17_x86_64.manylinux2014_x86_64.whl (2.1 MB)
+Using cached typing_extensions-4.15.0-py3-none-any.whl (44 kB)
+Using cached beautifulsoup4-4.14.3-py3-none-any.whl (107 kB)
+Using cached playwright-1.57.0-py3-none-manylinux1_x86_64.whl (46.0 MB)
+Using cached greenlet-3.3.0-cp313-cp313-manylinux_2_24_x86_64.manylinux_2_28_x86_64.whl (612 kB)
+Using cached pyee-13.0.0-py3-none-any.whl (15 kB)
+Using cached playwright_stealth-2.0.0-py3-none-any.whl (32 kB)
+Using cached pydantic_settings-2.12.0-py3-none-any.whl (51 kB)
+Using cached python_dotenv-1.2.1-py3-none-any.whl (21 kB)
+Using cached email_validator-2.3.0-py3-none-any.whl (35 kB)
+Using cached python_jose-3.5.0-py2.py3-none-any.whl (34 kB)
+Using cached rsa-4.9.1-py3-none-any.whl (34 kB)
+Using cached passlib-1.7.4-py2.py3-none-any.whl (525 kB)
+Using cached bcrypt-5.0.0-cp39-abi3-manylinux_2_34_x86_64.whl (278 kB)
+Using cached python_dateutil-2.9.0.post0-py2.py3-none-any.whl (229 kB)
+Using cached twilio-9.9.0-py2.py3-none-any.whl (1.8 MB)
+Using cached PyJWT-2.10.1-py3-none-any.whl (22 kB)
+Using cached phonenumbers-9.0.21-py2.py3-none-any.whl (2.6 MB)
+Using cached resend-2.19.0-py2.py3-none-any.whl (50 kB)
+Using cached apscheduler-3.11.2-py3-none-any.whl (64 kB)
+Using cached openpyxl-3.1.5-py2.py3-none-any.whl (250 kB)
+Using cached aiohttp-3.13.2-cp313-cp313-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl (1.7 MB)
+Using cached multidict-6.7.0-cp313-cp313-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl (254 kB)
+Using cached yarl-1.22.0-cp313-cp313-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl (377 kB)
+Using cached aiohappyeyeballs-2.6.1-py3-none-any.whl (15 kB)
+Using cached aiohttp_retry-2.9.1-py3-none-any.whl (10.0 kB)
+Using cached aiosignal-1.4.0-py3-none-any.whl (7.5 kB)
+Using cached annotated_doc-0.0.4-py3-none-any.whl (5.3 kB)
+Using cached annotated_types-0.7.0-py3-none-any.whl (13 kB)
+Using cached attrs-25.4.0-py3-none-any.whl (67 kB)
+Using cached click-8.3.1-py3-none-any.whl (108 kB)
+Using cached cryptography-46.0.3-cp311-abi3-manylinux_2_34_x86_64.whl (4.5 MB)
+Using cached cffi-2.0.0-cp313-cp313-manylinux2014_x86_64.manylinux_2_17_x86_64.whl (219 kB)
+Using cached dnspython-2.8.0-py3-none-any.whl (331 kB)
+Using cached ecdsa-0.19.1-py2.py3-none-any.whl (150 kB)
+Using cached frozenlist-1.8.0-cp313-cp313-manylinux1_x86_64.manylinux_2_28_x86_64.manylinux_2_5_x86_64.whl (234 kB)
+Using cached h11-0.16.0-py3-none-any.whl (37 kB)
+Using cached httptools-0.7.1-cp313-cp313-manylinux1_x86_64.manylinux_2_28_x86_64.manylinux_2_5_x86_64.whl (478 kB)
+Using cached idna-3.11-py3-none-any.whl (71 kB)
+Using cached propcache-0.4.1-cp313-cp313-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl (204 kB)
+Using cached pyasn1-0.6.1-py3-none-any.whl (83 kB)
+Using cached pyyaml-6.0.3-cp313-cp313-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl (801 kB)
+Using cached requests-2.32.5-py3-none-any.whl (64 kB)
+Using cached charset_normalizer-3.4.4-cp313-cp313-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl (153 kB)
+Using cached urllib3-2.6.2-py3-none-any.whl (131 kB)
+Using cached certifi-2025.11.12-py3-none-any.whl (159 kB)
+Using cached six-1.17.0-py2.py3-none-any.whl (11 kB)
+Using cached soupsieve-2.8.1-py3-none-any.whl (36 kB)
+Using cached typing_inspection-0.4.2-py3-none-any.whl (14 kB)
+Using cached tzlocal-5.3.1-py3-none-any.whl (18 kB)
+Using cached uvloop-0.22.1-cp313-cp313-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl (4.4 MB)
+Using cached watchfiles-1.1.1-cp313-cp313-manylinux_2_17_x86_64.manylinux2014_x86_64.whl (456 kB)
+Using cached websockets-15.0.1-cp313-cp313-manylinux_2_5_x86_64.manylinux1_x86_64.manylinux_2_17_x86_64.manylinux2014_x86_64.whl (182 kB)
+Using cached et_xmlfile-2.0.0-py3-none-any.whl (18 kB)
+Using cached mako-1.3.10-py3-none-any.whl (78 kB)
+Using cached markupsafe-3.0.3-cp313-cp313-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl (22 kB)
+Using cached pycparser-2.23-py3-none-any.whl (118 kB)
+Using cached sniffio-1.3.1-py3-none-any.whl (10 kB)
+Installing collected packages: passlib, websockets, uvloop, urllib3, tzlocal, typing-extensions, soupsieve, sniffio, six, pyyaml, python-multipart, python-dotenv, PyJWT, pycparser, pyasn1, psycopg2-binary, propcache, phonenumbers, multidict, MarkupSafe, jiter, idna, httptools, h11, greenlet, frozenlist, et-xmlfile, docstring-parser, dnspython, distro, click, charset_normalizer, certifi, bcrypt, attrs, asyncpg, annotated-types, annotated-doc, aiosqlite, aiohappyeyeballs, yarl, uvicorn, typing-inspection, sqlalchemy, rsa, requests, python-dateutil, pyee, pydantic-core, openpyxl, Mako, httpcore, email-validator, ecdsa, cffi, beautifulsoup4, apscheduler, anyio, aiosignal, watchfiles, starlette, resend, python-jose, pydantic, playwright, httpx, cryptography, alembic, aiohttp, pydantic-settings, playwright-stealth, fastapi, anthropic, aiohttp-retry, twilio
+Successfully installed Mako-1.3.10 MarkupSafe-3.0.3 PyJWT-2.10.1 aiohappyeyeballs-2.6.1 aiohttp-3.13.2 aiohttp-retry-2.9.1 aiosignal-1.4.0 aiosqlite-0.22.1 alembic-1.17.2 annotated-doc-0.0.4 annotated-types-0.7.0 anthropic-0.75.0 anyio-4.12.0 apscheduler-3.11.2 asyncpg-0.31.0 attrs-25.4.0 bcrypt-5.0.0 beautifulsoup4-4.14.3 certifi-2025.11.12 cffi-2.0.0 charset_normalizer-3.4.4 click-8.3.1 cryptography-46.0.3 distro-1.9.0 dnspython-2.8.0 docstring-parser-0.17.0 ecdsa-0.19.1 email-validator-2.3.0 et-xmlfile-2.0.0 fastapi-0.128.0 frozenlist-1.8.0 greenlet-3.3.0 h11-0.16.0 httpcore-1.0.9 httptools-0.7.1 httpx-0.28.1 idna-3.11 jiter-0.12.0 multidict-6.7.0 openpyxl-3.1.5 passlib-1.7.4 phonenumbers-9.0.21 playwright-1.57.0 playwright-stealth-2.0.0 propcache-0.4.1 psycopg2-binary-2.9.11 pyasn1-0.6.1 pycparser-2.23 pydantic-2.12.5 pydantic-core-2.41.5 pydantic-settings-2.12.0 pyee-13.0.0 python-dateutil-2.9.0.post0 python-dotenv-1.2.1 python-jose-3.5.0 python-multipart-0.0.21 pyyaml-6.0.3 requests-2.32.5 resend-2.19.0 rsa-4.9.1 six-1.17.0 sniffio-1.3.1 soupsieve-2.8.1 sqlalchemy-2.0.45 starlette-0.50.0 twilio-9.9.0 typing-extensions-4.15.0 typing-inspection-0.4.2 tzlocal-5.3.1 urllib3-2.6.2 uvicorn-0.40.0 uvloop-0.22.1 watchfiles-1.1.1 websockets-15.0.1 yarl-1.22.0
+[notice] A new release of pip is available: 25.1.1 -> 25.3
+[notice] To update, run: pip install --upgrade pip
+Installing dependencies...
+Switching to root user to install dependencies...
+Password: su: Authentication failure
+Failed to install browser dependencies
+Error: Installation process exited with code: 1
+==> Build failed 😞
