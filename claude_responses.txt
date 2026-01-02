@@ -4090,3 +4090,17 @@ Pushed mobile overflow fixes based on iPhone screenshots:
 2. **FAQs**: Added `min-w-0` and `break-words` so questions/answers wrap properly
 3. **Tab bar**: Shows shorter text on mobile ("Details" / "Outreach" instead of full names)
 4. **Main container**: Added `overflow-x-hidden` to prevent horizontal scroll
+
+=== CLAUDE RESPONSE ===
+
+Fixed Guest Outreach tab mobile overflow + updated icons:
+
+**Guest Outreach mobile fixes:**
+- Added `overflow-hidden` to main container and all section cards
+- Responsive padding (`p-4 sm:p-6`)
+- Added `break-words` and `min-w-0` to text containers
+- Action buttons won't get squished
+
+**Icon updates:**
+- Ceremony: Now a heart icon
+- Dress Code: Now a dress/clothing shape

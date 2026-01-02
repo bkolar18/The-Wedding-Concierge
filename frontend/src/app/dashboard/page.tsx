@@ -513,7 +513,7 @@ export default function DashboardPage() {
               >
                 <span className="flex items-center justify-center">
                   <svg className="w-5 h-5 sm:mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
                   </svg>
                   <span className="hidden sm:inline">Wedding Details</span>
                   <span className="sm:hidden text-xs ml-1">Details</span>
@@ -589,7 +589,9 @@ export default function DashboardPage() {
                 <div className="flex items-center justify-between mb-4">
                   <h3 className="text-lg font-medium text-gray-800 flex items-center">
                     <svg className="w-5 h-5 mr-2 text-rose-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                      <path d="M12 3L8 7H4v4l4 2v8h8v-8l4-2V7h-4L12 3z" />
+                      <path d="M4 8L4 16L10 12L4 8Z" />
+                      <path d="M20 8L20 16L14 12L20 8Z" />
+                      <rect x="10" y="10" width="4" height="4" rx="1" />
                     </svg>
                     Dress Code
                   </h3>

@@ -369,8 +369,8 @@ export default function SMSManager({ token, weddingId }: SMSManagerProps) {
                 <tr className="border-b border-gray-200">
                   <th className="text-left py-2 font-medium text-gray-600">Name</th>
                   <th className="text-left py-2 font-medium text-gray-600">Phone</th>
-                  <th className="text-left py-2 font-medium text-gray-600">Group</th>
-                  <th className="text-left py-2 font-medium text-gray-600">Status</th>
+                  <th className="text-left py-2 font-medium text-gray-600 hidden sm:table-cell">Group</th>
+                  <th className="text-left py-2 font-medium text-gray-600 hidden sm:table-cell">Status</th>
                   <th className="w-10"></th>
                 </tr>
               </thead>
@@ -379,8 +379,8 @@ export default function SMSManager({ token, weddingId }: SMSManagerProps) {
                   <tr key={guest.id} className="border-b border-gray-100 hover:bg-gray-50">
                     <td className="py-2">{guest.name}</td>
                     <td className="py-2 text-gray-600">{formatPhone(guest.phone_number)}</td>
-                    <td className="py-2 text-gray-500">{guest.group_name || '-'}</td>
-                    <td className="py-2">
+                    <td className="py-2 text-gray-500 hidden sm:table-cell">{guest.group_name || '-'}</td>
+                    <td className="py-2 hidden sm:table-cell">
                       {guest.opted_out ? (
                         <span className="text-red-600 text-xs">Opted out</span>
                       ) : guest.sms_consent ? (
