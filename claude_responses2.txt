@@ -1004,3 +1004,16 @@ User noticed batch 1 and batch 2 were taking same time as sequential (1.5 min ea
 - After: ~1.5 min (main page + all subpages parallel + Claude API)
 
 Committed and pushed to trigger Render deploy.
+
+=== CLAUDE RESPONSE - Worker Pool Pattern ===
+User suggested 2 browsers with 3 pages each instead of 6 browsers (more memory efficient).
+
+**Implementation:** Worker pool with asyncio.Queue
+- 2 browser workers run in parallel
+- Each worker pulls pages from shared queue
+- Faster worker picks up extra work automatically
+
+**For 6 pages:** ~1.5 min (each worker handles 3 pages)
+**For 9 pages:** ~2.5 min (round 1: 6 pages, round 2: 3 pages)
+
+Pushed to deploy.

@@ -162,23 +162,34 @@ class StealthBrowser:
             # Wait for dynamic content to load
             await asyncio.sleep(wait_time)
 
-            # For travel pages, wait for hotel/accommodation content to appear
+            # For travel pages, do progressive scrolling to load all hotels
             url_lower = url.lower()
             if any(kw in url_lower for kw in ['/travel', '/accommodations', '/hotels']):
-                logger.info("Travel page detected - waiting for hotel content to load")
-                # Try to wait for content that looks like hotel info
+                logger.info("Travel page detected - progressive scroll to load all hotels")
                 try:
-                    await page.wait_for_selector('text=/check-in/i', timeout=3000)
-                    logger.info("Found hotel content")
-                except Exception:
-                    pass  # Continue even if not found
+                    # Progressive scroll: move down in steps to trigger lazy loading
+                    for scroll_pct in [25, 50, 75, 100]:
+                        await page.evaluate(f"""
+                            window.scrollTo(0, document.body.scrollHeight * {scroll_pct / 100})
+                        """)
+                        await asyncio.sleep(0.5)
 
-            # Quick scroll to trigger lazy loading
-            try:
-                await page.evaluate("window.scrollTo(0, document.body.scrollHeight)")
-                await asyncio.sleep(0.3)
-            except Exception:
-                pass
+                    # Scroll back to top and down again to ensure everything loaded
+                    await page.evaluate("window.scrollTo(0, 0)")
+                    await asyncio.sleep(0.3)
+                    await page.evaluate("window.scrollTo(0, document.body.scrollHeight)")
+                    await asyncio.sleep(0.5)
+
+                    logger.info("Travel page scroll complete")
+                except Exception as e:
+                    logger.warning(f"Travel scroll error: {e}")
+            else:
+                # Quick scroll for non-travel pages
+                try:
+                    await page.evaluate("window.scrollTo(0, document.body.scrollHeight)")
+                    await asyncio.sleep(0.3)
+                except Exception:
+                    pass
 
             # Get the fully rendered HTML
             html = await page.content()
