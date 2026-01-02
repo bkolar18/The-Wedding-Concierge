@@ -287,34 +287,36 @@ class WeddingScraper:
 
             logger.info(f"Will scrape {len(subpages)} subpages: {subpages}")
 
-            # Critical subpages that should be retried if they fail
-            critical_pages = ["travel", "accommodations", "hotels", "q-a", "qa", "faq", "schedule"]
             # Pages that need extra wait time for JS to render hotel/accommodation info
             slow_render_pages = ["travel", "accommodations", "hotels"]
 
-            for subpage_url in subpages:
+            async def fetch_subpage(subpage_url: str) -> tuple:
+                """Fetch a single subpage and return (page_name, content)."""
                 page_name = urlparse(subpage_url).path.split("/")[-1] or "subpage"
-                is_critical = any(critical in page_name.lower() for critical in critical_pages)
                 needs_extra_wait = any(slow in page_name.lower() for slow in slow_render_pages)
-                max_attempts = 3 if is_critical else 1
-                # Use 8 seconds for travel/hotel pages, 5 seconds for other pages
-                wait_time = 8.0 if needs_extra_wait else 5.0
+                # Use 3 seconds for travel/hotel pages, 2 seconds for other pages
+                wait_time = 3.0 if needs_extra_wait else 2.0
 
-                for attempt in range(max_attempts):
-                    logger.info(f"Fetching subpage: {subpage_url} (attempt {attempt + 1}/{max_attempts}, wait={wait_time}s)")
-                    subpage_html = await self._fetch_page(subpage_url, wait_time=wait_time)
-                    if subpage_html:
-                        subpage_soup = BeautifulSoup(subpage_html, "html.parser")
-                        # Use smart content extraction to filter out sidebars/widgets
-                        subpage_content[page_name] = self._extract_main_content(subpage_soup, page_name)
-                        logger.info(f"Successfully scraped subpage: {page_name} ({len(subpage_content[page_name])} chars)")
-                        break
-                    else:
-                        if attempt < max_attempts - 1:
-                            logger.warning(f"Failed to fetch {page_name}, retrying in 2 seconds...")
-                            await asyncio.sleep(2)
-                        else:
-                            logger.warning(f"Failed to fetch subpage after {max_attempts} attempts: {subpage_url}")
+                logger.info(f"Fetching subpage: {subpage_url} (wait={wait_time}s)")
+                subpage_html = await self._fetch_page(subpage_url, wait_time=wait_time)
+                if subpage_html:
+                    subpage_soup = BeautifulSoup(subpage_html, "html.parser")
+                    content = self._extract_main_content(subpage_soup, page_name)
+                    logger.info(f"Successfully scraped subpage: {page_name} ({len(content)} chars)")
+                    return (page_name, content)
+                else:
+                    logger.warning(f"Failed to fetch subpage: {subpage_url}")
+                    return (page_name, None)
+
+            # Batch parallel fetching - 3 pages at a time to avoid overwhelming the server
+            batch_size = 3
+            for i in range(0, len(subpages), batch_size):
+                batch = subpages[i:i + batch_size]
+                logger.info(f"Fetching batch {i // batch_size + 1}: {len(batch)} pages")
+                results = await asyncio.gather(*[fetch_subpage(url) for url in batch])
+                for page_name, content in results:
+                    if content:
+                        subpage_content[page_name] = content
 
             # Diagnostic logging for subpage content
             logger.info(f"Subpage content keys: {list(subpage_content.keys())}")

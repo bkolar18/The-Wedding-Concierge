@@ -162,84 +162,23 @@ class StealthBrowser:
             # Wait for dynamic content to load
             await asyncio.sleep(wait_time)
 
-            # Try to wait for body to have content
-            try:
-                await page.wait_for_selector("body", timeout=5000)
-            except Exception:
-                pass  # Continue even if selector wait fails
-
-            # Try to close any popups/modals that might overlay content
-            try:
-                # Common close button selectors
-                close_selectors = [
-                    '[aria-label="Close"]',
-                    '[aria-label="close"]',
-                    'button[class*="close"]',
-                    'button[class*="Close"]',
-                    '[class*="modal"] button',
-                    '[class*="popup"] button',
-                    '[class*="overlay"] button',
-                    'button:has-text("Close")',
-                    'button:has-text("×")',
-                    'button:has-text("X")',
-                ]
-                for selector in close_selectors:
-                    try:
-                        close_btn = await page.query_selector(selector)
-                        if close_btn and await close_btn.is_visible():
-                            logger.info(f"Closing popup with selector: {selector}")
-                            await close_btn.click()
-                            await asyncio.sleep(0.5)
-                            break
-                    except Exception:
-                        continue
-            except Exception as e:
-                logger.debug(f"No popups to close: {e}")
-
             # For travel pages, wait for hotel/accommodation content to appear
             url_lower = url.lower()
             if any(kw in url_lower for kw in ['/travel', '/accommodations', '/hotels']):
                 logger.info("Travel page detected - waiting for hotel content to load")
-
-                # Click on the main content area to dismiss any overlays
-                try:
-                    main_content = await page.query_selector('main, [role="main"], article, .content')
-                    if main_content:
-                        await main_content.click()
-                        await asyncio.sleep(0.5)
-                except Exception:
-                    pass
-
                 # Try to wait for content that looks like hotel info
-                hotel_selectors = [
-                    'text=/hotel/i',
-                    'text=/check-in/i',
-                    'text=/booking/i',
-                    'text=/room/i',
-                    '[class*="hotel"]',
-                    '[class*="accommodation"]',
-                    '[class*="travel"]',
-                ]
-                for selector in hotel_selectors:
-                    try:
-                        await page.wait_for_selector(selector, timeout=3000)
-                        logger.info(f"Found hotel content with selector: {selector}")
-                        break
-                    except Exception:
-                        continue
-                # Extra wait after content appears for full render
-                await asyncio.sleep(2)
+                try:
+                    await page.wait_for_selector('text=/check-in/i', timeout=3000)
+                    logger.info("Found hotel content")
+                except Exception:
+                    pass  # Continue even if not found
 
-            # Scroll to trigger lazy loading
+            # Quick scroll to trigger lazy loading
             try:
-                await page.evaluate("window.scrollTo(0, document.body.scrollHeight / 2)")
-                await asyncio.sleep(0.5)
                 await page.evaluate("window.scrollTo(0, document.body.scrollHeight)")
-                await asyncio.sleep(0.5)
-                await page.evaluate("window.scrollTo(0, 0)")
-                await asyncio.sleep(0.5)
+                await asyncio.sleep(0.3)
             except Exception:
-                pass  # Continue even if scroll fails
+                pass
 
             # Get the fully rendered HTML
             html = await page.content()
