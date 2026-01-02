@@ -4067,3 +4067,17 @@ Done. Changes pushed:
 1. **File upload button** - Styled "Choose File:" button with spacing before filename
 2. **Edit guests** - Added pencil icon button on each row, opens edit modal
 3. **Expandable list** - "Show 25 more" button instead of "...and x more", plus "Show less" to collapse
+
+=== CLAUDE RESPONSE ===
+
+Done. Pushed mobile optimizations:
+
+**Dashboard fixes:**
+- Share section: `p-4 sm:p-8` padding (comfortable on small screens)
+- Modal form grids: Stack vertically on mobile, 2 columns on desktop
+- Modal containers: `p-4 sm:p-6` padding
+
+**Chat page:**
+- Hamburger menu appears on mobile when links are available
+- Dropdown shows "Wedding Website" and "My Dashboard"
+- Desktop: Links remain visible as before

@@ -278,7 +278,7 @@ export default function DashboardPage() {
     <div className="min-h-screen bg-gradient-to-b from-rose-50 to-white flex flex-col">
       <Header />
 
-      <main className="max-w-5xl mx-auto px-4 py-8 flex-grow">
+      <main className="max-w-5xl mx-auto px-4 py-8 flex-grow overflow-x-hidden">
         {!wedding && !showCreateForm ? (
           // No wedding yet - show welcome with options
           <div className="text-center py-16">
@@ -483,13 +483,13 @@ export default function DashboardPage() {
             </div>
 
             {/* Share link section */}
-            <div className="bg-gradient-to-r from-rose-500 to-rose-600 rounded-2xl shadow-lg p-4 sm:p-8 text-white">
+            <div className="bg-gradient-to-r from-rose-500 to-rose-600 rounded-2xl shadow-lg p-4 sm:p-8 text-white overflow-hidden">
               <h2 className="text-xl font-medium mb-2">Share with Your Guests</h2>
-              <p className="text-rose-100 mb-4">
+              <p className="text-rose-100 mb-4 break-words">
                 Give your guests this link so they can ask questions about your wedding.
               </p>
               <div className="flex flex-col sm:flex-row gap-3">
-                <div className="flex-1 bg-white/10 rounded-xl px-4 py-3 font-mono text-sm truncate">
+                <div className="flex-1 bg-white/10 rounded-xl px-4 py-3 font-mono text-sm overflow-hidden text-ellipsis break-all">
                   {typeof window !== 'undefined' ? `${window.location.origin}/chat/${wedding.access_code}` : `/chat/${wedding.access_code}`}
                 </div>
                 <button
@@ -502,7 +502,7 @@ export default function DashboardPage() {
             </div>
 
             {/* Tab Navigation */}
-            <div className="flex border-b border-gray-200">
+            <div className="flex border-b border-gray-200 overflow-hidden">
               <button
                 onClick={() => setActiveTab('details')}
                 className={`flex-1 py-4 text-center font-medium transition-colors relative ${
@@ -512,10 +512,11 @@ export default function DashboardPage() {
                 }`}
               >
                 <span className="flex items-center justify-center">
-                  <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg className="w-5 h-5 sm:mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
                   </svg>
-                  Wedding Details
+                  <span className="hidden sm:inline">Wedding Details</span>
+                  <span className="sm:hidden text-xs ml-1">Details</span>
                 </span>
                 {activeTab === 'details' && (
                   <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-rose-600" />
@@ -530,10 +531,11 @@ export default function DashboardPage() {
                 }`}
               >
                 <span className="flex items-center justify-center">
-                  <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg className="w-5 h-5 sm:mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
                   </svg>
-                  Guest Outreach
+                  <span className="hidden sm:inline">Guest Outreach</span>
+                  <span className="sm:hidden text-xs ml-1">Outreach</span>
                 </span>
                 {activeTab === 'outreach' && (
                   <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-rose-600" />
@@ -725,7 +727,7 @@ export default function DashboardPage() {
               </div>
 
               {/* FAQs */}
-              <div className="bg-white rounded-2xl shadow-lg p-6 md:col-span-2">
+              <div className="bg-white rounded-2xl shadow-lg p-6 md:col-span-2 overflow-hidden">
                 <div className="flex items-center justify-between mb-4">
                   <h3 className="text-lg font-medium text-gray-800 flex items-center">
                     <svg className="w-5 h-5 mr-2 text-rose-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -745,11 +747,11 @@ export default function DashboardPage() {
                     {wedding.faqs.map((faq) => (
                       <li key={faq.id} className="border-b border-gray-100 pb-4 last:border-0 last:pb-0 group">
                         <div className="flex justify-between">
-                          <div className="flex-1">
-                            <p className="font-medium text-gray-800">{faq.question}</p>
-                            <p className="text-sm text-gray-600 mt-1">{faq.answer}</p>
+                          <div className="flex-1 min-w-0">
+                            <p className="font-medium text-gray-800 break-words">{faq.question}</p>
+                            <p className="text-sm text-gray-600 mt-1 break-words">{faq.answer}</p>
                           </div>
-                          <div className="flex gap-2 ml-4">
+                          <div className="flex gap-2 ml-4 flex-shrink-0">
                             <button
                               onClick={() => openModal('faq', faq)}
                               className="text-gray-400 hover:text-gray-600"
