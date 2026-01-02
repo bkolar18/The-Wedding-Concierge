@@ -32,6 +32,17 @@ class Settings(BaseSettings):
     TWILIO_PHONE_NUMBER: Optional[str] = None
     TWILIO_MESSAGING_SERVICE_SID: Optional[str] = None  # For A2P 10DLC compliance
 
+    # Email (SMTP)
+    SMTP_HOST: Optional[str] = None
+    SMTP_PORT: int = 587
+    SMTP_USER: Optional[str] = None
+    SMTP_PASSWORD: Optional[str] = None
+    SMTP_FROM_EMAIL: str = "noreply@weddingconcierge.app"
+    SMTP_FROM_NAME: str = "The Wedding Concierge"
+
+    # Frontend URL for password reset links
+    FRONTEND_URL: str = "http://localhost:3000"
+
     class Config:
         env_file = str(ENV_FILE)
         case_sensitive = True

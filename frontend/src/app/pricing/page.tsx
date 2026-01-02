@@ -86,6 +86,14 @@ export default function PricingPage() {
                     <strong>24/7 availability</strong> - Answers questions day or night
                   </span>
                 </li>
+                <li className="flex items-start">
+                  <svg className="w-6 h-6 text-green-500 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                  </svg>
+                  <span className="text-gray-700">
+                    <strong>SMS guest messaging</strong> - Send blasts & schedule reminders
+                  </span>
+                </li>
               </ul>
 
               <Link
@@ -135,11 +143,21 @@ export default function PricingPage() {
               </p>
             </div>
 
-            <div className="pb-6">
+            <div className="border-b border-gray-100 pb-6">
               <h3 className="font-medium text-gray-800 mb-2">What websites can you import?</h3>
               <p className="text-gray-600">
                 We support The Knot, Zola, Joy, WeddingWire, Minted, and most custom
                 wedding websites. If yours doesn't work, let us know!
+              </p>
+            </div>
+
+            <div className="pb-6">
+              <h3 className="font-medium text-gray-800 mb-2">How does SMS messaging work?</h3>
+              <p className="text-gray-600">
+                Upload your guest list and send text messages directly to all your guests.
+                Send welcome messages, RSVP reminders, day-before logistics, or custom announcements.
+                You can also schedule messages in advance (like "7 days before wedding").
+                SMS costs approximately $0.01 per text and is billed separately based on usage.
               </p>
             </div>
           </div>

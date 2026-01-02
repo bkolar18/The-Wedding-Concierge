@@ -194,6 +194,42 @@ export async function getCurrentUser(token: string): Promise<User> {
   return response.json();
 }
 
+/**
+ * Request a password reset email.
+ */
+export async function forgotPassword(email: string): Promise<{ message: string }> {
+  const response = await fetch(`${API_URL}/api/auth/forgot-password`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ email }),
+  });
+
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(error.detail || 'Failed to send reset email');
+  }
+
+  return response.json();
+}
+
+/**
+ * Reset password using a token.
+ */
+export async function resetPassword(token: string, newPassword: string): Promise<{ message: string }> {
+  const response = await fetch(`${API_URL}/api/auth/reset-password`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ token, new_password: newPassword }),
+  });
+
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(error.detail || 'Failed to reset password');
+  }
+
+  return response.json();
+}
+
 // ============ WEDDING API ============
 
 export interface WeddingData {
@@ -896,6 +932,30 @@ export async function getSMSHistory(token: string, weddingId: string, limit: num
   if (!response.ok) {
     const error = await response.json();
     throw new Error(error.detail || 'Failed to get SMS history');
+  }
+
+  return response.json();
+}
+
+// ============ CONTACT API ============
+
+export interface ContactFormData {
+  name: string;
+  email: string;
+  message: string;
+  wedding_date?: string;
+}
+
+export async function submitContactForm(data: ContactFormData): Promise<{ message: string }> {
+  const response = await fetch(`${API_URL}/api/contact`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(data),
+  });
+
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(error.detail || 'Failed to send message');
   }
 
   return response.json();

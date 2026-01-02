@@ -17,7 +17,7 @@ from fastapi.responses import JSONResponse
 import traceback
 
 from core.config import settings
-from api.routes import chat, wedding, health, auth, scrape, sms
+from api.routes import chat, wedding, health, auth, scrape, sms, contact
 
 app = FastAPI(
     title=settings.APP_NAME,
@@ -64,6 +64,7 @@ app.include_router(chat.router, prefix="/api/chat", tags=["chat"])
 app.include_router(wedding.router, prefix="/api/wedding", tags=["wedding"])
 app.include_router(scrape.router, prefix="/api/scrape", tags=["scrape"])
 app.include_router(sms.router, prefix="/api/wedding", tags=["sms"])  # SMS routes under /api/wedding/{id}/...
+app.include_router(contact.router, prefix="/api", tags=["contact"])
 
 
 @app.on_event("startup")

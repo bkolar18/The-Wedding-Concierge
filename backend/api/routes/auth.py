@@ -1,4 +1,5 @@
 """Authentication API routes."""
+import re
 from datetime import datetime, timedelta
 from typing import Optional
 from fastapi import APIRouter, HTTPException, Depends, status
@@ -15,10 +16,32 @@ from core.auth import (
     create_access_token,
     get_current_user
 )
-from models.user import User
+from models.user import User, PasswordResetToken
 from models.wedding import Wedding
+from services.email import email_service
 
 router = APIRouter()
+
+
+def validate_password(password: str) -> tuple[bool, str]:
+    """
+    Validate password meets requirements:
+    - At least 8 characters
+    - At least 1 uppercase letter
+    - At least 1 special character
+
+    Returns (is_valid, error_message)
+    """
+    if len(password) < 8:
+        return False, "Password must be at least 8 characters"
+
+    if not re.search(r'[A-Z]', password):
+        return False, "Password must contain at least 1 uppercase letter"
+
+    if not re.search(r'[!@#$%^&*(),.?":{}|<>_\-+=\[\]\\\/`~]', password):
+        return False, "Password must contain at least 1 special character (!@#$%^&* etc.)"
+
+    return True, ""
 
 
 # Request/Response Models
@@ -64,6 +87,17 @@ class UserWithWeddingResponse(BaseModel):
     created_at: datetime
 
 
+class ForgotPasswordRequest(BaseModel):
+    """Request to initiate password reset."""
+    email: EmailStr
+
+
+class ResetPasswordRequest(BaseModel):
+    """Request to reset password with token."""
+    token: str
+    new_password: str
+
+
 @router.post("/register", response_model=TokenResponse, status_code=status.HTTP_201_CREATED)
 async def register(
     request: UserRegisterRequest,
@@ -87,10 +121,11 @@ async def register(
         )
 
     # Validate password
-    if len(request.password) < 8:
+    is_valid, error_msg = validate_password(request.password)
+    if not is_valid:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Password must be at least 8 characters"
+            detail=error_msg
         )
 
     # Create user
@@ -199,3 +234,102 @@ async def logout():
     The client should discard the token.
     """
     return {"message": "Successfully logged out"}
+
+
+@router.post("/forgot-password")
+async def forgot_password(
+    request: ForgotPasswordRequest,
+    db: AsyncSession = Depends(get_db)
+):
+    """
+    Request a password reset email.
+
+    Always returns success to prevent email enumeration attacks.
+    """
+    # Find user by email
+    result = await db.execute(
+        select(User).where(User.email == request.email.lower())
+    )
+    user = result.scalar_one_or_none()
+
+    if user:
+        # Invalidate any existing reset tokens for this user
+        result = await db.execute(
+            select(PasswordResetToken).where(
+                PasswordResetToken.user_id == user.id,
+                PasswordResetToken.used_at == None
+            )
+        )
+        existing_tokens = result.scalars().all()
+        for token in existing_tokens:
+            token.used_at = datetime.utcnow()
+
+        # Create new reset token (expires in 1 hour)
+        reset_token = PasswordResetToken(
+            user_id=user.id,
+            expires_at=datetime.utcnow() + timedelta(hours=1)
+        )
+        db.add(reset_token)
+        await db.commit()
+        await db.refresh(reset_token)
+
+        # Send email
+        await email_service.send_password_reset_email(
+            to_email=user.email,
+            reset_token=reset_token.token,
+            user_name=user.name
+        )
+
+    # Always return success to prevent email enumeration
+    return {"message": "If an account exists with that email, you will receive a password reset link."}
+
+
+@router.post("/reset-password")
+async def reset_password(
+    request: ResetPasswordRequest,
+    db: AsyncSession = Depends(get_db)
+):
+    """
+    Reset password using a valid reset token.
+    """
+    # Find token
+    result = await db.execute(
+        select(PasswordResetToken).where(PasswordResetToken.token == request.token)
+    )
+    reset_token = result.scalar_one_or_none()
+
+    if not reset_token or not reset_token.is_valid:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Invalid or expired reset token"
+        )
+
+    # Validate new password
+    is_valid, error_msg = validate_password(request.new_password)
+    if not is_valid:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=error_msg
+        )
+
+    # Get user
+    result = await db.execute(
+        select(User).where(User.id == reset_token.user_id)
+    )
+    user = result.scalar_one_or_none()
+
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="User not found"
+        )
+
+    # Update password
+    user.hashed_password = get_password_hash(request.new_password)
+
+    # Mark token as used
+    reset_token.used_at = datetime.utcnow()
+
+    await db.commit()
+
+    return {"message": "Password has been reset successfully"}

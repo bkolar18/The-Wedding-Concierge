@@ -3,10 +3,11 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import { useAuth } from '@/contexts/AuthContext';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, FormEvent } from 'react';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import ChatWidget from '@/components/chat/ChatWidget';
+import { submitContactForm } from '@/lib/api';
 
 // Hook for scroll-triggered animations
 function useScrollAnimation() {
@@ -39,7 +40,40 @@ export default function Home() {
   const howItWorks = useScrollAnimation();
   const demo = useScrollAnimation();
   const whyUs = useScrollAnimation();
-  const cta = useScrollAnimation();
+  const contactSection = useScrollAnimation();
+
+  // Contact form state
+  const [contactName, setContactName] = useState('');
+  const [contactEmail, setContactEmail] = useState('');
+  const [contactMessage, setContactMessage] = useState('');
+  const [contactWeddingDate, setContactWeddingDate] = useState('');
+  const [contactLoading, setContactLoading] = useState(false);
+  const [contactSuccess, setContactSuccess] = useState(false);
+  const [contactError, setContactError] = useState<string | null>(null);
+
+  const handleContactSubmit = async (e: FormEvent) => {
+    e.preventDefault();
+    setContactError(null);
+    setContactLoading(true);
+
+    try {
+      await submitContactForm({
+        name: contactName,
+        email: contactEmail,
+        message: contactMessage,
+        wedding_date: contactWeddingDate || undefined,
+      });
+      setContactSuccess(true);
+      setContactName('');
+      setContactEmail('');
+      setContactMessage('');
+      setContactWeddingDate('');
+    } catch (err) {
+      setContactError(err instanceof Error ? err.message : 'Failed to send message');
+    } finally {
+      setContactLoading(false);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-white flex flex-col">
@@ -322,25 +356,158 @@ export default function Home() {
         </div>
       </section>
 
-      {/* CTA Section */}
-      {!user && !isLoading && (
-        <section ref={cta.ref as React.RefObject<HTMLElement>} className="py-20 px-4 bg-gradient-to-r from-rose-500 to-rose-600">
-          <div className="max-w-2xl mx-auto text-center text-white">
-            <h2 className={`text-3xl md:text-4xl font-serif mb-4 ${cta.isVisible ? 'animate-fade-in-up' : 'opacity-0'}`}>
-              Ready to simplify your wedding?
-            </h2>
-            <p className={`text-rose-100 mb-8 text-lg ${cta.isVisible ? 'animate-fade-in-up animate-delay-100' : 'opacity-0'}`}>
-              Stop answering the same questions over and over. Let your concierge handle it for just $49.
-            </p>
-            <Link
-              href="/register"
-              className={`inline-block px-8 py-4 bg-white text-rose-600 rounded-full font-medium hover:bg-rose-50 hover:-translate-y-1 transition-all shadow-lg ${cta.isVisible ? 'animate-fade-in-up animate-delay-200' : 'opacity-0'}`}
-            >
-              Get Started Now
-            </Link>
+      {/* Contact Section */}
+      <section ref={contactSection.ref as React.RefObject<HTMLElement>} className="py-20 px-4 bg-gray-50">
+        <div className="max-w-4xl mx-auto">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
+            {/* Left side - Info */}
+            <div className={contactSection.isVisible ? 'animate-slide-in-left' : 'opacity-0'}>
+              <h2 className="text-3xl font-serif text-gray-800 mb-4">
+                Get in Touch
+              </h2>
+              <p className="text-gray-600 mb-8">
+                Have questions about The Wedding Concierge? We'd love to hear from you.
+                Send us a message and we'll get back to you as soon as possible.
+              </p>
+
+              <div className="space-y-4">
+                <div className="flex items-start space-x-4">
+                  <div className="w-10 h-10 bg-rose-100 rounded-full flex items-center justify-center flex-shrink-0">
+                    <svg className="w-5 h-5 text-rose-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                    </svg>
+                  </div>
+                  <div>
+                    <h3 className="font-medium text-gray-800">Email Support</h3>
+                    <p className="text-gray-600 text-sm">Get help with your wedding concierge setup</p>
+                  </div>
+                </div>
+
+                <div className="flex items-start space-x-4">
+                  <div className="w-10 h-10 bg-rose-100 rounded-full flex items-center justify-center flex-shrink-0">
+                    <svg className="w-5 h-5 text-rose-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                  </div>
+                  <div>
+                    <h3 className="font-medium text-gray-800">Quick Response</h3>
+                    <p className="text-gray-600 text-sm">We typically respond within 24 hours</p>
+                  </div>
+                </div>
+
+                <div className="flex items-start space-x-4">
+                  <div className="w-10 h-10 bg-rose-100 rounded-full flex items-center justify-center flex-shrink-0">
+                    <svg className="w-5 h-5 text-rose-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                  </div>
+                  <div>
+                    <h3 className="font-medium text-gray-800">Custom Features</h3>
+                    <p className="text-gray-600 text-sm">Need something special? Let us know!</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Right side - Form */}
+            <div className={contactSection.isVisible ? 'animate-slide-in-right animate-delay-200' : 'opacity-0'}>
+              <div className="bg-white rounded-2xl shadow-lg p-8">
+                {contactSuccess ? (
+                  <div className="text-center py-8">
+                    <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                      <svg className="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                      </svg>
+                    </div>
+                    <h3 className="text-xl font-medium text-gray-800 mb-2">Message Sent!</h3>
+                    <p className="text-gray-600 mb-6">Thank you for reaching out. We'll get back to you soon.</p>
+                    <button
+                      onClick={() => setContactSuccess(false)}
+                      className="text-rose-600 hover:text-rose-700 font-medium"
+                    >
+                      Send another message
+                    </button>
+                  </div>
+                ) : (
+                  <form onSubmit={handleContactSubmit} className="space-y-4">
+                    <div>
+                      <label htmlFor="contact-name" className="block text-sm font-medium text-gray-700 mb-1">
+                        Your Name
+                      </label>
+                      <input
+                        type="text"
+                        id="contact-name"
+                        value={contactName}
+                        onChange={(e) => setContactName(e.target.value)}
+                        placeholder="John & Jane"
+                        className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-rose-500 focus:border-rose-500 transition-colors"
+                        required
+                      />
+                    </div>
+
+                    <div>
+                      <label htmlFor="contact-email" className="block text-sm font-medium text-gray-700 mb-1">
+                        Email Address
+                      </label>
+                      <input
+                        type="email"
+                        id="contact-email"
+                        value={contactEmail}
+                        onChange={(e) => setContactEmail(e.target.value)}
+                        placeholder="you@example.com"
+                        className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-rose-500 focus:border-rose-500 transition-colors"
+                        required
+                      />
+                    </div>
+
+                    <div>
+                      <label htmlFor="contact-date" className="block text-sm font-medium text-gray-700 mb-1">
+                        Wedding Date (optional)
+                      </label>
+                      <input
+                        type="date"
+                        id="contact-date"
+                        value={contactWeddingDate}
+                        onChange={(e) => setContactWeddingDate(e.target.value)}
+                        className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-rose-500 focus:border-rose-500 transition-colors"
+                      />
+                    </div>
+
+                    <div>
+                      <label htmlFor="contact-message" className="block text-sm font-medium text-gray-700 mb-1">
+                        Message
+                      </label>
+                      <textarea
+                        id="contact-message"
+                        value={contactMessage}
+                        onChange={(e) => setContactMessage(e.target.value)}
+                        placeholder="Tell us how we can help..."
+                        rows={4}
+                        className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-rose-500 focus:border-rose-500 transition-colors resize-none"
+                        required
+                      />
+                    </div>
+
+                    {contactError && (
+                      <div className="text-red-600 text-sm bg-red-50 p-3 rounded-lg">
+                        {contactError}
+                      </div>
+                    )}
+
+                    <button
+                      type="submit"
+                      disabled={contactLoading}
+                      className="w-full py-3 px-4 bg-gradient-to-r from-rose-500 to-rose-600 text-white rounded-xl font-medium hover:from-rose-600 hover:to-rose-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-md hover:shadow-lg"
+                    >
+                      {contactLoading ? 'Sending...' : 'Send Message'}
+                    </button>
+                  </form>
+                )}
+              </div>
+            </div>
           </div>
-        </section>
-      )}
+        </div>
+      </section>
 
       <Footer />
     </div>

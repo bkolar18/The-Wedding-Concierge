@@ -3579,4 +3579,94 @@ if wedding_data.get('rsvp_url') or wedding_data.get('rsvp_deadline'):
 
 ---
 
-**Status:** Awaiting user approval before implementation.
+**Status:** User approved. Implementation completed.
+
+=== CLAUDE RESPONSE - Implementation Complete (Session Continuation) ===
+
+## Completed Tasks
+
+### 1. Password Requirements
+**Backend (`backend/api/routes/auth.py`):**
+- Added `validate_password()` function with regex checks:
+  - At least 8 characters
+  - At least 1 uppercase letter
+  - At least 1 special character (!@#$%^&* etc.)
+- Updated register endpoint to enforce validation
+
+**Frontend (`frontend/src/app/register/page.tsx`):**
+- Added real-time password validation with visual feedback
+- Green checkmarks appear as each requirement is met
+- Form prevents submission until all requirements satisfied
+
+### 2. Forgot Password Feature
+**Backend:**
+- `backend/models/user.py` - Added `PasswordResetToken` model with secure token generation
+- `backend/services/email.py` - Created email service with SMTP support
+- `backend/api/routes/auth.py` - Added endpoints:
+  - POST `/api/auth/forgot-password` - Sends reset email (prevents email enumeration)
+  - POST `/api/auth/reset-password` - Validates token and resets password
+- `backend/core/config.py` - Added SMTP configuration:
+  - SMTP_HOST, SMTP_PORT, SMTP_USER, SMTP_PASSWORD
+  - SMTP_FROM_EMAIL, SMTP_FROM_NAME
+  - FRONTEND_URL for reset links
+
+**Frontend:**
+- `frontend/src/app/forgot-password/page.tsx` - Email input form with success state
+- `frontend/src/app/reset-password/page.tsx` - Token validation + new password form
+- `frontend/src/app/login/page.tsx` - Added "Forgot password?" link
+- `frontend/src/lib/api.ts` - Added `forgotPassword()` and `resetPassword()` functions
+
+### 3. Contact Form
+**Backend:**
+- `backend/api/routes/contact.py` - Contact form endpoint that:
+  - Accepts name, email, message, and optional wedding date
+  - Sends formatted HTML email to admin
+  - Returns success message
+- `backend/main.py` - Registered contact router
+
+**Frontend:**
+- `frontend/src/app/page.tsx` - Added contact section with:
+  - Left side: Info cards (email support, quick response, custom features)
+  - Right side: Contact form (name, email, wedding date, message)
+  - Success state with confirmation message
+  - Scroll-triggered animations
+- `frontend/src/lib/api.ts` - Added `submitContactForm()` function
+
+## Files Modified/Created
+
+**Backend:**
+- `backend/core/config.py` - Added SMTP and frontend URL config
+- `backend/models/user.py` - Added PasswordResetToken model
+- `backend/services/email.py` - NEW: Email service with SMTP
+- `backend/api/routes/auth.py` - Added password validation and reset endpoints
+- `backend/api/routes/contact.py` - NEW: Contact form endpoint
+- `backend/main.py` - Added contact router
+
+**Frontend:**
+- `frontend/src/app/register/page.tsx` - Password requirements UI
+- `frontend/src/app/login/page.tsx` - Forgot password link
+- `frontend/src/app/forgot-password/page.tsx` - NEW: Request reset page
+- `frontend/src/app/reset-password/page.tsx` - NEW: Reset password page
+- `frontend/src/app/page.tsx` - Contact form section
+- `frontend/src/lib/api.ts` - Added auth and contact API functions
+
+## Environment Variables to Set for Production
+
+```
+# Email (SMTP)
+SMTP_HOST=smtp.example.com
+SMTP_PORT=587
+SMTP_USER=your-smtp-user
+SMTP_PASSWORD=your-smtp-password
+SMTP_FROM_EMAIL=noreply@weddingconcierge.app
+SMTP_FROM_NAME=The Wedding Concierge
+
+# Frontend URL for reset links
+FRONTEND_URL=https://the-wedding-concierge.vercel.app
+```
+
+## Notes
+- Email service gracefully handles missing SMTP config (logs to console in dev mode)
+- Password reset tokens expire after 1 hour
+- Contact form sends to SMTP_USER email or placeholder in dev
+- All forms have consistent styling with rose/gradient theme
