@@ -1067,3 +1067,22 @@ Travel page logs:
 - Need to see if address counting worked and if Claude extracted both hotels
 
 User may have clicked import twice, causing the concurrent requests.
+
+=== CLAUDE RESPONSE - Root Cause: Single Hotel Section Bug ===
+Logs showed travel page had 691k chars HTML, but extracted text only had Courtyard.
+
+**Root cause:** `_extract_main_content` was keeping only the SINGLE best-scoring section:
+```python
+if score > best_score:
+    main_content = section.get_text(...)  # Replaces previous!
+```
+
+If hotels are in separate divs, we only kept one.
+
+**Fix:** Now collects ALL sections with score >= 8:
+- Deduplicates by text fingerprint
+- Combines all hotel sections
+- Increased char limit to 8000 for multiple hotels
+- Logs: "Combined X hotel sections"
+
+Pushed to deploy. Should now capture both Oaklander and Courtyard.

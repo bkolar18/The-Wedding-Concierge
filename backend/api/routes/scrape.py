@@ -210,7 +210,19 @@ async def scrape_wedding_website(request: ScrapeRequest):
             }
             for e in raw_events
         ]
-        accommodations = structured_data.get("accommodations", [])
+        raw_accommodations = structured_data.get("accommodations", [])
+        # Transform accommodation field names from Claude format to frontend format
+        accommodations = [
+            {
+                "name": a.get("hotel_name", ""),
+                "address": a.get("address"),
+                "phone": a.get("phone"),
+                "booking_url": a.get("booking_url"),
+                "room_block_name": a.get("room_block_name"),
+                "room_block_code": a.get("room_block_code"),
+            }
+            for a in raw_accommodations
+        ]
         faqs = structured_data.get("faqs", [])
 
         # Create preview for user confirmation
