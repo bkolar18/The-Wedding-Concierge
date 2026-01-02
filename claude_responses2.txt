@@ -1105,3 +1105,17 @@ accommodations = [
 ```
 
 Pushed to deploy.
+
+=== CLAUDE RESPONSE - WeddingWire.us Support ===
+WeddingWire site returned garbled content quickly with 0 results.
+
+**Root causes:**
+1. `weddingwire.us` not in platform detection (only had `.com`)
+2. Used httpx instead of browser → got brotli-compressed binary data
+3. Content sent to Claude was unreadable garbage
+
+**Fix:** Added `weddingwire.us` to both:
+- SUPPORTED_PLATFORMS → detects as "weddingwire"
+- BROWSER_REQUIRED_PLATFORMS → uses stealth browser
+
+Pushed to deploy.

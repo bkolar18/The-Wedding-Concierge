@@ -177,7 +177,8 @@ class WeddingScraper:
         # Common sub-page names on wedding websites
         subpage_keywords = ["q-a", "qa", "faq", "travel", "things-to-do", "registry",
                           "rsvp", "schedule", "story", "photos", "party", "details",
-                          "accommodations", "hotels", "wedding-party", "our-story"]
+                          "accommodations", "hotels", "wedding-party", "our-story",
+                          "events", "ceremony", "reception", "welcome"]
 
         for link in soup.find_all("a", href=True):
             href = link["href"]
@@ -234,7 +235,7 @@ class WeddingScraper:
             sections = ["travel", "faq", "schedule", "registry", "story"]
             return [f"{base_url}/{section}" for section in sections]
         elif platform == "weddingwire":
-            sections = ["travel", "q-a", "schedule", "registry"]
+            sections = ["events", "travel", "accommodations", "q-a", "schedule", "registry"]
             return [f"{base_url}/{section}" for section in sections]
 
         return []
