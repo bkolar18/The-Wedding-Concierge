@@ -25,12 +25,14 @@ class WeddingScraper:
         "withjoy.com": "joy",
         "minted.com": "minted",
         "weddingwire.com": "weddingwire",
+        "weddingwire.us": "weddingwire",  # US domain variant
     }
 
     # Platforms known to require browser-based fetching due to bot protection
     BROWSER_REQUIRED_PLATFORMS = {
         "theknot.com": True,      # Akamai protection
         "weddingwire.com": True,  # Same owner as The Knot
+        "weddingwire.us": True,   # US domain variant
     }
 
     def __init__(self):

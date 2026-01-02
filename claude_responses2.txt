@@ -1086,3 +1086,22 @@ If hotels are in separate divs, we only kept one.
 - Logs: "Combined X hotel sections"
 
 Pushed to deploy. Should now capture both Oaklander and Courtyard.
+
+=== CLAUDE RESPONSE - Accommodation Name Display Fix ===
+Extraction worked! But preview only showed addresses, not hotel names.
+
+**Root cause:** Frontend expects `name` but Claude returns `hotel_name`.
+
+**Fix:** Added transformation in scrape.py (same pattern as events):
+```python
+accommodations = [
+    {
+        "name": a.get("hotel_name", ""),
+        "address": a.get("address"),
+        ...
+    }
+    for a in raw_accommodations
+]
+```
+
+Pushed to deploy.
