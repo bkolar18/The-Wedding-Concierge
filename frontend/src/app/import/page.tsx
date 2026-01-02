@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { scrapeWeddingWebsite, importWeddingFromUrl, ScrapePreview, ScrapeEvent, ScrapeAccommodation, ScrapeFAQ, ImportResponse } from '@/lib/api';
+import { startScrapeJob, getScrapeJobStatus, importWeddingFromUrl, ScrapePreview, ScrapeEvent, ScrapeAccommodation, ScrapeFAQ, ImportResponse } from '@/lib/api';
 import { useAuth } from '@/contexts/AuthContext';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
@@ -38,16 +38,6 @@ function formatDateString(dateStr: string): string {
   return dateStr;
 }
 
-const SCAN_STAGES = [
-  { progress: 10, message: 'Connecting to website...' },
-  { progress: 25, message: 'Loading main page...' },
-  { progress: 40, message: 'Finding additional pages...' },
-  { progress: 55, message: 'Scanning travel & accommodations...' },
-  { progress: 70, message: 'Scanning events & schedule...' },
-  { progress: 85, message: 'Extracting wedding details...' },
-  { progress: 95, message: 'Almost done...' },
-];
-
 export default function ImportPage() {
   const router = useRouter();
   const { user, token } = useAuth();
@@ -62,63 +52,96 @@ export default function ImportPage() {
   const [scanProgress, setScanProgress] = useState(0);
   const [scanMessage, setScanMessage] = useState('');
   const [showLongWaitMessage, setShowLongWaitMessage] = useState(false);
+  const [jobId, setJobId] = useState<string | null>(null);
 
   // User is logged in if we have a token from AuthContext
   const isLoggedIn = !!token;
 
-  // Progress animation during scanning
+  // Poll for job status when we have a jobId and are scanning
   useEffect(() => {
-    if (step !== 'scanning') {
-      setScanProgress(0);
-      setScanMessage('');
-      setShowLongWaitMessage(false);
+    if (!jobId || step !== 'scanning') {
       return;
     }
 
-    let stageIndex = 0;
-    const interval = setInterval(() => {
-      if (stageIndex < SCAN_STAGES.length) {
-        setScanProgress(SCAN_STAGES[stageIndex].progress);
-        setScanMessage(SCAN_STAGES[stageIndex].message);
-        stageIndex++;
+    let cancelled = false;
+    let pollCount = 0;
+
+    const pollJobStatus = async () => {
+      try {
+        const status = await getScrapeJobStatus(jobId);
+
+        if (cancelled) return;
+
+        // Update progress from server
+        setScanProgress(status.progress);
+        setScanMessage(status.message || 'Processing...');
+
+        if (status.status === 'completed' && status.preview && status.data) {
+          // Success!
+          setScanProgress(100);
+          setScanMessage('Complete!');
+          await new Promise(resolve => setTimeout(resolve, 500));
+          setPreview(status.preview);
+          setScrapedData(status.data);
+          setPlatform(status.platform || null);
+          setStep('preview');
+          setIsLoading(false);
+          setJobId(null);
+        } else if (status.status === 'failed') {
+          // Error
+          setError(status.error || 'Failed to scan website');
+          setStep('input');
+          setIsLoading(false);
+          setJobId(null);
+        } else {
+          // Still processing, poll again
+          pollCount++;
+          // Show long wait message after ~50 seconds (about 17 polls at 3s each)
+          if (pollCount > 17) {
+            setShowLongWaitMessage(true);
+          }
+          setTimeout(pollJobStatus, 3000);
+        }
+      } catch (err) {
+        if (cancelled) return;
+        // Network error - retry a few times
+        if (pollCount < 60) {
+          pollCount++;
+          setTimeout(pollJobStatus, 3000);
+        } else {
+          setError('Lost connection to server. Your scan may still be processing - try refreshing.');
+          setStep('input');
+          setIsLoading(false);
+          setJobId(null);
+        }
       }
-    }, 8000); // Move to next stage every 8 seconds
+    };
 
-    // Start immediately
-    setScanProgress(SCAN_STAGES[0].progress);
-    setScanMessage(SCAN_STAGES[0].message);
-
-    // Show long wait message after 50 seconds
-    const longWaitTimeout = setTimeout(() => {
-      setShowLongWaitMessage(true);
-    }, 50000);
+    // Start polling
+    pollJobStatus();
 
     return () => {
-      clearInterval(interval);
-      clearTimeout(longWaitTimeout);
+      cancelled = true;
     };
-  }, [step]);
+  }, [jobId, step]);
 
   const handleScan = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
     setIsLoading(true);
     setStep('scanning');
+    setScanProgress(5);
+    setScanMessage('Starting...');
+    setShowLongWaitMessage(false);
 
     try {
-      const result = await scrapeWeddingWebsite(url);
-      setScanProgress(100);
-      setScanMessage('Complete!');
-      // Small delay to show 100% before transitioning
-      await new Promise(resolve => setTimeout(resolve, 500));
-      setPreview(result.preview);
-      setScrapedData(result.data);  // Store scraped data to avoid re-scraping on import
-      setPlatform(result.platform);
-      setStep('preview');
+      // Start background job - returns immediately
+      const { job_id } = await startScrapeJob(url);
+      setJobId(job_id);
+      // Polling will be handled by the useEffect above
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to scan website');
+      setError(err instanceof Error ? err.message : 'Failed to start scan');
       setStep('input');
-    } finally {
       setIsLoading(false);
     }
   };
@@ -147,6 +170,10 @@ export default function ImportPage() {
     setPlatform(null);
     setImportResult(null);
     setError(null);
+    setJobId(null);
+    setScanProgress(0);
+    setScanMessage('');
+    setShowLongWaitMessage(false);
   };
 
   return (

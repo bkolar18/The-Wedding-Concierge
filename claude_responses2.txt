@@ -1335,3 +1335,64 @@ if pages_available:
 **Example Claude behavior:**
 - Guest: "Where can I see photos?"
 - Claude: "You can view photos on Hannah & Parker's wedding website at https://theknot.com/.../photos"
+
+=== CLAUDE RESPONSE - Fix Date Display Showing Wrong Day ===
+
+User reported: "the day of the wedding in the preview is listed as the day before the actual wedding again"
+
+**The Problem:**
+When JavaScript parses `"2024-09-14"` as a Date, it treats it as midnight UTC. In US timezones, this displays as the previous day (September 13th at 7pm EST).
+
+```javascript
+new Date("2024-09-14")  // Interpreted as UTC midnight
+// In EST (UTC-5), this shows as September 13th at 7pm!
+```
+
+**The Fix:**
+Parse the `YYYY-MM-DD` string directly without going through JavaScript's Date UTC interpretation:
+
+```javascript
+// Before (wrong):
+new Date("2024-09-14").toLocaleDateString(...)  // Shows Sept 13 in EST
+
+// After (correct):
+function formatDateString(dateStr: string): string {
+  const match = dateStr.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+  if (match) {
+    const year = parseInt(match[1]);
+    const month = parseInt(match[2]) - 1; // 0-indexed
+    const day = parseInt(match[3]);
+
+    // Create date at noon local time to avoid timezone edge cases
+    const date = new Date(year, month, day, 12, 0, 0);
+    // ... format with weekday, month name, day, year
+  }
+}
+```
+
+Fixed in:
+- `frontend/src/app/import/page.tsx` - Preview wedding date
+- `frontend/src/app/dashboard/page.tsx` - Wedding details header
+- `frontend/src/app/chat/[accessCode]/page.tsx` - Chat page header
+
+=== CLAUDE RESPONSE - Load Failed on Mobile When Switching Apps ===
+
+User asked: "why does it say Load Failed when i move away from the import on my phone (close the website browser for a different app)"
+
+That's normal mobile browser behavior. When you switch away from the browser to another app, the OS suspends the browser tab to save battery. This cancels any in-progress network requests.
+
+The import/scrape takes 30-60+ seconds, so if you switch apps during that time:
+1. The API request gets cancelled
+2. The page shows "Load Failed" when you return
+
+**Quick fixes:**
+1. **Keep the browser open** during import - don't switch apps until it completes
+2. We could add a message like "Please keep this page open while scanning..."
+
+**Better long-term fix:**
+Use a background job pattern:
+1. User submits URL → Server returns a job ID immediately
+2. Scraping happens server-side (doesn't matter if user leaves)
+3. Client polls for completion or gets notified when done
+
+Want me to add a warning message for now, or implement the background job pattern? The warning is quick, the job pattern is more work but a better UX.

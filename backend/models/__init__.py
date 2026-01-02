@@ -3,6 +3,7 @@ from .wedding import Wedding, WeddingEvent, WeddingAccommodation, WeddingFAQ
 from .user import User
 from .chat import ChatSession, ChatMessage
 from .sms import Guest, SMSTemplate, ScheduledMessage, MessageLog
+from .scrape_job import ScrapeJob, ScrapeJobStatus
 
 __all__ = [
     "Wedding",
@@ -16,4 +17,6 @@ __all__ = [
     "SMSTemplate",
     "ScheduledMessage",
     "MessageLog",
+    "ScrapeJob",
+    "ScrapeJobStatus",
 ]

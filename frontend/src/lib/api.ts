@@ -652,6 +652,60 @@ export async function importWeddingFromUrl(url: string, token?: string, data?: R
   return response.json();
 }
 
+// ============ BACKGROUND SCRAPE JOB API ============
+
+export interface StartScrapeResponse {
+  job_id: string;
+  message: string;
+}
+
+export interface ScrapeJobStatus {
+  job_id: string;
+  status: 'pending' | 'processing' | 'completed' | 'failed';
+  progress: number;
+  message: string | null;
+  // Results (only present when completed)
+  platform?: string | null;
+  data?: Record<string, unknown> | null;
+  preview?: ScrapePreview | null;
+  // Error (only present when failed)
+  error?: string | null;
+}
+
+/**
+ * Start a background scrape job. Returns immediately with a job ID.
+ * Use getScrapeJobStatus to poll for progress and results.
+ */
+export async function startScrapeJob(url: string): Promise<StartScrapeResponse> {
+  const response = await fetch(`${API_URL}/api/scrape/start`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ url }),
+  });
+
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(error.detail || 'Failed to start scrape job');
+  }
+
+  return response.json();
+}
+
+/**
+ * Get the status of a background scrape job.
+ * Returns progress updates while running, full results when complete.
+ */
+export async function getScrapeJobStatus(jobId: string): Promise<ScrapeJobStatus> {
+  const response = await fetch(`${API_URL}/api/scrape/status/${jobId}`);
+
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(error.detail || 'Failed to get job status');
+  }
+
+  return response.json();
+}
+
 // ============ GUEST API ============
 
 export interface Guest {

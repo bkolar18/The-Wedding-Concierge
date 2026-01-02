@@ -3,16 +3,19 @@ import re
 import socket
 import ipaddress
 import logging
+import asyncio
 from typing import Optional
 from urllib.parse import urlparse
 from datetime import date, datetime
-from fastapi import APIRouter, HTTPException, Depends
+from fastapi import APIRouter, HTTPException, Depends, BackgroundTasks
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from pydantic import BaseModel, HttpUrl
 
 from services.scraper import WeddingScraper
 from services.scraper.data_mapper import WeddingDataMapper
 from core.auth import get_current_user_optional
+from core.database import async_session_maker
+from models.scrape_job import ScrapeJob, ScrapeJobStatus
 
 logger = logging.getLogger(__name__)
 
@@ -432,3 +435,215 @@ async def import_wedding_from_url(
     finally:
         if scraper:
             await scraper.close()
+
+
+# ============================================================================
+# Background Job Endpoints - for mobile-friendly async scraping
+# ============================================================================
+
+class StartScrapeRequest(BaseModel):
+    """Request to start a background scrape job."""
+    url: str
+
+
+class StartScrapeResponse(BaseModel):
+    """Response with job ID for polling."""
+    job_id: str
+    message: str
+
+
+class JobStatusResponse(BaseModel):
+    """Response with job status and results if complete."""
+    job_id: str
+    status: str
+    progress: int
+    message: Optional[str] = None
+    # Results (only present when completed)
+    platform: Optional[str] = None
+    data: Optional[dict] = None
+    preview: Optional[dict] = None
+    # Error (only present when failed)
+    error: Optional[str] = None
+
+
+async def run_scrape_job(job_id: str, url: str):
+    """Background task to run the scrape job."""
+    async with async_session_maker() as db:
+        from sqlalchemy import select
+
+        # Get the job
+        result = await db.execute(select(ScrapeJob).where(ScrapeJob.id == job_id))
+        job = result.scalar_one_or_none()
+        if not job:
+            logger.error(f"Job {job_id} not found")
+            return
+
+        # Update status to processing
+        job.status = ScrapeJobStatus.PROCESSING
+        job.started_at = datetime.utcnow()
+        job.progress = 10
+        job.message = "Connecting to website..."
+        await db.commit()
+
+        scraper = WeddingScraper()
+
+        try:
+            # Update progress
+            job.progress = 25
+            job.message = "Loading main page..."
+            await db.commit()
+
+            # Scrape the website
+            raw_data = await scraper.scrape(url)
+
+            if "error" in raw_data:
+                job.status = ScrapeJobStatus.FAILED
+                job.error = raw_data["error"]
+                job.completed_at = datetime.utcnow()
+                await db.commit()
+                return
+
+            # Update progress
+            job.progress = 70
+            job.message = "Extracting wedding details..."
+            await db.commit()
+
+            # Map to structured wedding data
+            mapper = WeddingDataMapper()
+            structured_data = await mapper.extract_structured_data(raw_data)
+
+            # Transform for frontend
+            raw_events = structured_data.get("events", [])
+            events = [
+                {
+                    "name": e.get("event_name", ""),
+                    "date": e.get("event_date"),
+                    "time": e.get("event_time"),
+                    "description": e.get("description"),
+                    "venue_name": e.get("venue_name"),
+                    "venue_address": e.get("venue_address"),
+                    "dress_code": e.get("dress_code"),
+                }
+                for e in raw_events
+            ]
+            raw_accommodations = structured_data.get("accommodations", [])
+            accommodations = [
+                {
+                    "name": a.get("hotel_name", ""),
+                    "address": a.get("address"),
+                    "phone": a.get("phone"),
+                    "booking_url": a.get("booking_url"),
+                    "room_block_name": a.get("room_block_name"),
+                    "room_block_code": a.get("room_block_code"),
+                }
+                for a in raw_accommodations
+            ]
+            faqs = structured_data.get("faqs", [])
+
+            # Create preview
+            preview = {
+                "partner1_name": structured_data.get("partner1_name", ""),
+                "partner2_name": structured_data.get("partner2_name", ""),
+                "wedding_date": structured_data.get("wedding_date"),
+                "ceremony_venue": structured_data.get("ceremony_venue_name"),
+                "ceremony_venue_address": structured_data.get("ceremony_venue_address"),
+                "reception_venue": structured_data.get("reception_venue_name"),
+                "reception_venue_address": structured_data.get("reception_venue_address"),
+                "dress_code": structured_data.get("dress_code"),
+                "events_count": len(events),
+                "accommodations_count": len(accommodations),
+                "faqs_count": len(faqs),
+                "has_registry": bool(structured_data.get("registry_urls")),
+                "events": events,
+                "accommodations": accommodations,
+                "faqs": faqs,
+            }
+
+            # Update job with results
+            job.status = ScrapeJobStatus.COMPLETED
+            job.progress = 100
+            job.message = "Complete!"
+            job.platform = raw_data.get("platform", "generic")
+            job.scraped_data = structured_data
+            job.preview_data = preview
+            job.completed_at = datetime.utcnow()
+            await db.commit()
+
+            logger.info(f"Job {job_id} completed successfully")
+
+        except Exception as e:
+            logger.error(f"Job {job_id} failed: {e}")
+            job.status = ScrapeJobStatus.FAILED
+            job.error = str(e)
+            job.completed_at = datetime.utcnow()
+            await db.commit()
+        finally:
+            await scraper.close()
+
+
+@router.post("/start", response_model=StartScrapeResponse)
+async def start_scrape_job(request: StartScrapeRequest):
+    """
+    Start a background scrape job and return immediately with a job ID.
+
+    The client can poll /status/{job_id} to check progress and get results.
+    This is mobile-friendly - the scrape continues even if the user leaves the page.
+    """
+    # Validate URL to prevent SSRF
+    is_valid, error_msg = validate_url_for_ssrf(request.url)
+    if not is_valid:
+        raise HTTPException(status_code=400, detail=error_msg)
+
+    # Create job in database
+    async with async_session_maker() as db:
+        job = ScrapeJob(
+            url=request.url,
+            status=ScrapeJobStatus.PENDING,
+            progress=0,
+            message="Starting..."
+        )
+        db.add(job)
+        await db.commit()
+        await db.refresh(job)
+        job_id = job.id
+
+    # Start background task
+    asyncio.create_task(run_scrape_job(job_id, request.url))
+
+    return StartScrapeResponse(
+        job_id=job_id,
+        message="Scrape job started. Poll /status/{job_id} for progress."
+    )
+
+
+@router.get("/status/{job_id}", response_model=JobStatusResponse)
+async def get_scrape_job_status(job_id: str):
+    """
+    Get the status of a background scrape job.
+
+    Returns progress updates while running, and full results when complete.
+    """
+    from sqlalchemy import select
+
+    async with async_session_maker() as db:
+        result = await db.execute(select(ScrapeJob).where(ScrapeJob.id == job_id))
+        job = result.scalar_one_or_none()
+
+        if not job:
+            raise HTTPException(status_code=404, detail="Job not found")
+
+        response = JobStatusResponse(
+            job_id=job.id,
+            status=job.status.value,
+            progress=job.progress,
+            message=job.message
+        )
+
+        if job.status == ScrapeJobStatus.COMPLETED:
+            response.platform = job.platform
+            response.data = job.scraped_data
+            response.preview = job.preview_data
+        elif job.status == ScrapeJobStatus.FAILED:
+            response.error = job.error
+
+        return response
