@@ -280,6 +280,11 @@ class WeddingScraper:
                 subpages = self._get_known_subpages(url, platform)
 
             subpage_content = {}
+
+            # Skip pages that don't contain useful info for the chat assistant
+            skip_pages = ["photos", "photo"]
+            subpages = [url for url in subpages if not any(skip in urlparse(url).path.lower() for skip in skip_pages)]
+
             logger.info(f"Will scrape {len(subpages)} subpages: {subpages}")
 
             # Critical subpages that should be retried if they fail
