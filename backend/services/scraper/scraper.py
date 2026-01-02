@@ -461,29 +461,59 @@ class WeddingScraper:
 
         # For travel/accommodation pages, look for specific content areas
         travel_keywords = ['travel', 'hotel', 'accommod', 'stay', 'lodging', 'where to stay',
-                          'room block', 'book your room', 'reserv']
+                          'room block', 'book your room', 'reserv', 'check-in', 'check-out',
+                          'courtyard', 'marriott', 'hilton', 'hyatt', 'inn', 'suites']
         if any(kw in page_name.lower() for kw in ['travel', 'accommodations', 'hotels']):
             # Try to find the main travel content section
             main_content = None
+            best_score = 0
 
             # Look for sections with travel-related content
             for section in soup_copy.find_all(['main', 'article', 'section', 'div']):
-                section_text = section.get_text(strip=True).lower()
+                section_text = section.get_text(strip=True)
+                section_text_lower = section_text.lower()
                 section_class = ' '.join(section.get('class', [])).lower()
                 section_id = (section.get('id') or '').lower()
 
-                # Check if this section has travel content
-                has_travel_keywords = any(kw in section_text[:500] for kw in travel_keywords)
-                is_travel_section = any(kw in section_class or kw in section_id for kw in travel_keywords)
+                # Skip sections that look like registry/product listings
+                if any(x in section_text_lower for x in ['needs 1 of', 'add to cart', 'shop registry', 'our wish list']):
+                    continue
 
-                if has_travel_keywords or is_travel_section:
-                    # Make sure it's actual content, not just a nav link
-                    if len(section_text) > 100:
-                        main_content = section.get_text(separator="\n", strip=True)
-                        logger.info(f"Found travel section with {len(main_content)} chars")
-                        break
+                # Score this section based on hotel-related content
+                score = 0
 
-            if main_content:
+                # Check for travel keywords (search more of the text)
+                for kw in travel_keywords:
+                    if kw in section_text_lower[:2000]:
+                        score += 1
+
+                # Bonus points for phone number pattern (hotels have phone numbers)
+                if re.search(r'\(\d{3}\)\s*\d{3}[-.]?\d{4}', section_text):
+                    score += 5
+                    logger.info(f"Found phone number in section")
+
+                # Bonus for address-like pattern (street addresses)
+                if re.search(r'\d+\s+\w+\s+(st|street|ave|avenue|blvd|boulevard|rd|road|dr|drive|ln|lane)', section_text_lower):
+                    score += 5
+                    logger.info(f"Found address pattern in section")
+
+                # Bonus for check-in/check-out dates
+                if 'check-in' in section_text_lower and 'check-out' in section_text_lower:
+                    score += 10
+                    logger.info(f"Found check-in/check-out in section")
+
+                # Is it a travel section by class/id?
+                if any(kw in section_class or kw in section_id for kw in ['travel', 'hotel', 'accommod']):
+                    score += 3
+
+                # Update best match if this section has higher score and sufficient content
+                if score > best_score and len(section_text) > 200:
+                    best_score = score
+                    main_content = section.get_text(separator="\n", strip=True)
+                    logger.info(f"New best travel section: score={score}, length={len(main_content)}")
+
+            if main_content and best_score >= 3:
+                logger.info(f"Using travel section with score {best_score}")
                 return self._clean_page_text(main_content)[:5000]
 
         # For Q&A/FAQ pages, look for question/answer content

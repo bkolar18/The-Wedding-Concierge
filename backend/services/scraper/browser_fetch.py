@@ -168,10 +168,48 @@ class StealthBrowser:
             except Exception:
                 pass  # Continue even if selector wait fails
 
+            # Try to close any popups/modals that might overlay content
+            try:
+                # Common close button selectors
+                close_selectors = [
+                    '[aria-label="Close"]',
+                    '[aria-label="close"]',
+                    'button[class*="close"]',
+                    'button[class*="Close"]',
+                    '[class*="modal"] button',
+                    '[class*="popup"] button',
+                    '[class*="overlay"] button',
+                    'button:has-text("Close")',
+                    'button:has-text("×")',
+                    'button:has-text("X")',
+                ]
+                for selector in close_selectors:
+                    try:
+                        close_btn = await page.query_selector(selector)
+                        if close_btn and await close_btn.is_visible():
+                            logger.info(f"Closing popup with selector: {selector}")
+                            await close_btn.click()
+                            await asyncio.sleep(0.5)
+                            break
+                    except Exception:
+                        continue
+            except Exception as e:
+                logger.debug(f"No popups to close: {e}")
+
             # For travel pages, wait for hotel/accommodation content to appear
             url_lower = url.lower()
             if any(kw in url_lower for kw in ['/travel', '/accommodations', '/hotels']):
                 logger.info("Travel page detected - waiting for hotel content to load")
+
+                # Click on the main content area to dismiss any overlays
+                try:
+                    main_content = await page.query_selector('main, [role="main"], article, .content')
+                    if main_content:
+                        await main_content.click()
+                        await asyncio.sleep(0.5)
+                except Exception:
+                    pass
+
                 # Try to wait for content that looks like hotel info
                 hotel_selectors = [
                     'text=/hotel/i',
