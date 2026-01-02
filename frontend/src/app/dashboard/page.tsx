@@ -23,6 +23,34 @@ import {
   AccommodationCreateData,
   FAQCreateData,
 } from '@/lib/api';
+
+// Format date string without timezone conversion
+// Parses "YYYY-MM-DD" directly to avoid JavaScript Date's UTC interpretation
+function formatDateString(dateStr: string): string {
+  const months = [
+    'January', 'February', 'March', 'April', 'May', 'June',
+    'July', 'August', 'September', 'October', 'November', 'December'
+  ];
+  const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+
+  // Parse YYYY-MM-DD format
+  const match = dateStr.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+  if (match) {
+    const year = parseInt(match[1]);
+    const month = parseInt(match[2]) - 1; // 0-indexed
+    const day = parseInt(match[3]);
+
+    // Create date at noon local time to avoid any timezone edge cases
+    const date = new Date(year, month, day, 12, 0, 0);
+    const weekday = days[date.getDay()];
+    const monthName = months[month];
+
+    return `${weekday}, ${monthName} ${day}, ${year}`;
+  }
+
+  // Fallback: return as-is if format doesn't match
+  return dateStr;
+}
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import SMSManager from '@/components/SMSManager';
@@ -442,12 +470,7 @@ export default function DashboardPage() {
                   </h1>
                   {wedding.wedding_date && (
                     <p className="text-gray-500 mt-1">
-                      {new Date(wedding.wedding_date).toLocaleDateString('en-US', {
-                        weekday: 'long',
-                        year: 'numeric',
-                        month: 'long',
-                        day: 'numeric'
-                      })}
+                      {formatDateString(wedding.wedding_date)}
                     </p>
                   )}
                 </div>

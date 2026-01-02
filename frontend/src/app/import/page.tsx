@@ -10,6 +10,34 @@ import Footer from '@/components/Footer';
 
 type Step = 'input' | 'scanning' | 'preview' | 'success';
 
+// Format date string without timezone conversion
+// Parses "YYYY-MM-DD" directly to avoid JavaScript Date's UTC interpretation
+function formatDateString(dateStr: string): string {
+  const months = [
+    'January', 'February', 'March', 'April', 'May', 'June',
+    'July', 'August', 'September', 'October', 'November', 'December'
+  ];
+  const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+
+  // Parse YYYY-MM-DD format
+  const match = dateStr.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+  if (match) {
+    const year = parseInt(match[1]);
+    const month = parseInt(match[2]) - 1; // 0-indexed
+    const day = parseInt(match[3]);
+
+    // Create date at noon local time to avoid any timezone edge cases
+    const date = new Date(year, month, day, 12, 0, 0);
+    const weekday = days[date.getDay()];
+    const monthName = months[month];
+
+    return `${weekday}, ${monthName} ${day}, ${year}`;
+  }
+
+  // Fallback: return as-is if format doesn't match
+  return dateStr;
+}
+
 const SCAN_STAGES = [
   { progress: 10, message: 'Connecting to website...' },
   { progress: 25, message: 'Loading main page...' },
@@ -241,12 +269,7 @@ export default function ImportPage() {
                   </h2>
                   {preview.wedding_date && (
                     <p className="text-gray-600">
-                      Wedding Date: {new Date(preview.wedding_date).toLocaleDateString('en-US', {
-                        weekday: 'long',
-                        year: 'numeric',
-                        month: 'long',
-                        day: 'numeric'
-                      })}
+                      Wedding Date: {formatDateString(preview.wedding_date)}
                     </p>
                   )}
                 </div>
