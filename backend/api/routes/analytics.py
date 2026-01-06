@@ -186,13 +186,8 @@ async def get_chat_transcript(
     if not session:
         raise HTTPException(status_code=404, detail="Chat session not found")
 
-    # Verify ownership
-    wedding_result = await db.execute(
-        select(Wedding).where(Wedding.id == session.wedding_id)
-    )
-    wedding = wedding_result.scalar_one_or_none()
-
-    if not wedding or wedding.owner_id != current_user.id:
+    # Verify ownership (User has wedding_id, not Wedding has owner_id)
+    if current_user.wedding_id != session.wedding_id:
         raise HTTPException(status_code=403, detail="Not authorized to view this chat")
 
     # Build transcript
