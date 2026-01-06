@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { Suspense, useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import { useSearchParams, useRouter } from 'next/navigation';
 import Header from '@/components/Header';
@@ -52,7 +52,8 @@ function XIcon() {
   );
 }
 
-export default function PricingPage() {
+// Wrap the main content in a separate component to use with Suspense
+function PricingContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { token, user } = useAuth();
@@ -395,5 +396,18 @@ export default function PricingPage() {
 
       <Footer />
     </div>
+  );
+}
+
+// Main page component with Suspense boundary for useSearchParams
+export default function PricingPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-gradient-to-b from-rose-50 to-white flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-rose-600"></div>
+      </div>
+    }>
+      <PricingContent />
+    </Suspense>
   );
 }
