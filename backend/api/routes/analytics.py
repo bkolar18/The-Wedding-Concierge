@@ -68,9 +68,12 @@ async def get_analytics(
 
     Returns chat statistics and recent sessions.
     """
-    # Get user's wedding
+    # Get user's wedding (User has wedding_id, not Wedding has owner_id)
+    if not current_user.wedding_id:
+        raise HTTPException(status_code=404, detail="No wedding found")
+
     result = await db.execute(
-        select(Wedding).where(Wedding.owner_id == current_user.id)
+        select(Wedding).where(Wedding.id == current_user.wedding_id)
     )
     wedding = result.scalar_one_or_none()
 
