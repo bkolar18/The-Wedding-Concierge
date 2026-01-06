@@ -71,74 +71,85 @@ async def get_analytics(
     if not wedding:
         raise HTTPException(status_code=404, detail="No wedding found")
 
-    # Get total sessions count
-    sessions_result = await db.execute(
-        select(func.count(ChatSession.id))
-        .where(ChatSession.wedding_id == wedding.id)
-    )
-    total_sessions = sessions_result.scalar() or 0
-
-    # Get total messages count
-    messages_result = await db.execute(
-        select(func.count(ChatMessage.id))
-        .join(ChatSession, ChatMessage.session_id == ChatSession.id)
-        .where(ChatSession.wedding_id == wedding.id)
-    )
-    total_messages = messages_result.scalar() or 0
-
-    # Get unique guests count (by guest_identifier)
-    unique_result = await db.execute(
-        select(func.count(func.distinct(ChatSession.guest_identifier)))
-        .where(ChatSession.wedding_id == wedding.id)
-    )
-    unique_guests = unique_result.scalar() or 0
-
-    # Get web sessions count
-    web_result = await db.execute(
-        select(func.count(ChatSession.id))
-        .where(
-            ChatSession.wedding_id == wedding.id,
-            ChatSession.channel == "web"
-        )
-    )
-    web_sessions = web_result.scalar() or 0
-
-    # Get SMS sessions count
-    sms_result = await db.execute(
-        select(func.count(ChatSession.id))
-        .where(
-            ChatSession.wedding_id == wedding.id,
-            ChatSession.channel == "sms"
-        )
-    )
-    sms_sessions = sms_result.scalar() or 0
-
-    # Get recent sessions
-    sessions_query = await db.execute(
-        select(ChatSession)
-        .where(ChatSession.wedding_id == wedding.id)
-        .order_by(desc(ChatSession.last_message_at))
-        .limit(20)
-    )
-    sessions = list(sessions_query.scalars().all())
-
+    # Initialize counters
+    total_sessions = 0
+    total_messages = 0
+    unique_guests = 0
+    web_sessions = 0
+    sms_sessions = 0
     recent_sessions = []
-    for session in sessions:
-        # Get message count for each session
-        msg_count_result = await db.execute(
-            select(func.count(ChatMessage.id))
-            .where(ChatMessage.session_id == session.id)
-        )
-        message_count = msg_count_result.scalar() or 0
 
-        recent_sessions.append(ChatSessionSummary(
-            id=session.id,
-            guest_name=session.guest_name,
-            channel=session.channel,
-            message_count=message_count,
-            created_at=session.created_at,
-            last_message_at=session.last_message_at
-        ))
+    try:
+        # Get total sessions count
+        sessions_result = await db.execute(
+            select(func.count(ChatSession.id))
+            .where(ChatSession.wedding_id == wedding.id)
+        )
+        total_sessions = sessions_result.scalar() or 0
+
+        # Get total messages count
+        messages_result = await db.execute(
+            select(func.count(ChatMessage.id))
+            .join(ChatSession, ChatMessage.session_id == ChatSession.id)
+            .where(ChatSession.wedding_id == wedding.id)
+        )
+        total_messages = messages_result.scalar() or 0
+
+        # Get unique guests count (by guest_identifier)
+        unique_result = await db.execute(
+            select(func.count(func.distinct(ChatSession.guest_identifier)))
+            .where(ChatSession.wedding_id == wedding.id)
+        )
+        unique_guests = unique_result.scalar() or 0
+
+        # Get web sessions count
+        web_result = await db.execute(
+            select(func.count(ChatSession.id))
+            .where(
+                ChatSession.wedding_id == wedding.id,
+                ChatSession.channel == "web"
+            )
+        )
+        web_sessions = web_result.scalar() or 0
+
+        # Get SMS sessions count
+        sms_result = await db.execute(
+            select(func.count(ChatSession.id))
+            .where(
+                ChatSession.wedding_id == wedding.id,
+                ChatSession.channel == "sms"
+            )
+        )
+        sms_sessions = sms_result.scalar() or 0
+
+        # Get recent sessions
+        sessions_query = await db.execute(
+            select(ChatSession)
+            .where(ChatSession.wedding_id == wedding.id)
+            .order_by(desc(ChatSession.last_message_at))
+            .limit(20)
+        )
+        sessions = list(sessions_query.scalars().all())
+
+        for session in sessions:
+            # Get message count for each session
+            msg_count_result = await db.execute(
+                select(func.count(ChatMessage.id))
+                .where(ChatMessage.session_id == session.id)
+            )
+            message_count = msg_count_result.scalar() or 0
+
+            recent_sessions.append(ChatSessionSummary(
+                id=session.id,
+                guest_name=session.guest_name,
+                channel=session.channel,
+                message_count=message_count,
+                created_at=session.created_at,
+                last_message_at=session.last_message_at
+            ))
+    except Exception:
+        # If chat tables don't exist yet, just return zeros
+        pass
 
     return AnalyticsResponse(
         total_sessions=total_sessions,
