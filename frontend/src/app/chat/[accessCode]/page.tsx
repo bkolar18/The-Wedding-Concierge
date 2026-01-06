@@ -1,14 +1,16 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useParams } from 'next/navigation';
+import { useParams, useSearchParams } from 'next/navigation';
 import { getWeddingPreview, WeddingPreview } from '@/lib/api';
 import { useAuth } from '@/contexts/AuthContext';
 import ChatWidget from '@/components/chat/ChatWidget';
 
 export default function WeddingChatPage() {
   const params = useParams();
+  const searchParams = useSearchParams();
   const accessCode = params.accessCode as string;
+  const isEmbed = searchParams.get('embed') === 'true';
   const { user } = useAuth();
 
   const [wedding, setWedding] = useState<WeddingPreview | null>(null);
@@ -65,10 +67,10 @@ export default function WeddingChatPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-b from-rose-50 to-white flex items-center justify-center">
+      <div className={`${isEmbed ? 'h-full' : 'min-h-screen'} bg-gradient-to-b from-rose-50 to-white flex items-center justify-center`}>
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-rose-600 mx-auto mb-4"></div>
-          <p className="text-gray-600">Loading wedding details...</p>
+          <p className="text-gray-600">Loading...</p>
         </div>
       </div>
     );
@@ -76,19 +78,39 @@ export default function WeddingChatPage() {
 
   if (error || !wedding) {
     return (
-      <div className="min-h-screen bg-gradient-to-b from-rose-50 to-white flex items-center justify-center p-4">
+      <div className={`${isEmbed ? 'h-full' : 'min-h-screen'} bg-gradient-to-b from-rose-50 to-white flex items-center justify-center p-4`}>
         <div className="text-center max-w-md">
-          <div className="text-6xl mb-4">💒</div>
-          <h1 className="text-2xl font-serif text-gray-800 mb-2">Wedding Not Found</h1>
-          <p className="text-gray-600 mb-6">
-            {error || "We couldn't find a wedding with that access code. Please check the link and try again."}
+          <h1 className="text-xl font-serif text-gray-800 mb-2">Wedding Not Found</h1>
+          <p className="text-gray-600 text-sm">
+            {error || "We couldn't find a wedding with that access code."}
           </p>
-          <a
-            href="/"
-            className="inline-block px-6 py-3 bg-rose-600 text-white rounded-lg hover:bg-rose-700 transition-colors"
-          >
-            Go Home
-          </a>
+          {!isEmbed && (
+            <a
+              href="/"
+              className="inline-block mt-4 px-6 py-3 bg-rose-600 text-white rounded-lg hover:bg-rose-700 transition-colors"
+            >
+              Go Home
+            </a>
+          )}
+        </div>
+      </div>
+    );
+  }
+
+  // Embed mode: show only the chat widget
+  if (isEmbed) {
+    return (
+      <div className="h-full flex flex-col bg-white">
+        {/* Minimal header with couple names */}
+        <div className="px-4 py-3 border-b border-gray-100 bg-gradient-to-r from-rose-50 to-white">
+          <h1 className="text-sm font-medium text-gray-700 text-center">
+            {wedding.partner1_name} & {wedding.partner2_name}
+          </h1>
+        </div>
+
+        {/* Chat widget fills remaining space */}
+        <div className="flex-1 overflow-hidden">
+          <ChatWidget accessCode={accessCode} weddingPreview={wedding} embedded />
         </div>
       </div>
     );

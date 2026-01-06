@@ -1,14 +1,18 @@
 """Vendor management API endpoints."""
 from typing import List, Optional
 from datetime import date
-from fastapi import APIRouter, HTTPException, Depends
+import base64
+import json
+from fastapi import APIRouter, HTTPException, Depends, UploadFile, File
 from pydantic import BaseModel
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 from sqlalchemy.orm import selectinload
+import anthropic
 
 from core.database import get_db
 from core.auth import get_current_user
+from core.config import settings
 from models.user import User
 from models.wedding import Wedding
 from models.vendor import (
@@ -717,3 +721,168 @@ async def get_vendor_summary(
         "upcoming_payments": upcoming_payments[:10],  # Top 10
         "overdue_payments": overdue_payments,
     }
+
+
+# --- Contract Extraction Endpoint ---
+
+class ExtractedContractData(BaseModel):
+    """Data extracted from a vendor contract."""
+    business_name: Optional[str] = None
+    category: Optional[str] = None
+    contact_name: Optional[str] = None
+    email: Optional[str] = None
+    phone: Optional[str] = None
+    address: Optional[str] = None
+    contract_amount: Optional[float] = None
+    deposit_amount: Optional[float] = None
+    service_description: Optional[str] = None
+    service_date: Optional[str] = None
+    payment_schedule: Optional[List[dict]] = None
+    notes: Optional[str] = None
+    confidence: str = "medium"
+
+
+@router.post("/extract-contract")
+async def extract_contract_data(
+    file: UploadFile = File(...),
+    current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db)
+):
+    """
+    Extract vendor information from a contract PDF or image.
+
+    Uses Claude's vision capabilities to analyze the contract
+    and extract key information for the user to review before saving.
+
+    Supported formats: PDF, PNG, JPG, JPEG
+    Max file size: 10MB
+    """
+    # Verify user has a wedding
+    await get_user_wedding(current_user, db)
+
+    # Validate file type
+    allowed_types = ["application/pdf", "image/png", "image/jpeg", "image/jpg"]
+    content_type = file.content_type or ""
+
+    if content_type not in allowed_types:
+        raise HTTPException(
+            status_code=400,
+            detail=f"Unsupported file type: {content_type}. Allowed: PDF, PNG, JPG"
+        )
+
+    # Read file content
+    content = await file.read()
+
+    # Check file size (10MB limit)
+    if len(content) > 10 * 1024 * 1024:
+        raise HTTPException(
+            status_code=400,
+            detail="File too large. Maximum size is 10MB."
+        )
+
+    # Encode content for Claude
+    base64_content = base64.standard_b64encode(content).decode("utf-8")
+
+    # Determine media type for Claude
+    if content_type == "application/pdf":
+        media_type = "application/pdf"
+    elif content_type in ["image/jpeg", "image/jpg"]:
+        media_type = "image/jpeg"
+    else:
+        media_type = "image/png"
+
+    # Build extraction prompt
+    extraction_prompt = """Analyze this wedding vendor contract and extract the following information.
+Return the data as a JSON object with these fields:
+
+{
+    "business_name": "The vendor's business name",
+    "category": "One of: Venue, Photographer, Videographer, DJ/Band, Florist, Caterer, Cake/Desserts, Hair/Makeup, Wedding Planner, Officiant, Transportation, Rentals, Invitations, Photo Booth, Lighting, Other",
+    "contact_name": "Primary contact person name",
+    "email": "Contact email address",
+    "phone": "Contact phone number",
+    "address": "Business address",
+    "contract_amount": 0.00,
+    "deposit_amount": 0.00,
+    "service_description": "Brief description of services included",
+    "service_date": "YYYY-MM-DD format if specified",
+    "payment_schedule": [
+        {
+            "description": "e.g., Deposit, Final Payment, etc.",
+            "amount": 0.00,
+            "due_date": "YYYY-MM-DD or relative date like 'Due on wedding day'"
+        }
+    ],
+    "notes": "Any other important terms, cancellation policy, etc.",
+    "confidence": "high/medium/low based on how clearly the information was visible"
+}
+
+Important:
+- Only include fields you can confidently extract
+- For amounts, use numbers only (no $ or commas)
+- If a date is mentioned but not in YYYY-MM-DD format, try to convert it or include as-is in notes
+- Set confidence to "low" if the document is blurry or information is unclear
+
+Return ONLY the JSON object, no other text."""
+
+    try:
+        # Call Claude API for extraction
+        client = anthropic.Anthropic(api_key=settings.ANTHROPIC_API_KEY)
+
+        message = client.messages.create(
+            model="claude-sonnet-4-20250514",
+            max_tokens=2000,
+            messages=[
+                {
+                    "role": "user",
+                    "content": [
+                        {
+                            "type": "document" if media_type == "application/pdf" else "image",
+                            "source": {
+                                "type": "base64",
+                                "media_type": media_type,
+                                "data": base64_content,
+                            },
+                        },
+                        {
+                            "type": "text",
+                            "text": extraction_prompt,
+                        }
+                    ],
+                }
+            ],
+        )
+
+        # Parse the response
+        response_text = message.content[0].text.strip()
+
+        # Try to parse as JSON
+        # Handle case where Claude might wrap in ```json blocks
+        if response_text.startswith("```"):
+            response_text = response_text.split("```")[1]
+            if response_text.startswith("json"):
+                response_text = response_text[4:]
+
+        extracted_data = json.loads(response_text)
+
+        return {
+            "success": True,
+            "extracted_data": extracted_data,
+            "message": "Contract data extracted successfully. Please review and confirm before saving.",
+        }
+
+    except json.JSONDecodeError:
+        raise HTTPException(
+            status_code=500,
+            detail="Failed to parse extracted data. Please try again or enter data manually."
+        )
+    except anthropic.APIError as e:
+        raise HTTPException(
+            status_code=500,
+            detail=f"AI extraction failed: {str(e)}"
+        )
+    except Exception as e:
+        raise HTTPException(
+            status_code=500,
+            detail=f"Contract extraction failed: {str(e)}"
+        )

@@ -1176,17 +1176,29 @@ export interface VendorCommunicationCreateData {
 }
 
 export interface VendorSummary {
-  total_vendors: number;
-  by_category: Record<string, number>;
-  by_status: Record<string, number>;
-  total_contract_value: number;
-  total_paid: number;
-  total_pending: number;
+  summary: {
+    total_vendors: number;
+    total_contract: number;
+    total_paid: number;
+    balance_due: number;
+    percent_paid: number;
+  };
+  by_category: Record<string, { count: number; total: number; paid: number }>;
   upcoming_payments: Array<{
     vendor_name: string;
+    vendor_id: string;
+    payment_id: string;
+    description: string;
     amount: number;
     due_date: string;
-    payment_type: string;
+  }>;
+  overdue_payments: Array<{
+    vendor_name: string;
+    vendor_id: string;
+    payment_id: string;
+    description: string;
+    amount: number;
+    due_date: string;
   }>;
 }
 
@@ -1311,6 +1323,55 @@ export async function getVendorSummary(token: string, weddingId: string): Promis
   if (!response.ok) {
     const error = await response.json();
     throw new Error(error.detail || 'Failed to get vendor summary');
+  }
+
+  return response.json();
+}
+
+/**
+ * Extracted contract data from AI analysis.
+ */
+export interface ExtractedContractData {
+  business_name?: string;
+  category?: string;
+  contact_name?: string;
+  email?: string;
+  phone?: string;
+  address?: string;
+  contract_amount?: number;
+  deposit_amount?: number;
+  service_description?: string;
+  service_date?: string;
+  payment_schedule?: Array<{
+    description: string;
+    amount: number;
+    due_date: string;
+  }>;
+  notes?: string;
+  confidence: 'high' | 'medium' | 'low';
+}
+
+/**
+ * Upload a contract and extract vendor data using AI.
+ */
+export async function extractContractData(
+  token: string,
+  file: File
+): Promise<{ success: boolean; extracted_data: ExtractedContractData; message: string }> {
+  const formData = new FormData();
+  formData.append('file', file);
+
+  const response = await fetch(`${API_URL}/api/vendors/extract-contract`, {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+    body: formData,
+  });
+
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(error.detail || 'Failed to extract contract data');
   }
 
   return response.json();

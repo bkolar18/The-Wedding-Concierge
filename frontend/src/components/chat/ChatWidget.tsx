@@ -11,9 +11,10 @@ interface Message {
 interface ChatWidgetProps {
   accessCode?: string;
   weddingPreview?: WeddingPreview;
+  embedded?: boolean;
 }
 
-export default function ChatWidget({ accessCode: initialAccessCode, weddingPreview }: ChatWidgetProps) {
+export default function ChatWidget({ accessCode: initialAccessCode, weddingPreview, embedded = false }: ChatWidgetProps) {
   const [accessCode, setAccessCode] = useState(initialAccessCode || '');
   const [guestName, setGuestName] = useState('');
   const [sessionId, setSessionId] = useState<string | null>(null);
@@ -108,7 +109,7 @@ export default function ChatWidget({ accessCode: initialAccessCode, weddingPrevi
   // Name prompt screen (when accessed via direct link)
   if (showNamePrompt && !sessionId) {
     return (
-      <div className="bg-white rounded-2xl shadow-lg overflow-hidden">
+      <div className={`bg-white overflow-hidden ${embedded ? 'h-full flex flex-col justify-center' : 'rounded-2xl shadow-lg'}`}>
         <div className="p-6">
           <div className="text-center mb-6">
             <div className="w-16 h-16 bg-rose-100 rounded-full flex items-center justify-center mx-auto mb-4">
@@ -232,21 +233,23 @@ export default function ChatWidget({ accessCode: initialAccessCode, weddingPrevi
 
   // Chat interface
   return (
-    <div className="flex flex-col h-[500px] bg-white rounded-2xl shadow-lg overflow-hidden">
-      {/* Header */}
-      <div className="bg-gradient-to-r from-rose-600 to-rose-500 text-white p-4">
-        <div className="flex items-center space-x-3">
-          <div className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center">
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
-            </svg>
-          </div>
-          <div>
-            <h2 className="font-medium">{weddingTitle}</h2>
-            <p className="text-rose-100 text-sm">Wedding Assistant</p>
+    <div className={`flex flex-col bg-white overflow-hidden ${embedded ? 'h-full' : 'h-[500px] rounded-2xl shadow-lg'}`}>
+      {/* Header - hide in embedded mode since parent has header */}
+      {!embedded && (
+        <div className="bg-gradient-to-r from-rose-600 to-rose-500 text-white p-4">
+          <div className="flex items-center space-x-3">
+            <div className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center">
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
+              </svg>
+            </div>
+            <div>
+              <h2 className="font-medium">{weddingTitle}</h2>
+              <p className="text-rose-100 text-sm">Wedding Assistant</p>
+            </div>
           </div>
         </div>
-      </div>
+      )}
 
       {/* Messages */}
       <div ref={messagesContainerRef} className="flex-1 overflow-y-auto p-4 space-y-4 bg-gray-50">

@@ -7,6 +7,7 @@ import {
   VendorPayment,
   VendorPaymentCreateData,
   VendorSummary,
+  ExtractedContractData,
   VENDOR_CATEGORIES,
   VENDOR_STATUSES,
   PAYMENT_TYPES,
@@ -19,6 +20,7 @@ import {
   createVendorPayment,
   updateVendorPayment,
   deleteVendorPayment,
+  extractContractData,
 } from '@/lib/api';
 
 interface VendorManagerProps {
@@ -26,7 +28,7 @@ interface VendorManagerProps {
   weddingId: string;
 }
 
-type ModalType = 'addVendor' | 'editVendor' | 'viewVendor' | 'addPayment' | 'editPayment' | null;
+type ModalType = 'addVendor' | 'editVendor' | 'viewVendor' | 'addPayment' | 'editPayment' | 'uploadContract' | 'reviewContract' | null;
 
 const initialVendorForm: VendorCreateData = {
   business_name: '',
@@ -77,6 +79,10 @@ export default function VendorManager({ token, weddingId }: VendorManagerProps) 
   const [paymentForm, setPaymentForm] = useState<VendorPaymentCreateData>(initialPaymentForm);
   const [editingPaymentId, setEditingPaymentId] = useState<string | null>(null);
 
+  // Contract upload
+  const [isExtracting, setIsExtracting] = useState(false);
+  const [extractedData, setExtractedData] = useState<ExtractedContractData | null>(null);
+
   // Load data
   useEffect(() => {
     loadData();
@@ -105,6 +111,7 @@ export default function VendorManager({ token, weddingId }: VendorManagerProps) 
     setSelectedVendor(null);
     setPaymentForm(initialPaymentForm);
     setEditingPaymentId(null);
+    setExtractedData(null);
   };
 
   // Vendor handlers
@@ -250,6 +257,69 @@ export default function VendorManager({ token, weddingId }: VendorManagerProps) 
     setModalType('editPayment');
   };
 
+  // Contract upload handler
+  const handleContractUpload = async (file: File) => {
+    setIsExtracting(true);
+    setModalError(null);
+    try {
+      const result = await extractContractData(token, file);
+      setExtractedData(result.extracted_data);
+      // Pre-fill the vendor form with extracted data
+      setVendorForm({
+        ...initialVendorForm,
+        business_name: result.extracted_data.business_name || '',
+        category: mapExtractedCategory(result.extracted_data.category),
+        contact_name: result.extracted_data.contact_name || '',
+        email: result.extracted_data.email || '',
+        phone: result.extracted_data.phone || '',
+        contract_amount: result.extracted_data.contract_amount,
+        service_description: result.extracted_data.service_description || '',
+        service_date: result.extracted_data.service_date || '',
+        notes: result.extracted_data.notes || '',
+      });
+      setModalType('reviewContract');
+    } catch (err) {
+      setModalError(err instanceof Error ? err.message : 'Failed to extract contract data');
+    } finally {
+      setIsExtracting(false);
+    }
+  };
+
+  // Map extracted category to valid category value
+  const mapExtractedCategory = (category?: string): string => {
+    if (!category) return 'other';
+    const categoryLower = category.toLowerCase();
+    const mapping: Record<string, string> = {
+      'venue': 'venue',
+      'photographer': 'photography',
+      'videographer': 'videography',
+      'dj/band': 'dj_band',
+      'dj': 'dj_band',
+      'band': 'dj_band',
+      'florist': 'florist',
+      'caterer': 'catering',
+      'catering': 'catering',
+      'cake/desserts': 'cake_desserts',
+      'cake': 'cake_desserts',
+      'desserts': 'cake_desserts',
+      'hair/makeup': 'hair_makeup',
+      'hair': 'hair_makeup',
+      'makeup': 'hair_makeup',
+      'wedding planner': 'planner_coordinator',
+      'planner': 'planner_coordinator',
+      'coordinator': 'planner_coordinator',
+      'officiant': 'officiant',
+      'transportation': 'transportation',
+      'rentals': 'rentals',
+      'invitations': 'stationery',
+      'stationery': 'stationery',
+      'photo booth': 'photo_booth',
+      'lighting': 'lighting_av',
+      'lighting/av': 'lighting_av',
+    };
+    return mapping[categoryLower] || 'other';
+  };
+
   const formatCurrency = (amount: number | null | undefined) => {
     if (amount === null || amount === undefined) return '-';
     return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(amount);
@@ -358,15 +428,26 @@ export default function VendorManager({ token, weddingId }: VendorManagerProps) 
             </svg>
             Vendors ({vendors.length})
           </h2>
-          <button
-            onClick={() => setModalType('addVendor')}
-            className="text-sm bg-rose-600 text-white px-4 py-2 rounded-lg hover:bg-rose-700 flex items-center"
-          >
-            <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-            </svg>
-            Add Vendor
-          </button>
+          <div className="flex gap-2">
+            <button
+              onClick={() => setModalType('uploadContract')}
+              className="text-sm border border-rose-600 text-rose-600 px-4 py-2 rounded-lg hover:bg-rose-50 flex items-center"
+            >
+              <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+              </svg>
+              Upload Contract
+            </button>
+            <button
+              onClick={() => setModalType('addVendor')}
+              className="text-sm bg-rose-600 text-white px-4 py-2 rounded-lg hover:bg-rose-700 flex items-center"
+            >
+              <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+              </svg>
+              Add Vendor
+            </button>
+          </div>
         </div>
 
         {/* Filters */}
@@ -831,6 +912,200 @@ export default function VendorManager({ token, weddingId }: VendorManagerProps) 
                     </button>
                     <button type="submit" disabled={isSaving} className="flex-1 py-2 bg-rose-600 text-white rounded-lg hover:bg-rose-700 disabled:opacity-50">
                       {isSaving ? 'Saving...' : modalType === 'addPayment' ? 'Add Payment' : 'Save Changes'}
+                    </button>
+                  </div>
+                </form>
+              </>
+            )}
+
+            {/* Upload Contract Modal */}
+            {modalType === 'uploadContract' && (
+              <>
+                <h3 className="text-xl font-semibold text-gray-800 mb-4">
+                  Upload Vendor Contract
+                </h3>
+                <p className="text-gray-500 text-sm mb-4">
+                  Upload a contract PDF or image and we'll extract the vendor information automatically.
+                </p>
+                <div className="border-2 border-dashed border-gray-300 rounded-xl p-8 text-center">
+                  {isExtracting ? (
+                    <div className="space-y-4">
+                      <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-rose-600 mx-auto"></div>
+                      <p className="text-gray-600">Analyzing contract...</p>
+                      <p className="text-gray-400 text-sm">This may take a few seconds</p>
+                    </div>
+                  ) : (
+                    <>
+                      <svg className="w-12 h-12 text-gray-400 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+                      </svg>
+                      <p className="text-gray-600 mb-2">Drag and drop a file here, or click to browse</p>
+                      <p className="text-gray-400 text-sm mb-4">Supports PDF, PNG, JPG (max 10MB)</p>
+                      <input
+                        type="file"
+                        accept=".pdf,.png,.jpg,.jpeg"
+                        onChange={(e) => {
+                          const file = e.target.files?.[0];
+                          if (file) handleContractUpload(file);
+                        }}
+                        className="hidden"
+                        id="contract-upload"
+                      />
+                      <label
+                        htmlFor="contract-upload"
+                        className="inline-block px-6 py-2 bg-rose-600 text-white rounded-lg hover:bg-rose-700 cursor-pointer"
+                      >
+                        Choose File
+                      </label>
+                    </>
+                  )}
+                </div>
+                {modalError && <p className="text-red-600 text-sm mt-4">{modalError}</p>}
+                <div className="flex gap-3 pt-4">
+                  <button onClick={closeModal} className="flex-1 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50">
+                    Cancel
+                  </button>
+                </div>
+              </>
+            )}
+
+            {/* Review Extracted Contract Data Modal */}
+            {modalType === 'reviewContract' && extractedData && (
+              <>
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="text-xl font-semibold text-gray-800">
+                    Review Extracted Data
+                  </h3>
+                  <span className={`text-xs px-2 py-1 rounded ${
+                    extractedData.confidence === 'high' ? 'bg-green-100 text-green-700' :
+                    extractedData.confidence === 'medium' ? 'bg-yellow-100 text-yellow-700' :
+                    'bg-red-100 text-red-700'
+                  }`}>
+                    {extractedData.confidence} confidence
+                  </span>
+                </div>
+                <p className="text-gray-500 text-sm mb-4">
+                  Please review and edit the extracted information before saving.
+                </p>
+                <form onSubmit={handleAddVendor} className="space-y-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="md:col-span-2">
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Business Name *</label>
+                      <input
+                        type="text"
+                        value={vendorForm.business_name}
+                        onChange={(e) => setVendorForm({ ...vendorForm, business_name: e.target.value })}
+                        className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-rose-500"
+                        required
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Category *</label>
+                      <select
+                        value={vendorForm.category}
+                        onChange={(e) => setVendorForm({ ...vendorForm, category: e.target.value })}
+                        className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-rose-500"
+                        required
+                      >
+                        {VENDOR_CATEGORIES.map(cat => (
+                          <option key={cat.value} value={cat.value}>{cat.label}</option>
+                        ))}
+                      </select>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Contact Name</label>
+                      <input
+                        type="text"
+                        value={vendorForm.contact_name}
+                        onChange={(e) => setVendorForm({ ...vendorForm, contact_name: e.target.value })}
+                        className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-rose-500"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
+                      <input
+                        type="email"
+                        value={vendorForm.email}
+                        onChange={(e) => setVendorForm({ ...vendorForm, email: e.target.value })}
+                        className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-rose-500"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Phone</label>
+                      <input
+                        type="tel"
+                        value={vendorForm.phone}
+                        onChange={(e) => setVendorForm({ ...vendorForm, phone: e.target.value })}
+                        className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-rose-500"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Contract Amount</label>
+                      <input
+                        type="number"
+                        step="0.01"
+                        value={vendorForm.contract_amount || ''}
+                        onChange={(e) => setVendorForm({ ...vendorForm, contract_amount: e.target.value ? parseFloat(e.target.value) : undefined })}
+                        className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-rose-500"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Service Date</label>
+                      <input
+                        type="date"
+                        value={vendorForm.service_date}
+                        onChange={(e) => setVendorForm({ ...vendorForm, service_date: e.target.value })}
+                        className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-rose-500"
+                      />
+                    </div>
+                    <div className="md:col-span-2">
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Service Description</label>
+                      <textarea
+                        value={vendorForm.service_description}
+                        onChange={(e) => setVendorForm({ ...vendorForm, service_description: e.target.value })}
+                        rows={2}
+                        className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-rose-500"
+                      />
+                    </div>
+                    <div className="md:col-span-2">
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Notes</label>
+                      <textarea
+                        value={vendorForm.notes}
+                        onChange={(e) => setVendorForm({ ...vendorForm, notes: e.target.value })}
+                        rows={2}
+                        className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-rose-500"
+                      />
+                    </div>
+                  </div>
+
+                  {/* Show extracted payment schedule if available */}
+                  {extractedData.payment_schedule && extractedData.payment_schedule.length > 0 && (
+                    <div className="bg-blue-50 rounded-lg p-4">
+                      <h4 className="font-medium text-blue-800 mb-2">Payment Schedule Found</h4>
+                      <p className="text-blue-600 text-sm mb-2">
+                        The following payments were detected. You can add them after creating the vendor.
+                      </p>
+                      <ul className="text-sm text-blue-700 space-y-1">
+                        {extractedData.payment_schedule.map((p, i) => (
+                          <li key={i}>
+                            {p.description}: {formatCurrency(p.amount)} - {p.due_date}
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+
+                  {modalError && <p className="text-red-600 text-sm">{modalError}</p>}
+                  <div className="flex gap-3 pt-2">
+                    <button
+                      type="button"
+                      onClick={() => setModalType('uploadContract')}
+                      className="flex-1 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50"
+                    >
+                      Back
+                    </button>
+                    <button type="submit" disabled={isSaving} className="flex-1 py-2 bg-rose-600 text-white rounded-lg hover:bg-rose-700 disabled:opacity-50">
+                      {isSaving ? 'Saving...' : 'Save Vendor'}
                     </button>
                   </div>
                 </form>

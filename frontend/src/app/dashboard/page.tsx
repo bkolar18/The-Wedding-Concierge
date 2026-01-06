@@ -57,6 +57,7 @@ import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import SMSManager from '@/components/SMSManager';
 import VendorManager from '@/components/VendorManager';
+import VendorBudgetSummary from '@/components/VendorBudgetSummary';
 import AnalyticsDashboard from '@/components/AnalyticsDashboard';
 
 // Modal types
@@ -904,6 +905,7 @@ export default function DashboardPage() {
             {/* Vendors Tab */}
             {activeTab === 'vendors' && (
               <div className="space-y-6">
+                <VendorBudgetSummary token={token!} weddingId={wedding.id} />
                 <VendorManager token={token!} weddingId={wedding.id} />
               </div>
             )}
