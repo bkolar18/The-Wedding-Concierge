@@ -1,9 +1,11 @@
 """Weekly digest email API endpoints."""
 import logging
 from datetime import datetime, timedelta
+from typing import List, Tuple
 from fastapi import APIRouter, HTTPException, Depends
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, func
+import anthropic
 
 from core.database import get_db
 from core.auth import get_current_user
@@ -14,6 +16,68 @@ from services.email import email_service
 from core.config import settings
 
 logger = logging.getLogger(__name__)
+
+# Initialize Claude client for topic extraction
+_claude_client = None
+
+
+def get_claude_client():
+    """Get or create Claude client."""
+    global _claude_client
+    if _claude_client is None:
+        _claude_client = anthropic.AsyncAnthropic(api_key=settings.ANTHROPIC_API_KEY)
+    return _claude_client
+
+
+async def extract_topics_from_messages(messages: List[str]) -> List[Tuple[str, int]]:
+    """
+    Use Claude to extract and count common topics from guest messages.
+
+    Args:
+        messages: List of guest message strings
+
+    Returns:
+        List of (topic, count) tuples, sorted by count descending
+    """
+    if not messages:
+        return []
+
+    # Limit to most recent 50 messages to control costs
+    sample_messages = messages[:50]
+    messages_text = "\n".join(f"- {msg}" for msg in sample_messages)
+
+    try:
+        client = get_claude_client()
+        response = await client.messages.create(
+            model="claude-3-haiku-20240307",  # Use Haiku for cost efficiency
+            max_tokens=256,
+            messages=[{
+                "role": "user",
+                "content": f"""Analyze these wedding guest questions and identify the top 3 topics they're asking about.
+
+Guest questions:
+{messages_text}
+
+Return ONLY a JSON array of the top 3 topics with counts, like:
+[["Dress Code", 5], ["Hotel/Accommodations", 4], ["Schedule/Timing", 3]]
+
+Use short, clear topic names (2-3 words max). Count how many questions relate to each topic.
+If there are fewer than 3 distinct topics, return fewer items.
+Return ONLY the JSON array, nothing else."""
+            }]
+        )
+
+        # Parse the response
+        import json
+        result_text = response.content[0].text.strip()
+        topics = json.loads(result_text)
+
+        # Convert to list of tuples and validate
+        return [(str(topic), int(count)) for topic, count in topics[:3]]
+
+    except Exception as e:
+        logger.warning(f"Topic extraction failed: {e}")
+        return []
 
 router = APIRouter()
 
@@ -45,7 +109,9 @@ async def get_weekly_stats(
     unique_guests = len(set(s.guest_name for s in sessions if s.guest_name))
 
     # Get messages this week
+    top_topics = []
     if session_ids:
+        # Get message count
         messages_result = await db.execute(
             select(func.count(ChatMessage.id))
             .where(
@@ -54,17 +120,30 @@ async def get_weekly_stats(
             )
         )
         total_messages = messages_result.scalar() or 0
+
+        # Get actual message content for topic extraction
+        content_result = await db.execute(
+            select(ChatMessage.content)
+            .where(
+                ChatMessage.session_id.in_(session_ids),
+                ChatMessage.role == "user"
+            )
+            .order_by(ChatMessage.created_at.desc())
+            .limit(50)  # Limit for cost control
+        )
+        message_contents = content_result.scalars().all()
+
+        # Extract topics using Claude
+        if message_contents:
+            top_topics = await extract_topics_from_messages(list(message_contents))
     else:
         total_messages = 0
-
-    # Note: Topic extraction could be added in a future version
-    # by analyzing message content with AI
 
     return {
         "total_conversations": total_conversations,
         "total_messages": total_messages,
         "unique_guests": unique_guests,
-        "top_topics": []  # Reserved for future topic extraction feature
+        "top_topics": top_topics
     }
 
 
