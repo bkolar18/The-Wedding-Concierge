@@ -113,15 +113,14 @@ async def get_analytics(
     )
     sms_sessions = sms_result.scalar() or 0
 
-    # Get recent sessions with message counts
-    # First get recent sessions
+    # Get recent sessions
     sessions_query = await db.execute(
         select(ChatSession)
         .where(ChatSession.wedding_id == wedding.id)
         .order_by(desc(ChatSession.last_message_at))
         .limit(20)
     )
-    sessions = sessions_query.scalars().all()
+    sessions = list(sessions_query.scalars().all())
 
     recent_sessions = []
     for session in sessions:
