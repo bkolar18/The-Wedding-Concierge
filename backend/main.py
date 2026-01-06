@@ -11,12 +11,12 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 logger.error("=== MAIN.PY STARTING ===")
 
-from fastapi import FastAPI, Request
+from fastapi import FastAPI, Request, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 import traceback
 
-from slowapi import Limiter, _rate_limit_exceeded_handler
+from slowapi import Limiter
 from slowapi.util import get_remote_address
 from slowapi.errors import RateLimitExceeded
 
@@ -32,9 +32,55 @@ app = FastAPI(
     version="0.1.0",
 )
 
-# Add rate limiter to app state and exception handler
+# Add rate limiter to app state
 app.state.limiter = limiter
-app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
+
+
+def get_cors_headers(request: Request) -> dict:
+    """Get CORS headers for the request origin."""
+    origin = request.headers.get("origin", "")
+    allowed_origins = [
+        "http://localhost:3000",
+        "http://127.0.0.1:3000",
+        "http://localhost:3001",
+        "http://127.0.0.1:3001",
+        "https://the-wedding-concierge.vercel.app",
+    ]
+
+    # Check exact match or regex pattern for Vercel preview deployments
+    import re
+    vercel_pattern = r"https://the-wedding-concierge(-[a-z0-9]+)?\.vercel\.app"
+
+    if origin in allowed_origins or re.match(vercel_pattern, origin):
+        return {
+            "Access-Control-Allow-Origin": origin,
+            "Access-Control-Allow-Credentials": "true",
+            "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS, PATCH",
+            "Access-Control-Allow-Headers": "Content-Type, Authorization, X-Requested-With",
+        }
+    return {}
+
+
+@app.exception_handler(HTTPException)
+async def http_exception_handler(request: Request, exc: HTTPException):
+    """Handle HTTP exceptions with CORS headers."""
+    cors_headers = get_cors_headers(request)
+    return JSONResponse(
+        status_code=exc.status_code,
+        content={"detail": exc.detail},
+        headers=cors_headers
+    )
+
+
+@app.exception_handler(RateLimitExceeded)
+async def rate_limit_exception_handler(request: Request, exc: RateLimitExceeded):
+    """Handle rate limit exceeded with CORS headers."""
+    cors_headers = get_cors_headers(request)
+    return JSONResponse(
+        status_code=429,
+        content={"detail": f"Rate limit exceeded: {exc.detail}"},
+        headers=cors_headers
+    )
 
 
 @app.exception_handler(Exception)
@@ -54,18 +100,23 @@ async def global_exception_handler(request: Request, exc: Exception):
         f.write("\n")
         f.flush()
 
+    # Get CORS headers for this request
+    cors_headers = get_cors_headers(request)
+
     # In production, hide error details from users
     from core.config import IS_PRODUCTION
     if IS_PRODUCTION:
         return JSONResponse(
             status_code=500,
-            content={"detail": "An internal error occurred. Please try again later."}
+            content={"detail": "An internal error occurred. Please try again later."},
+            headers=cors_headers
         )
     else:
         # In development, show full error details for debugging
         return JSONResponse(
             status_code=500,
-            content={"detail": f"{type(exc).__name__}: {str(exc)}"}
+            content={"detail": f"{type(exc).__name__}: {str(exc)}"},
+            headers=cors_headers
         )
 
 # CORS middleware for frontend
