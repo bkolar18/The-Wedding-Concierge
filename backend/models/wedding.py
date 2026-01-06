@@ -13,9 +13,49 @@ if TYPE_CHECKING:
     from .vendor import Vendor
 
 
+import re
+
+
 def generate_uuid() -> str:
     """Generate a UUID string."""
     return str(uuid.uuid4())
+
+
+def generate_slug(partner1_name: str, partner2_name: str) -> str:
+    """Generate a URL-friendly slug from partner names.
+
+    Examples:
+        "Alice Smith", "Bob Jones" -> "alice-and-bob"
+        "María García", "José López" -> "maria-and-jose"
+    """
+    # Extract first names (first word of each name)
+    first1 = partner1_name.split()[0] if partner1_name else "partner1"
+    first2 = partner2_name.split()[0] if partner2_name else "partner2"
+
+    # Combine with "and"
+    combined = f"{first1}-and-{first2}"
+
+    # Lowercase and remove accents/special chars
+    slug = combined.lower()
+    # Replace accented characters with ASCII equivalents
+    replacements = {
+        'á': 'a', 'à': 'a', 'ä': 'a', 'â': 'a', 'ã': 'a',
+        'é': 'e', 'è': 'e', 'ë': 'e', 'ê': 'e',
+        'í': 'i', 'ì': 'i', 'ï': 'i', 'î': 'i',
+        'ó': 'o', 'ò': 'o', 'ö': 'o', 'ô': 'o', 'õ': 'o',
+        'ú': 'u', 'ù': 'u', 'ü': 'u', 'û': 'u',
+        'ñ': 'n', 'ç': 'c',
+    }
+    for old, new in replacements.items():
+        slug = slug.replace(old, new)
+
+    # Remove any remaining non-alphanumeric characters except hyphens
+    slug = re.sub(r'[^a-z0-9-]', '', slug)
+
+    # Remove multiple consecutive hyphens
+    slug = re.sub(r'-+', '-', slug)
+
+    return slug
 
 
 class Wedding(Base):
@@ -68,6 +108,9 @@ class Wedding(Base):
 
     # Access control
     access_code: Mapped[Optional[str]] = mapped_column(String(50), nullable=True)
+
+    # Public registration slug (e.g., "smith-jones" for /join/smith-jones)
+    slug: Mapped[Optional[str]] = mapped_column(String(100), unique=True, nullable=True, index=True)
 
     # Relationships
     events: Mapped[List["WeddingEvent"]] = relationship(

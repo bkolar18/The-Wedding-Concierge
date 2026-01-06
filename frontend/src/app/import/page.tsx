@@ -288,12 +288,23 @@ export default function ImportPage() {
                 </button>
               </form>
 
-              <div className="mt-8 pt-6 border-t border-gray-100 text-center">
-                <p className="text-sm text-gray-500">
-                  Don&apos;t have a wedding website?{' '}
-                  <Link href="/register" className="text-rose-600 hover:text-rose-700">
-                    Create your wedding manually
+              <div className="mt-8 pt-6 border-t border-gray-100">
+                <div className="text-center mb-4">
+                  <p className="text-sm text-gray-500 mb-4">
+                    Don&apos;t have a wedding website? No problem!
+                  </p>
+                  <Link
+                    href="/setup"
+                    className="inline-flex items-center px-6 py-3 bg-gray-100 text-gray-700 rounded-xl font-medium hover:bg-gray-200 transition-colors"
+                  >
+                    <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
+                    </svg>
+                    Set Up with Guided Wizard
                   </Link>
+                </div>
+                <p className="text-xs text-gray-400 text-center">
+                  Our step-by-step wizard will help you enter all your wedding details
                 </p>
               </div>
             </div>
@@ -522,21 +533,46 @@ export default function ImportPage() {
               </div>
 
               {isLoggedIn ? (
-                <p className="mt-8 text-sm text-gray-500">
-                  Your wedding has been linked to your account.{' '}
-                  <Link href="/dashboard" className="text-rose-600 hover:text-rose-700">
-                    Go to Dashboard
-                  </Link>{' '}
-                  to edit details and manage your concierge.
-                </p>
+                <div className="mt-8 pt-6 border-t border-gray-100">
+                  <p className="text-sm text-gray-500 mb-4">
+                    Your wedding has been linked to your account.
+                  </p>
+                  <div className="flex flex-col sm:flex-row gap-3 justify-center">
+                    <Link
+                      href="/dashboard"
+                      className="inline-flex items-center justify-center px-6 py-3 bg-gray-100 text-gray-700 rounded-xl font-medium hover:bg-gray-200 transition-colors"
+                    >
+                      <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+                      </svg>
+                      Go to Dashboard
+                    </Link>
+                    <Link
+                      href="/setup?enhance=true"
+                      className="inline-flex items-center justify-center px-6 py-3 border border-rose-200 text-rose-600 rounded-xl font-medium hover:bg-rose-50 transition-colors"
+                    >
+                      <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                      </svg>
+                      Review & Enhance Details
+                    </Link>
+                  </div>
+                </div>
               ) : (
-                <p className="mt-8 text-sm text-gray-500">
-                  Want to edit your wedding details?{' '}
-                  <Link href="/register" className="text-rose-600 hover:text-rose-700">
-                    Create an account
-                  </Link>{' '}
-                  to access the dashboard.
-                </p>
+                <div className="mt-8 pt-6 border-t border-gray-100">
+                  <p className="text-sm text-gray-500 mb-4">
+                    Want to edit your wedding details?
+                  </p>
+                  <Link
+                    href="/register"
+                    className="inline-flex items-center justify-center px-6 py-3 bg-rose-100 text-rose-700 rounded-xl font-medium hover:bg-rose-200 transition-colors"
+                  >
+                    <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                    </svg>
+                    Create Account to Access Dashboard
+                  </Link>
+                </div>
               )}
             </div>
           )}

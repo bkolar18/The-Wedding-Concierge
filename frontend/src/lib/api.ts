@@ -257,7 +257,9 @@ export interface WeddingData {
   rsvp_deadline: string | null;
   additional_notes: string | null;
   access_code: string;
+  slug: string | null;
   chat_url: string;
+  join_url: string | null;
   events: Array<{
     id: string;
     name: string;
@@ -1404,6 +1406,65 @@ export async function createVendorCommunication(
   if (!response.ok) {
     const error = await response.json();
     throw new Error(error.detail || 'Failed to add communication');
+  }
+
+  return response.json();
+}
+
+// ============ PUBLIC API (No Auth Required) ============
+
+export interface PublicWeddingInfo {
+  partner1_name: string;
+  partner2_name: string;
+  wedding_date: string | null;
+  access_code: string;
+}
+
+export interface GuestRegistrationData {
+  name: string;
+  phone_number: string;
+  email?: string;
+}
+
+export interface GuestRegistrationResponse {
+  success: boolean;
+  message: string;
+  chat_url: string;
+  guest_id?: string;
+  guest_name?: string;
+  already_registered: boolean;
+}
+
+/**
+ * Get public wedding info by slug (for guest registration page).
+ */
+export async function getPublicWeddingBySlug(slug: string): Promise<PublicWeddingInfo> {
+  const response = await fetch(`${API_URL}/api/public/wedding/${encodeURIComponent(slug)}`);
+
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(error.detail || 'Wedding not found');
+  }
+
+  return response.json();
+}
+
+/**
+ * Register a guest for a wedding (public, no auth required).
+ */
+export async function registerGuest(
+  slug: string,
+  data: GuestRegistrationData
+): Promise<GuestRegistrationResponse> {
+  const response = await fetch(`${API_URL}/api/public/wedding/${encodeURIComponent(slug)}/register`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(data),
+  });
+
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(error.detail || 'Failed to register');
   }
 
   return response.json();

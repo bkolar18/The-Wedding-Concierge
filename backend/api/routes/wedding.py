@@ -9,7 +9,7 @@ from sqlalchemy.orm import selectinload
 
 from core.database import get_db
 from core.auth import get_current_user
-from models.wedding import Wedding, WeddingEvent, WeddingAccommodation, WeddingFAQ
+from models.wedding import Wedding, WeddingEvent, WeddingAccommodation, WeddingFAQ, generate_slug
 from models.user import User
 
 router = APIRouter()
@@ -165,6 +165,21 @@ async def create_my_wedding(
         else:
             access_code = f"{name1}-{name2}"
 
+    # Generate slug for public registration URL
+    base_slug = generate_slug(wedding_data.partner1_name, wedding_data.partner2_name)
+    slug = base_slug
+
+    # Ensure slug is unique by appending a number if needed
+    counter = 1
+    while True:
+        result = await db.execute(
+            select(Wedding).where(Wedding.slug == slug)
+        )
+        if not result.scalar_one_or_none():
+            break
+        slug = f"{base_slug}-{counter}"
+        counter += 1
+
     # Create wedding
     wedding = Wedding(
         partner1_name=wedding_data.partner1_name,
@@ -184,7 +199,8 @@ async def create_my_wedding(
         wedding_website_url=wedding_data.wedding_website_url,
         rsvp_url=wedding_data.rsvp_url,
         additional_notes=wedding_data.additional_notes,
-        access_code=access_code
+        access_code=access_code,
+        slug=slug
     )
     db.add(wedding)
     await db.flush()
@@ -197,7 +213,9 @@ async def create_my_wedding(
     return {
         "id": str(wedding.id),
         "access_code": wedding.access_code,
+        "slug": wedding.slug,
         "chat_url": f"/chat/{wedding.access_code}",
+        "join_url": f"/join/{wedding.slug}",
         "message": f"Wedding created! Share this link with your guests."
     }
 
@@ -252,7 +270,9 @@ async def get_my_wedding(
         "rsvp_url": wedding.rsvp_url,
         "additional_notes": wedding.additional_notes,
         "access_code": wedding.access_code,
+        "slug": wedding.slug,
         "chat_url": f"/chat/{wedding.access_code}",
+        "join_url": f"/join/{wedding.slug}" if wedding.slug else None,
         "events": [
             {
                 "id": str(e.id),

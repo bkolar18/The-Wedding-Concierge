@@ -55,6 +55,7 @@ import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import SMSManager from '@/components/SMSManager';
 import VendorManager from '@/components/VendorManager';
+import QRCodeCard from '@/components/QRCodeCard';
 
 // Modal types
 type ModalType = 'wedding' | 'event' | 'accommodation' | 'faq' | null;
@@ -506,13 +507,13 @@ export default function DashboardPage() {
               </div>
             </div>
 
-            {/* Share link section */}
+            {/* Share section with QR codes */}
             <div className="bg-gradient-to-r from-rose-500 to-rose-600 rounded-2xl shadow-lg p-4 sm:p-8 text-white overflow-hidden">
               <h2 className="text-xl font-medium mb-2">Share with Your Guests</h2>
               <p className="text-rose-100 mb-4 break-words">
-                Give your guests this link so they can ask questions about your wedding.
+                Give your guests these links so they can ask questions about your wedding.
               </p>
-              <div className="flex flex-col sm:flex-row gap-3">
+              <div className="flex flex-col sm:flex-row gap-3 mb-4">
                 <div className="flex-1 bg-white/10 rounded-xl px-4 py-3 font-mono text-sm overflow-hidden text-ellipsis break-all">
                   {typeof window !== 'undefined' ? `${window.location.origin}/chat/${wedding.access_code}` : `/chat/${wedding.access_code}`}
                 </div>
@@ -523,6 +524,33 @@ export default function DashboardPage() {
                   {copied ? 'Copied!' : 'Copy Link'}
                 </button>
               </div>
+
+              {/* QR Codes Grid */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6">
+                {/* Chat QR Code */}
+                <QRCodeCard
+                  url={typeof window !== 'undefined' ? `${window.location.origin}/chat/${wedding.access_code}` : ''}
+                  title="Chat Link"
+                  description="Guests can scan this to access the wedding concierge directly."
+                  size={160}
+                  downloadName={`${wedding.partner1_name.split(' ')[0]}-${wedding.partner2_name.split(' ')[0]}-chat-qr`.toLowerCase()}
+                />
+
+                {/* Registration QR Code (if slug exists) */}
+                {wedding.slug && (
+                  <QRCodeCard
+                    url={typeof window !== 'undefined' ? `${window.location.origin}/join/${wedding.slug}` : ''}
+                    title="Guest Registration"
+                    description="Guests can register their phone number and get added to your guest list automatically."
+                    size={160}
+                    downloadName={`${wedding.partner1_name.split(' ')[0]}-${wedding.partner2_name.split(' ')[0]}-register-qr`.toLowerCase()}
+                  />
+                )}
+              </div>
+
+              <p className="text-rose-100 text-sm mt-4">
+                Print these QR codes on your save-the-dates, invitations, or display them at your welcome table.
+              </p>
             </div>
 
             {/* Tab Navigation */}
