@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { useAuth } from '@/contexts/AuthContext';
@@ -114,7 +114,7 @@ interface FAQFormData {
   category: string;
 }
 
-export default function SetupWizardPage() {
+function SetupWizardContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { user, token } = useAuth();
@@ -1105,5 +1105,18 @@ export default function SetupWizardPage() {
 
       <Footer />
     </div>
+  );
+}
+
+// Main page component with Suspense boundary for useSearchParams
+export default function SetupWizardPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-gradient-to-b from-rose-50 to-white flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-rose-600"></div>
+      </div>
+    }>
+      <SetupWizardContent />
+    </Suspense>
   );
 }
