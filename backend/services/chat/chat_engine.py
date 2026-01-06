@@ -107,6 +107,37 @@ class ChatEngine:
                 if event.get('description'):
                     context_parts.append(f"- Details: {event['description']}")
 
+        # Vendors
+        vendors = wedding_data.get('vendors', [])
+        if vendors:
+            context_parts.append("\n### Wedding Vendors")
+            # Group by category for cleaner output
+            vendor_categories = {}
+            for vendor in vendors:
+                category = vendor.get('category', 'Other')
+                if category not in vendor_categories:
+                    vendor_categories[category] = []
+                vendor_categories[category].append(vendor)
+
+            for category, category_vendors in vendor_categories.items():
+                # Format category name nicely
+                category_display = category.replace('_', ' ').title()
+                context_parts.append(f"\n**{category_display}**")
+                for vendor in category_vendors:
+                    context_parts.append(f"- {vendor.get('business_name', 'Unknown')}")
+                    if vendor.get('contact_name'):
+                        context_parts.append(f"  - Contact: {vendor['contact_name']}")
+                    if vendor.get('email'):
+                        context_parts.append(f"  - Email: {vendor['email']}")
+                    if vendor.get('phone'):
+                        context_parts.append(f"  - Phone: {vendor['phone']}")
+                    if vendor.get('website_url'):
+                        context_parts.append(f"  - Website: {vendor['website_url']}")
+                    if vendor.get('instagram_handle'):
+                        context_parts.append(f"  - Instagram: @{vendor['instagram_handle'].lstrip('@')}")
+                    if vendor.get('service_description'):
+                        context_parts.append(f"  - Services: {vendor['service_description']}")
+
         # Registry
         registry_urls = wedding_data.get('registry_urls')
         if registry_urls:

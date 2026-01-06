@@ -176,13 +176,14 @@ async def send_message(
             detail="Chat session not found"
         )
 
-    # Get wedding with all related data
+    # Get wedding with all related data (including vendors for chat context)
     result = await db.execute(
         select(Wedding)
         .options(
             selectinload(Wedding.accommodations),
             selectinload(Wedding.events),
-            selectinload(Wedding.faqs)
+            selectinload(Wedding.faqs),
+            selectinload(Wedding.vendors)
         )
         .where(Wedding.id == session.wedding_id)
     )
@@ -198,6 +199,7 @@ async def send_message(
     accommodations_list = list(wedding.accommodations)
     events_list = list(wedding.events)
     faqs_list = list(wedding.faqs)
+    vendors_list = list(wedding.vendors) if wedding.vendors else []
 
     wedding_data = {
         "partner1_name": wedding.partner1_name,
@@ -251,6 +253,20 @@ async def send_message(
                 "answer": faq.answer,
             }
             for faq in faqs_list
+        ],
+        "vendors": [
+            {
+                "business_name": vendor.business_name,
+                "category": vendor.category,
+                "contact_name": vendor.contact_name,
+                "email": vendor.email,
+                "phone": vendor.phone,
+                "website_url": vendor.website_url,
+                "instagram_handle": vendor.instagram_handle,
+                "service_description": vendor.service_description,
+            }
+            for vendor in vendors_list
+            if vendor.is_confirmed  # Only include confirmed vendors in chat
         ],
     }
 
