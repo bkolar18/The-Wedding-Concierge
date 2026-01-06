@@ -210,6 +210,48 @@ Roll up vendor costs into a budget overview.
 
 ---
 
+### 3.3 Vendor Contract Upload & Extraction
+**Priority: MEDIUM** | **Complexity: Medium-High**
+
+Allow couples to upload vendor contracts (PDF/images) and auto-extract key details.
+
+**Extracted data:**
+- Vendor contact info (name, email, phone)
+- Contract total amount
+- Payment schedule (deposits, installments, final payment)
+- Due dates
+- Service date/time
+- Key terms (cancellation policy, etc.)
+
+**Privacy-conscious implementation:**
+- **"Extract & delete" option** - Parse contract, populate fields, delete original file
+- **Manual review step** - Show extracted data before saving, let user edit/approve
+- **Optional feature** - Don't force it; offer as a convenience
+- **Clear privacy messaging** - "Your contracts are processed securely and never shared"
+- **Encrypted storage** - If originals are kept, encrypt at rest
+
+**User flow:**
+1. Click "Upload Contract" on vendor detail page
+2. Select PDF or image file
+3. Processing indicator while AI extracts data
+4. Review screen showing extracted fields (editable)
+5. Confirm to save to vendor record
+6. Option: "Keep original" or "Delete after extraction"
+
+**Technical implementation:**
+- File upload to secure storage (S3/R2 with encryption)
+- Claude API for document understanding (vision for images, text for PDFs)
+- Structured extraction prompt for payment terms
+- Auto-populate vendor payment schedule from extracted dates
+
+**Why couples will use it despite privacy concerns:**
+- Time savings (10-page contract → auto-filled payment schedule)
+- The extracted data isn't more sensitive than manual entry
+- Trust built through transparency and "extract & delete" option
+- Same demographic already uses cloud storage for wedding docs
+
+---
+
 ## Phase 4: Mobile Experience
 *Goal: Meet couples where they are (on mobile)*
 
