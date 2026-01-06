@@ -387,19 +387,19 @@ export default function VendorManager({ token, weddingId }: VendorManagerProps) 
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             <div className="bg-gray-50 rounded-lg p-4">
               <p className="text-sm text-gray-500">Total Vendors</p>
-              <p className="text-2xl font-bold text-gray-800">{summary.total_vendors}</p>
+              <p className="text-2xl font-bold text-gray-800">{summary.summary.total_vendors}</p>
             </div>
             <div className="bg-gray-50 rounded-lg p-4">
               <p className="text-sm text-gray-500">Total Budget</p>
-              <p className="text-2xl font-bold text-gray-800">{formatCurrency(summary.total_contract_value)}</p>
+              <p className="text-2xl font-bold text-gray-800">{formatCurrency(summary.summary.total_contract)}</p>
             </div>
             <div className="bg-green-50 rounded-lg p-4">
               <p className="text-sm text-green-600">Paid</p>
-              <p className="text-2xl font-bold text-green-700">{formatCurrency(summary.total_paid)}</p>
+              <p className="text-2xl font-bold text-green-700">{formatCurrency(summary.summary.total_paid)}</p>
             </div>
             <div className="bg-yellow-50 rounded-lg p-4">
-              <p className="text-sm text-yellow-600">Pending</p>
-              <p className="text-2xl font-bold text-yellow-700">{formatCurrency(summary.total_pending)}</p>
+              <p className="text-sm text-yellow-600">Remaining</p>
+              <p className="text-2xl font-bold text-yellow-700">{formatCurrency(summary.summary.balance_due)}</p>
             </div>
           </div>
 
@@ -409,7 +409,7 @@ export default function VendorManager({ token, weddingId }: VendorManagerProps) 
               <div className="space-y-2">
                 {summary.upcoming_payments.slice(0, 3).map((payment, idx) => (
                   <div key={idx} className="flex justify-between items-center text-sm bg-rose-50 p-2 rounded-lg">
-                    <span className="text-gray-700">{payment.vendor_name} - {payment.payment_type}</span>
+                    <span className="text-gray-700">{payment.vendor_name} - {payment.description}</span>
                     <span className="font-medium text-rose-600">{formatCurrency(payment.amount)} due {formatDate(payment.due_date)}</span>
                   </div>
                 ))}
