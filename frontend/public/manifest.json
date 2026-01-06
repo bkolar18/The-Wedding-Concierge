@@ -2,7 +2,7 @@
   "name": "The Wedding Concierge",
   "short_name": "Wedding Concierge",
   "description": "Your AI-powered wedding assistant",
-  "start_url": "/",
+  "start_url": "/dashboard",
   "display": "standalone",
   "background_color": "#ffffff",
   "theme_color": "#e11d48",
