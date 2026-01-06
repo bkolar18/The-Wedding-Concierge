@@ -57,7 +57,6 @@ import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import SMSManager from '@/components/SMSManager';
 import VendorManager from '@/components/VendorManager';
-import QRCodeCard from '@/components/QRCodeCard';
 
 // Modal types
 type ModalType = 'wedding' | 'event' | 'accommodation' | 'faq' | null;
@@ -555,31 +554,22 @@ export default function DashboardPage() {
                 </button>
               </div>
 
-              {/* QR Codes Grid */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6">
-                {/* Chat QR Code */}
-                <QRCodeCard
-                  url={typeof window !== 'undefined' ? `${window.location.origin}/chat/${wedding.access_code}` : ''}
-                  title="Chat Link"
-                  description="Guests can scan this to access the wedding concierge directly."
-                  size={160}
-                  downloadName={`${wedding.partner1_name.split(' ')[0]}-${wedding.partner2_name.split(' ')[0]}-chat-qr`.toLowerCase()}
-                />
-
-                {/* Registration QR Code (if slug exists) */}
-                {wedding.slug && (
-                  <QRCodeCard
-                    url={typeof window !== 'undefined' ? `${window.location.origin}/join/${wedding.slug}` : ''}
-                    title="Guest Registration"
-                    description="Guests can register their phone number and get added to your guest list automatically."
-                    size={160}
-                    downloadName={`${wedding.partner1_name.split(' ')[0]}-${wedding.partner2_name.split(' ')[0]}-register-qr`.toLowerCase()}
-                  />
-                )}
+              {/* Generate QR Code Button */}
+              <div className="mt-4">
+                <Link
+                  href={`/qr/${wedding.access_code}`}
+                  target="_blank"
+                  className="inline-flex items-center px-6 py-3 bg-white/20 hover:bg-white/30 text-white rounded-xl font-medium transition-colors"
+                >
+                  <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z" />
+                  </svg>
+                  Generate QR Code
+                </Link>
               </div>
 
               <p className="text-rose-100 text-sm mt-4">
-                Print these QR codes on your save-the-dates, invitations, or display them at your welcome table.
+                Print QR codes on your save-the-dates, invitations, or display them at your welcome table.
               </p>
             </div>
 
