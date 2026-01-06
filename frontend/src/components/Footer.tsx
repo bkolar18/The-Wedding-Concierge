@@ -1,6 +1,38 @@
+'use client';
+
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 
 export default function Footer() {
+  const [isStandalone, setIsStandalone] = useState(false);
+
+  // Detect if running as PWA (standalone mode)
+  useEffect(() => {
+    const standalone = window.matchMedia('(display-mode: standalone)').matches
+      || (window.navigator as Navigator & { standalone?: boolean }).standalone === true;
+    setIsStandalone(standalone);
+  }, []);
+
+  // Simplified footer for PWA mode
+  if (isStandalone) {
+    return (
+      <footer className="bg-gray-900 text-gray-400 py-6 px-4">
+        <div className="max-w-6xl mx-auto text-center text-sm">
+          <div className="flex items-center justify-center space-x-2 mb-2">
+            <span className="text-lg font-serif text-white">The Wedding Concierge</span>
+            <svg className="w-6 h-6 text-rose-400" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M6 22C6 14 10 10 16 10C22 10 26 14 26 22H6Z" fill="currentColor" opacity="0.9"/>
+              <circle cx="16" cy="8" r="3" fill="currentColor"/>
+              <rect x="15" y="8" width="2" height="3" fill="currentColor"/>
+              <rect x="4" y="22" width="24" height="3" rx="1" fill="currentColor"/>
+            </svg>
+          </div>
+          <p>2024 The Wedding Concierge. All rights reserved.</p>
+        </div>
+      </footer>
+    );
+  }
+
   return (
     <footer className="bg-gray-900 text-gray-400 py-12 px-4">
       <div className="max-w-6xl mx-auto">
