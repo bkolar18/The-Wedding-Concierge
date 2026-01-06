@@ -57,6 +57,7 @@ import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import SMSManager from '@/components/SMSManager';
 import VendorManager from '@/components/VendorManager';
+import AnalyticsDashboard from '@/components/AnalyticsDashboard';
 
 // Modal types
 type ModalType = 'wedding' | 'event' | 'accommodation' | 'faq' | null;
@@ -90,7 +91,7 @@ export default function DashboardPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Tab state
-  const [activeTab, setActiveTab] = useState<'details' | 'outreach' | 'vendors'>('details');
+  const [activeTab, setActiveTab] = useState<'details' | 'outreach' | 'vendors' | 'analytics'>('details');
 
   // Modal state for editing
   const [editingItem, setEditingItem] = useState<EditingItem | null>(null);
@@ -632,6 +633,25 @@ export default function DashboardPage() {
                   <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-rose-600" />
                 )}
               </button>
+              <button
+                onClick={() => setActiveTab('analytics')}
+                className={`flex-1 py-4 text-center font-medium transition-colors relative ${
+                  activeTab === 'analytics'
+                    ? 'text-rose-600'
+                    : 'text-gray-500 hover:text-gray-700'
+                }`}
+              >
+                <span className="flex items-center justify-center">
+                  <svg className="w-5 h-5 sm:mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                  </svg>
+                  <span className="hidden sm:inline">Analytics</span>
+                  <span className="sm:hidden text-xs ml-1">Analytics</span>
+                </span>
+                {activeTab === 'analytics' && (
+                  <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-rose-600" />
+                )}
+              </button>
             </div>
 
             {/* Tab Content */}
@@ -885,6 +905,13 @@ export default function DashboardPage() {
             {activeTab === 'vendors' && (
               <div className="space-y-6">
                 <VendorManager token={token!} weddingId={wedding.id} />
+              </div>
+            )}
+
+            {/* Analytics Tab */}
+            {activeTab === 'analytics' && (
+              <div className="space-y-6">
+                <AnalyticsDashboard token={token!} />
               </div>
             )}
           </div>

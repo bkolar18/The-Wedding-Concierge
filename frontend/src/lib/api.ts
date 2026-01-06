@@ -1595,3 +1595,69 @@ export async function registerGuest(
 
   return response.json();
 }
+
+// ============ ANALYTICS API ============
+
+export interface ChatSessionSummary {
+  id: string;
+  guest_name: string | null;
+  channel: string;
+  message_count: number;
+  created_at: string;
+  last_message_at: string;
+}
+
+export interface AnalyticsData {
+  total_sessions: number;
+  total_messages: number;
+  unique_guests: number;
+  web_sessions: number;
+  sms_sessions: number;
+  recent_sessions: ChatSessionSummary[];
+}
+
+export interface ChatTranscriptMessage {
+  role: string;
+  content: string;
+  timestamp: string;
+}
+
+export interface ChatTranscript {
+  session_id: string;
+  guest_name: string | null;
+  channel: string;
+  created_at: string;
+  messages: ChatTranscriptMessage[];
+}
+
+/**
+ * Get analytics data for the user's wedding.
+ */
+export async function getAnalytics(token: string): Promise<AnalyticsData> {
+  const response = await fetch(`${API_URL}/api/analytics`, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(error.detail || 'Failed to get analytics');
+  }
+
+  return response.json();
+}
+
+/**
+ * Get full chat transcript for a session.
+ */
+export async function getChatTranscript(token: string, sessionId: string): Promise<ChatTranscript> {
+  const response = await fetch(`${API_URL}/api/analytics/transcript/${sessionId}`, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(error.detail || 'Failed to get transcript');
+  }
+
+  return response.json();
+}
