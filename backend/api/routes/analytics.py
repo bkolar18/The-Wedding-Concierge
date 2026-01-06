@@ -114,22 +114,24 @@ async def get_analytics(
     sms_sessions = sms_result.scalar() or 0
 
     # Get recent sessions with message counts
-    recent_result = await db.execute(
-        select(
-            ChatSession,
-            func.count(ChatMessage.id).label('message_count')
-        )
-        .outerjoin(ChatMessage, ChatMessage.session_id == ChatSession.id)
+    # First get recent sessions
+    sessions_query = await db.execute(
+        select(ChatSession)
         .where(ChatSession.wedding_id == wedding.id)
-        .group_by(ChatSession.id)
         .order_by(desc(ChatSession.last_message_at))
         .limit(20)
     )
+    sessions = sessions_query.scalars().all()
 
     recent_sessions = []
-    for row in recent_result:
-        session = row[0]
-        message_count = row[1]
+    for session in sessions:
+        # Get message count for each session
+        msg_count_result = await db.execute(
+            select(func.count(ChatMessage.id))
+            .where(ChatMessage.session_id == session.id)
+        )
+        message_count = msg_count_result.scalar() or 0
+
         recent_sessions.append(ChatSessionSummary(
             id=session.id,
             guest_name=session.guest_name,
