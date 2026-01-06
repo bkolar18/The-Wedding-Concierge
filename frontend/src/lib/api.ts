@@ -1045,3 +1045,366 @@ export async function submitContactForm(data: ContactFormData): Promise<{ messag
 
   return response.json();
 }
+
+// ============ VENDOR API ============
+
+export const VENDOR_CATEGORIES = [
+  { value: 'venue', label: 'Venue' },
+  { value: 'catering', label: 'Catering' },
+  { value: 'photography', label: 'Photography' },
+  { value: 'videography', label: 'Videography' },
+  { value: 'florist', label: 'Florist' },
+  { value: 'dj_band', label: 'DJ/Band' },
+  { value: 'officiant', label: 'Officiant' },
+  { value: 'hair_makeup', label: 'Hair & Makeup' },
+  { value: 'cake_desserts', label: 'Cake & Desserts' },
+  { value: 'transportation', label: 'Transportation' },
+  { value: 'rentals', label: 'Rentals' },
+  { value: 'lighting_av', label: 'Lighting/AV' },
+  { value: 'photo_booth', label: 'Photo Booth' },
+  { value: 'stationery', label: 'Stationery' },
+  { value: 'planner_coordinator', label: 'Planner/Coordinator' },
+  { value: 'other', label: 'Other' },
+] as const;
+
+export const VENDOR_STATUSES = [
+  { value: 'inquiry', label: 'Inquiry' },
+  { value: 'quoted', label: 'Quoted' },
+  { value: 'deposit_paid', label: 'Deposit Paid' },
+  { value: 'booked', label: 'Booked' },
+  { value: 'completed', label: 'Completed' },
+  { value: 'cancelled', label: 'Cancelled' },
+] as const;
+
+export const PAYMENT_TYPES = [
+  { value: 'deposit', label: 'Deposit' },
+  { value: 'installment', label: 'Installment' },
+  { value: 'final', label: 'Final Payment' },
+  { value: 'tip', label: 'Tip' },
+  { value: 'refund', label: 'Refund' },
+  { value: 'other', label: 'Other' },
+] as const;
+
+export const PAYMENT_STATUSES = [
+  { value: 'pending', label: 'Pending' },
+  { value: 'paid', label: 'Paid' },
+  { value: 'overdue', label: 'Overdue' },
+  { value: 'cancelled', label: 'Cancelled' },
+] as const;
+
+export interface Vendor {
+  id: string;
+  wedding_id: string;
+  business_name: string;
+  category: string;
+  contact_name: string | null;
+  email: string | null;
+  phone: string | null;
+  website: string | null;
+  instagram_handle: string | null;
+  status: string;
+  contract_amount: number | null;
+  notes: string | null;
+  service_description: string | null;
+  service_date: string | null;
+  service_start_time: string | null;
+  service_end_time: string | null;
+  created_at: string;
+  updated_at: string;
+  payments: VendorPayment[];
+  communications: VendorCommunication[];
+}
+
+export interface VendorPayment {
+  id: string;
+  vendor_id: string;
+  payment_type: string;
+  amount: number;
+  due_date: string | null;
+  paid_date: string | null;
+  status: string;
+  payment_method: string | null;
+  notes: string | null;
+  created_at: string;
+}
+
+export interface VendorCommunication {
+  id: string;
+  vendor_id: string;
+  communication_type: string;
+  subject: string | null;
+  content: string;
+  communication_date: string;
+  created_at: string;
+}
+
+export interface VendorCreateData {
+  business_name: string;
+  category: string;
+  contact_name?: string;
+  email?: string;
+  phone?: string;
+  website?: string;
+  instagram_handle?: string;
+  status?: string;
+  contract_amount?: number;
+  notes?: string;
+  service_description?: string;
+  service_date?: string;
+  service_start_time?: string;
+  service_end_time?: string;
+}
+
+export interface VendorPaymentCreateData {
+  payment_type: string;
+  amount: number;
+  due_date?: string;
+  paid_date?: string;
+  status?: string;
+  payment_method?: string;
+  notes?: string;
+}
+
+export interface VendorCommunicationCreateData {
+  communication_type: string;
+  subject?: string;
+  content: string;
+  communication_date?: string;
+}
+
+export interface VendorSummary {
+  total_vendors: number;
+  by_category: Record<string, number>;
+  by_status: Record<string, number>;
+  total_contract_value: number;
+  total_paid: number;
+  total_pending: number;
+  upcoming_payments: Array<{
+    vendor_name: string;
+    amount: number;
+    due_date: string;
+    payment_type: string;
+  }>;
+}
+
+/**
+ * Get all vendors for a wedding.
+ */
+export async function getVendors(
+  token: string,
+  weddingId: string,
+  category?: string,
+  status?: string
+): Promise<Vendor[]> {
+  const params = new URLSearchParams();
+  params.append('wedding_id', weddingId);
+  if (category) params.append('category', category);
+  if (status) params.append('status', status);
+
+  const response = await fetch(`${API_URL}/api/vendors?${params.toString()}`, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(error.detail || 'Failed to get vendors');
+  }
+
+  return response.json();
+}
+
+/**
+ * Get a single vendor by ID.
+ */
+export async function getVendor(token: string, vendorId: string): Promise<Vendor> {
+  const response = await fetch(`${API_URL}/api/vendors/${vendorId}`, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(error.detail || 'Failed to get vendor');
+  }
+
+  return response.json();
+}
+
+/**
+ * Create a new vendor.
+ */
+export async function createVendor(
+  token: string,
+  weddingId: string,
+  data: VendorCreateData
+): Promise<{ id: string; message: string }> {
+  const response = await fetch(`${API_URL}/api/vendors?wedding_id=${weddingId}`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify(data),
+  });
+
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(error.detail || 'Failed to create vendor');
+  }
+
+  return response.json();
+}
+
+/**
+ * Update an existing vendor.
+ */
+export async function updateVendor(
+  token: string,
+  vendorId: string,
+  data: Partial<VendorCreateData>
+): Promise<{ id: string; message: string }> {
+  const response = await fetch(`${API_URL}/api/vendors/${vendorId}`, {
+    method: 'PATCH',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify(data),
+  });
+
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(error.detail || 'Failed to update vendor');
+  }
+
+  return response.json();
+}
+
+/**
+ * Delete a vendor.
+ */
+export async function deleteVendor(token: string, vendorId: string): Promise<{ message: string }> {
+  const response = await fetch(`${API_URL}/api/vendors/${vendorId}`, {
+    method: 'DELETE',
+    headers: { Authorization: `Bearer ${token}` },
+  });
+
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(error.detail || 'Failed to delete vendor');
+  }
+
+  return response.json();
+}
+
+/**
+ * Get vendor summary/dashboard data for a wedding.
+ */
+export async function getVendorSummary(token: string, weddingId: string): Promise<VendorSummary> {
+  const response = await fetch(`${API_URL}/api/vendors/summary/all?wedding_id=${weddingId}`, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(error.detail || 'Failed to get vendor summary');
+  }
+
+  return response.json();
+}
+
+/**
+ * Add a payment to a vendor.
+ */
+export async function createVendorPayment(
+  token: string,
+  vendorId: string,
+  data: VendorPaymentCreateData
+): Promise<{ id: string; message: string }> {
+  const response = await fetch(`${API_URL}/api/vendors/${vendorId}/payments`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify(data),
+  });
+
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(error.detail || 'Failed to add payment');
+  }
+
+  return response.json();
+}
+
+/**
+ * Update a vendor payment.
+ */
+export async function updateVendorPayment(
+  token: string,
+  vendorId: string,
+  paymentId: string,
+  data: Partial<VendorPaymentCreateData>
+): Promise<{ id: string; message: string }> {
+  const response = await fetch(`${API_URL}/api/vendors/${vendorId}/payments/${paymentId}`, {
+    method: 'PATCH',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify(data),
+  });
+
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(error.detail || 'Failed to update payment');
+  }
+
+  return response.json();
+}
+
+/**
+ * Delete a vendor payment.
+ */
+export async function deleteVendorPayment(
+  token: string,
+  vendorId: string,
+  paymentId: string
+): Promise<{ message: string }> {
+  const response = await fetch(`${API_URL}/api/vendors/${vendorId}/payments/${paymentId}`, {
+    method: 'DELETE',
+    headers: { Authorization: `Bearer ${token}` },
+  });
+
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(error.detail || 'Failed to delete payment');
+  }
+
+  return response.json();
+}
+
+/**
+ * Add a communication log to a vendor.
+ */
+export async function createVendorCommunication(
+  token: string,
+  vendorId: string,
+  data: VendorCommunicationCreateData
+): Promise<{ id: string; message: string }> {
+  const response = await fetch(`${API_URL}/api/vendors/${vendorId}/communications`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify(data),
+  });
+
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(error.detail || 'Failed to add communication');
+  }
+
+  return response.json();
+}

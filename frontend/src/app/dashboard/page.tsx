@@ -54,6 +54,7 @@ function formatDateString(dateStr: string): string {
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import SMSManager from '@/components/SMSManager';
+import VendorManager from '@/components/VendorManager';
 
 // Modal types
 type ModalType = 'wedding' | 'event' | 'accommodation' | 'faq' | null;
@@ -86,7 +87,7 @@ export default function DashboardPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Tab state
-  const [activeTab, setActiveTab] = useState<'details' | 'outreach'>('details');
+  const [activeTab, setActiveTab] = useState<'details' | 'outreach' | 'vendors'>('details');
 
   // Modal state for editing
   const [editingItem, setEditingItem] = useState<EditingItem | null>(null);
@@ -564,6 +565,25 @@ export default function DashboardPage() {
                   <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-rose-600" />
                 )}
               </button>
+              <button
+                onClick={() => setActiveTab('vendors')}
+                className={`flex-1 py-4 text-center font-medium transition-colors relative ${
+                  activeTab === 'vendors'
+                    ? 'text-rose-600'
+                    : 'text-gray-500 hover:text-gray-700'
+                }`}
+              >
+                <span className="flex items-center justify-center">
+                  <svg className="w-5 h-5 sm:mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                  </svg>
+                  <span className="hidden sm:inline">Vendors</span>
+                  <span className="sm:hidden text-xs ml-1">Vendors</span>
+                </span>
+                {activeTab === 'vendors' && (
+                  <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-rose-600" />
+                )}
+              </button>
             </div>
 
             {/* Tab Content */}
@@ -810,6 +830,13 @@ export default function DashboardPage() {
             {activeTab === 'outreach' && (
               <div className="space-y-6">
                 <SMSManager token={token!} weddingId={wedding.id} />
+              </div>
+            )}
+
+            {/* Vendors Tab */}
+            {activeTab === 'vendors' && (
+              <div className="space-y-6">
+                <VendorManager token={token!} weddingId={wedding.id} />
               </div>
             )}
           </div>

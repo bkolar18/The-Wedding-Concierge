@@ -10,6 +10,7 @@ from core.database import Base
 if TYPE_CHECKING:
     from .chat import ChatSession
     from .sms import Guest, SMSTemplate, ScheduledMessage
+    from .vendor import Vendor
 
 
 def generate_uuid() -> str:
@@ -91,6 +92,11 @@ class Wedding(Base):
     )
     scheduled_messages: Mapped[List["ScheduledMessage"]] = relationship(
         "ScheduledMessage", back_populates="wedding", cascade="all, delete-orphan"
+    )
+
+    # Vendor management relationships
+    vendors: Mapped[List["Vendor"]] = relationship(
+        "Vendor", back_populates="wedding", cascade="all, delete-orphan"
     )
 
     def __repr__(self):
