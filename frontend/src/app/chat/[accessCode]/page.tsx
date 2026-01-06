@@ -253,12 +253,14 @@ export default function WeddingChatPage() {
         </div>
       </main>
 
-      {/* Footer */}
-      <footer className="py-6 text-center text-sm border-t border-rose-100">
-        <a href="/" className="text-gray-400 hover:text-rose-500 transition-colors">
-          Powered by The Wedding Concierge
-        </a>
-      </footer>
+      {/* Footer - only show branding if enabled */}
+      {wedding.show_branding !== false && (
+        <footer className="py-6 text-center text-sm border-t border-rose-100">
+          <a href="/" className="text-gray-400 hover:text-rose-500 transition-colors">
+            Powered by The Wedding Concierge
+          </a>
+        </footer>
+      )}
     </div>
   );
 }

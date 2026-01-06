@@ -286,15 +286,17 @@ export default function GuestRegistrationPage() {
           </p>
         </div>
 
-        {/* Footer */}
-        <div className="text-center mt-6">
-          <p className="text-sm text-gray-500">
-            Powered by{' '}
-            <Link href="/" className="text-rose-600 hover:text-rose-700">
-              The Wedding Concierge
-            </Link>
-          </p>
-        </div>
+        {/* Footer - only show branding if enabled */}
+        {wedding.show_branding !== false && (
+          <div className="text-center mt-6">
+            <p className="text-sm text-gray-500">
+              Powered by{' '}
+              <Link href="/" className="text-rose-600 hover:text-rose-700">
+                The Wedding Concierge
+              </Link>
+            </p>
+          </div>
+        )}
       </div>
     </div>
   );

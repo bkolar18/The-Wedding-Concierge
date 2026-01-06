@@ -35,6 +35,8 @@ export interface WeddingPreview {
   dress_code: string | null;
   access_code: string;
   wedding_website_url: string | null;
+  chat_greeting: string | null;
+  show_branding: boolean;
 }
 
 /**
@@ -258,6 +260,8 @@ export interface WeddingData {
   additional_notes: string | null;
   access_code: string;
   slug: string | null;
+  chat_greeting: string | null;
+  show_branding: boolean;
   chat_url: string;
   join_url: string | null;
   events: Array<{
@@ -1605,6 +1609,7 @@ export interface PublicWeddingInfo {
   partner2_name: string;
   wedding_date: string | null;
   access_code: string;
+  show_branding: boolean;
 }
 
 export interface GuestRegistrationData {

@@ -61,6 +61,7 @@ class WeddingPublicInfo(BaseModel):
     partner2_name: str
     wedding_date: Optional[str] = None
     access_code: str
+    show_branding: bool = True
 
 
 # --- Endpoints ---
@@ -91,7 +92,8 @@ async def get_wedding_by_slug(
         partner1_name=wedding.partner1_name,
         partner2_name=wedding.partner2_name,
         wedding_date=wedding.wedding_date.isoformat() if wedding.wedding_date else None,
-        access_code=wedding.access_code
+        access_code=wedding.access_code,
+        show_branding=wedding.show_branding if wedding.show_branding is not None else True
     )
 
 
@@ -217,5 +219,6 @@ async def get_wedding_by_access_code(
         partner1_name=wedding.partner1_name,
         partner2_name=wedding.partner2_name,
         wedding_date=wedding.wedding_date.isoformat() if wedding.wedding_date else None,
-        access_code=wedding.access_code
+        access_code=wedding.access_code,
+        show_branding=wedding.show_branding if wedding.show_branding is not None else True
     )

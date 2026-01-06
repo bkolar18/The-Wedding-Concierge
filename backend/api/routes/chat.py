@@ -59,6 +59,8 @@ class WeddingPreviewResponse(BaseModel):
     dress_code: Optional[str] = None
     access_code: str
     wedding_website_url: Optional[str] = None
+    chat_greeting: Optional[str] = None
+    show_branding: bool = True
 
 
 @router.get("/preview/{access_code}", response_model=WeddingPreviewResponse)
@@ -93,7 +95,9 @@ async def get_wedding_preview(
         ceremony_venue_address=wedding.ceremony_venue_address,
         dress_code=wedding.dress_code,
         access_code=wedding.access_code,
-        wedding_website_url=wedding.wedding_website_url
+        wedding_website_url=wedding.wedding_website_url,
+        chat_greeting=wedding.chat_greeting,
+        show_branding=wedding.show_branding if wedding.show_branding is not None else True
     )
 
 

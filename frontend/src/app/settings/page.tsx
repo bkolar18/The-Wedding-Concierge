@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useAuth } from '@/contexts/AuthContext';
-import { getPaymentStatus, PaymentStatus } from '@/lib/api';
+import { getPaymentStatus, PaymentStatus, getMyWedding, updateMyWedding, WeddingData } from '@/lib/api';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 
@@ -12,8 +12,15 @@ export default function SettingsPage() {
   const router = useRouter();
   const { user, token, isLoading: authLoading, logout } = useAuth();
   const [paymentStatus, setPaymentStatus] = useState<PaymentStatus | null>(null);
+  const [wedding, setWedding] = useState<WeddingData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isStandalone, setIsStandalone] = useState(false);
+
+  // Chat customization state
+  const [chatGreeting, setChatGreeting] = useState('');
+  const [showBranding, setShowBranding] = useState(true);
+  const [isSaving, setIsSaving] = useState(false);
+  const [saveMessage, setSaveMessage] = useState<string | null>(null);
 
   // Detect if running as PWA (standalone mode)
   useEffect(() => {
@@ -29,13 +36,21 @@ export default function SettingsPage() {
     }
   }, [authLoading, user, router]);
 
-  // Load payment status
+  // Load payment status and wedding data
   useEffect(() => {
     async function loadData() {
       if (!token) return;
       try {
-        const data = await getPaymentStatus(token);
-        setPaymentStatus(data);
+        const [paymentData, weddingData] = await Promise.all([
+          getPaymentStatus(token),
+          getMyWedding(token).catch(() => null)
+        ]);
+        setPaymentStatus(paymentData);
+        if (weddingData) {
+          setWedding(weddingData);
+          setChatGreeting(weddingData.chat_greeting || '');
+          setShowBranding(weddingData.show_branding !== false);
+        }
       } catch {
         // Ignore errors
       } finally {
@@ -50,6 +65,32 @@ export default function SettingsPage() {
   const handleLogout = () => {
     logout();
     router.push('/');
+  };
+
+  const handleSaveChatSettings = async () => {
+    if (!token) return;
+    setIsSaving(true);
+    setSaveMessage(null);
+
+    try {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const updateData: any = {
+        chat_greeting: chatGreeting || null,
+      };
+
+      // Only include show_branding if user has paid plan
+      if (paymentStatus?.subscription_tier !== 'free') {
+        updateData.show_branding = showBranding;
+      }
+
+      await updateMyWedding(token, updateData);
+      setSaveMessage('Settings saved successfully!');
+      setTimeout(() => setSaveMessage(null), 3000);
+    } catch (err) {
+      setSaveMessage(err instanceof Error ? err.message : 'Failed to save settings');
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   if (authLoading || isLoading) {
@@ -171,6 +212,79 @@ export default function SettingsPage() {
               )}
             </div>
           </div>
+
+          {/* Chat Customization Section - only show if user has a wedding */}
+          {wedding && (
+          <div className="bg-white rounded-2xl shadow-lg p-6">
+            <h3 className="text-lg font-medium text-gray-800 flex items-center mb-4">
+              <svg className="w-5 h-5 mr-2 text-rose-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+              </svg>
+              Chat Customization
+            </h3>
+
+            {/* Custom Greeting */}
+            <div className="mb-4">
+              <label htmlFor="chatGreeting" className="block text-sm font-medium text-gray-700 mb-2">
+                Custom Welcome Message
+              </label>
+              <textarea
+                id="chatGreeting"
+                value={chatGreeting}
+                onChange={(e) => setChatGreeting(e.target.value)}
+                placeholder={`Hi there! I'm here to help you with any questions about ${wedding.partner1_name} and ${wedding.partner2_name}'s upcoming wedding...`}
+                className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-rose-500 focus:border-rose-500 transition-colors resize-none"
+                rows={4}
+                maxLength={500}
+              />
+              <p className="text-xs text-gray-500 mt-1">
+                {chatGreeting.length}/500 characters. Leave empty to use the default greeting.
+              </p>
+            </div>
+
+            {/* Show Branding Toggle */}
+            <div className="flex items-center justify-between py-3 border-t border-gray-100">
+              <div>
+                <span className="text-gray-700 font-medium">Show &quot;Powered by&quot; branding</span>
+                <p className="text-xs text-gray-500 mt-0.5">
+                  {paymentStatus?.subscription_tier === 'free'
+                    ? 'Upgrade to remove branding'
+                    : 'Display branding on chat and registration pages'}
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setShowBranding(!showBranding)}
+                disabled={paymentStatus?.subscription_tier === 'free'}
+                className={`relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-rose-500 focus:ring-offset-2 ${
+                  showBranding ? 'bg-rose-600' : 'bg-gray-200'
+                } ${paymentStatus?.subscription_tier === 'free' ? 'opacity-50 cursor-not-allowed' : ''}`}
+              >
+                <span
+                  className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${
+                    showBranding ? 'translate-x-5' : 'translate-x-0'
+                  }`}
+                />
+              </button>
+            </div>
+
+            {/* Save Button */}
+            <div className="mt-4 pt-4 border-t border-gray-100">
+              {saveMessage && (
+                <p className={`text-sm mb-3 ${saveMessage.includes('success') ? 'text-green-600' : 'text-red-600'}`}>
+                  {saveMessage}
+                </p>
+              )}
+              <button
+                onClick={handleSaveChatSettings}
+                disabled={isSaving}
+                className="w-full py-2 bg-rose-600 text-white rounded-lg font-medium hover:bg-rose-700 disabled:opacity-50 transition-colors"
+              >
+                {isSaving ? 'Saving...' : 'Save Chat Settings'}
+              </button>
+            </div>
+          </div>
+          )}
 
           {/* Sign Out */}
           <div className="bg-white rounded-2xl shadow-lg p-6">

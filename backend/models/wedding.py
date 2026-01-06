@@ -112,6 +112,10 @@ class Wedding(Base):
     # Public registration slug (e.g., "smith-jones" for /join/smith-jones)
     slug: Mapped[Optional[str]] = mapped_column(String(100), unique=True, nullable=True, index=True)
 
+    # Chat customization
+    chat_greeting: Mapped[Optional[str]] = mapped_column(Text, nullable=True)  # Custom welcome message for chat
+    show_branding: Mapped[bool] = mapped_column(Boolean, default=True)  # Show "Powered by" branding (premium can disable)
+
     # Relationships
     events: Mapped[List["WeddingEvent"]] = relationship(
         "WeddingEvent", back_populates="wedding", cascade="all, delete-orphan"

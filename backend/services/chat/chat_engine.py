@@ -273,7 +273,15 @@ Now help the wedding guests with their questions!"""
             return "I'm having a little trouble right now. Please try again in a moment!"
 
     async def get_greeting(self, wedding: "Wedding") -> str:
-        """Get an initial greeting message for a new chat session."""
+        """Get an initial greeting message for a new chat session.
+
+        Uses custom greeting if set by the couple, otherwise uses default.
+        """
+        # Use custom greeting if the couple has set one
+        if wedding.chat_greeting:
+            return wedding.chat_greeting
+
+        # Default greeting
         return f"""Hi there! I'm here to help you with any questions about {wedding.partner1_name} and {wedding.partner2_name}'s upcoming wedding.
 
 You can ask me things like:

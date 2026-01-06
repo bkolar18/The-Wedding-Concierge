@@ -120,6 +120,8 @@ class WeddingUpdate(BaseModel):
     rsvp_url: Optional[str] = None
     additional_notes: Optional[str] = None
     access_code: Optional[str] = None
+    chat_greeting: Optional[str] = None
+    show_branding: Optional[bool] = None
 
 
 # --- Endpoints ---
@@ -288,6 +290,8 @@ async def get_my_wedding(
         "additional_notes": wedding.additional_notes,
         "access_code": wedding.access_code,
         "slug": wedding.slug,
+        "chat_greeting": wedding.chat_greeting,
+        "show_branding": wedding.show_branding,
         "chat_url": f"/chat/{wedding.access_code}",
         "join_url": f"/join/{wedding.slug}" if wedding.slug else None,
         "events": [
@@ -352,6 +356,15 @@ async def update_my_wedding(
 
     if not wedding:
         raise HTTPException(status_code=404, detail="Wedding not found")
+
+    # Enforce show_branding restriction for free tier
+    if update_data.show_branding is False:
+        user_tier = current_user.subscription_tier or "free"
+        if user_tier == "free":
+            raise HTTPException(
+                status_code=403,
+                detail="Removing branding requires a paid plan. Please upgrade to Standard or Premium."
+            )
 
     # Update fields
     update_dict = update_data.model_dump(exclude_unset=True)
