@@ -1,14 +1,14 @@
 (function() {
   'use strict';
 
-  // Configuration
-  var WIDGET_HOST = 'https://the-wedding-concierge.vercel.app';
-
   // Get script element and attributes
   var scriptTag = document.currentScript || (function() {
     var scripts = document.getElementsByTagName('script');
     return scripts[scripts.length - 1];
   })();
+
+  // Configuration - allow custom host for development/self-hosting
+  var WIDGET_HOST = scriptTag.getAttribute('data-host') || 'https://the-wedding-concierge.vercel.app';
 
   var accessCode = scriptTag.getAttribute('data-wedding');
   var primaryColor = scriptTag.getAttribute('data-color') || '#f43f5e'; // rose-500 default
