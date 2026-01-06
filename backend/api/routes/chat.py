@@ -307,11 +307,12 @@ async def send_message(
     )
     db.add(user_msg)
 
-    # Get AI response
+    # Get AI response (with caching for common questions)
     response = await get_chat_engine().chat(
         wedding_data=wedding_data,
         message=request.message,
-        conversation_history=conversation_history
+        conversation_history=conversation_history,
+        wedding_id=str(wedding.id)
     )
 
     # Save assistant response

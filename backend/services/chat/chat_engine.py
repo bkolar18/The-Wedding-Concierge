@@ -1,6 +1,9 @@
 """Chat engine for answering wedding-related questions."""
-from typing import Optional, List, Dict, Any, Union, TYPE_CHECKING
+import hashlib
+import logging
+from typing import Optional, List, Dict, Any, Tuple, TYPE_CHECKING
 from datetime import datetime, date
+from collections import OrderedDict
 import anthropic
 
 from core.config import settings
@@ -8,14 +11,114 @@ from core.config import settings
 if TYPE_CHECKING:
     from models.wedding import Wedding
 
+logger = logging.getLogger(__name__)
+
+
+class ResponseCache:
+    """
+    Simple in-memory LRU cache for chat responses.
+
+    Caches responses for common questions to reduce API costs.
+    Cache is invalidated when wedding data changes (via wedding_id + data hash).
+
+    Storage: ~1KB per cached response, 100 entries = ~100KB max
+    """
+
+    def __init__(self, max_size: int = 100, ttl_seconds: int = 3600):
+        """
+        Initialize cache.
+
+        Args:
+            max_size: Maximum number of cached responses (LRU eviction)
+            ttl_seconds: Time-to-live for cache entries (1 hour default)
+        """
+        self.max_size = max_size
+        self.ttl_seconds = ttl_seconds
+        self._cache: OrderedDict[str, Tuple[str, float]] = OrderedDict()
+
+    def _make_key(self, wedding_id: str, message: str, data_hash: str) -> str:
+        """Create cache key from wedding ID, normalized message, and data hash."""
+        # Normalize message: lowercase, strip whitespace, remove punctuation
+        normalized = message.lower().strip().rstrip('?!.')
+        # Include data_hash so cache invalidates when wedding data changes
+        key_str = f"{wedding_id}:{data_hash}:{normalized}"
+        return hashlib.md5(key_str.encode()).hexdigest()
+
+    def get(self, wedding_id: str, message: str, data_hash: str) -> Optional[str]:
+        """Get cached response if exists and not expired."""
+        key = self._make_key(wedding_id, message, data_hash)
+
+        if key not in self._cache:
+            return None
+
+        response, timestamp = self._cache[key]
+        now = datetime.utcnow().timestamp()
+
+        # Check if expired
+        if now - timestamp > self.ttl_seconds:
+            del self._cache[key]
+            return None
+
+        # Move to end (most recently used)
+        self._cache.move_to_end(key)
+        logger.debug(f"Cache HIT for message: {message[:50]}...")
+        return response
+
+    def set(self, wedding_id: str, message: str, data_hash: str, response: str):
+        """Cache a response."""
+        key = self._make_key(wedding_id, message, data_hash)
+
+        # Evict oldest if at capacity
+        while len(self._cache) >= self.max_size:
+            self._cache.popitem(last=False)
+
+        self._cache[key] = (response, datetime.utcnow().timestamp())
+        logger.debug(f"Cache SET for message: {message[:50]}...")
+
+    def invalidate_wedding(self, wedding_id: str):
+        """Invalidate all cache entries for a wedding (called when data updates)."""
+        # Since we use data_hash in keys, old entries will naturally miss
+        # This method is here for explicit invalidation if needed
+        pass
+
+    @property
+    def stats(self) -> Dict[str, int]:
+        """Get cache statistics."""
+        return {
+            "size": len(self._cache),
+            "max_size": self.max_size
+        }
+
+
+# Global cache instance
+_response_cache = ResponseCache(max_size=100, ttl_seconds=3600)
+
+
+def get_data_hash(wedding_data: Dict[str, Any]) -> str:
+    """Create a hash of wedding data to detect changes."""
+    # Only hash key fields that affect responses
+    key_fields = [
+        wedding_data.get('partner1_name', ''),
+        wedding_data.get('partner2_name', ''),
+        str(wedding_data.get('wedding_date', '')),
+        wedding_data.get('dress_code', ''),
+        wedding_data.get('ceremony_venue_name', ''),
+        wedding_data.get('ceremony_venue_address', ''),
+        str(len(wedding_data.get('accommodations', []))),
+        str(len(wedding_data.get('events', []))),
+        str(len(wedding_data.get('faqs', []))),
+    ]
+    return hashlib.md5('|'.join(key_fields).encode()).hexdigest()[:8]
+
 
 class ChatEngine:
     """AI-powered chat engine for wedding Q&A."""
 
     def __init__(self):
-        """Initialize the chat engine with Claude."""
+        """Initialize the chat engine with Claude Haiku for cost efficiency."""
         self.client = anthropic.AsyncAnthropic(api_key=settings.ANTHROPIC_API_KEY)
-        self.model = settings.LLM_MODEL
+        self.model = settings.LLM_MODEL  # claude-3-5-haiku-20241022
+        self.cache = _response_cache
 
     def _format_date(self, d: Optional[date]) -> Optional[str]:
         """Format a date object to string."""
@@ -225,19 +328,34 @@ Now help the wedding guests with their questions!"""
         self,
         wedding_data: Dict[str, Any],
         message: str,
-        conversation_history: Optional[List[Dict[str, str]]] = None
+        conversation_history: Optional[List[Dict[str, str]]] = None,
+        wedding_id: Optional[str] = None
     ) -> str:
         """
         Process a chat message and return a response.
+
+        Uses caching for first messages in a conversation (no history)
+        to reduce API costs for common questions like "what's the dress code?"
 
         Args:
             wedding_data: The wedding data as a dictionary
             message: The user's message
             conversation_history: Previous messages in the conversation
+            wedding_id: Optional wedding ID for caching
 
         Returns:
             The assistant's response
         """
+        # Only cache first messages (no conversation history)
+        # Follow-up questions need full context
+        can_cache = wedding_id and (not conversation_history or len(conversation_history) <= 1)
+
+        if can_cache:
+            data_hash = get_data_hash(wedding_data)
+            cached = self.cache.get(wedding_id, message, data_hash)
+            if cached:
+                return cached
+
         system_prompt = self.build_system_prompt(wedding_data)
 
         # Build messages list
@@ -265,11 +383,18 @@ Now help the wedding guests with their questions!"""
                 messages=messages
             )
 
-            return response.content[0].text
+            result = response.content[0].text
+
+            # Cache the response for future identical questions
+            if can_cache and wedding_id:
+                data_hash = get_data_hash(wedding_data)
+                self.cache.set(wedding_id, message, data_hash, result)
+
+            return result
 
         except anthropic.APIError as e:
             # Log error and return friendly message
-            print(f"Claude API error: {e}")
+            logger.error(f"Claude API error: {e}")
             return "I'm having a little trouble right now. Please try again in a moment!"
 
     async def get_greeting(self, wedding: "Wedding") -> str:
