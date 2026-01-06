@@ -433,6 +433,7 @@ export interface AccommodationCreateData {
   hotel_name: string;
   address?: string;
   phone?: string;
+  website_url?: string;
   booking_url?: string;
   has_room_block?: boolean;
   room_block_name?: string;
