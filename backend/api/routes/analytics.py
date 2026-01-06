@@ -16,6 +16,12 @@ from models.user import User
 router = APIRouter()
 
 
+@router.get("/test")
+async def test_analytics():
+    """Simple test endpoint."""
+    return {"status": "ok", "message": "Analytics route is working"}
+
+
 class ChatSessionSummary(BaseModel):
     """Summary of a single chat session."""
     id: str
