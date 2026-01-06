@@ -21,7 +21,7 @@ from slowapi.util import get_remote_address
 from slowapi.errors import RateLimitExceeded
 
 from core.config import settings
-from api.routes import chat, wedding, health, auth, scrape, sms, contact, vendor, public, payment, analytics
+from api.routes import chat, wedding, health, auth, scrape, sms, contact, vendor, public, payment, analytics, digest
 
 # Initialize rate limiter
 limiter = Limiter(key_func=get_remote_address)
@@ -96,6 +96,7 @@ app.include_router(vendor.router, prefix="/api/vendors", tags=["vendors"])
 app.include_router(public.router, prefix="/api/public", tags=["public"])
 app.include_router(payment.router, prefix="/api/payment", tags=["payment"])
 app.include_router(analytics.router, prefix="/api/analytics", tags=["analytics"])
+app.include_router(digest.router, prefix="/api/digest", tags=["digest"])
 
 
 @app.on_event("startup")
