@@ -99,6 +99,42 @@ async def run_migrations():
             END IF;
         END $$;
         """,
+        # Add chat_greeting column for custom welcome message
+        """
+        DO $$
+        BEGIN
+            IF NOT EXISTS (
+                SELECT 1 FROM information_schema.columns
+                WHERE table_name = 'weddings' AND column_name = 'chat_greeting'
+            ) THEN
+                ALTER TABLE weddings ADD COLUMN chat_greeting VARCHAR(500);
+            END IF;
+        END $$;
+        """,
+        # Add show_branding column for premium feature
+        """
+        DO $$
+        BEGIN
+            IF NOT EXISTS (
+                SELECT 1 FROM information_schema.columns
+                WHERE table_name = 'weddings' AND column_name = 'show_branding'
+            ) THEN
+                ALTER TABLE weddings ADD COLUMN show_branding BOOLEAN DEFAULT true;
+            END IF;
+        END $$;
+        """,
+        # Add custom_slug column for guest self-registration
+        """
+        DO $$
+        BEGIN
+            IF NOT EXISTS (
+                SELECT 1 FROM information_schema.columns
+                WHERE table_name = 'weddings' AND column_name = 'custom_slug'
+            ) THEN
+                ALTER TABLE weddings ADD COLUMN custom_slug VARCHAR(100);
+            END IF;
+        END $$;
+        """,
     ]
 
     async with engine.begin() as conn:
