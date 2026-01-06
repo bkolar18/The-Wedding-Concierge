@@ -13,6 +13,14 @@ export default function SettingsPage() {
   const { user, token, isLoading: authLoading, logout } = useAuth();
   const [paymentStatus, setPaymentStatus] = useState<PaymentStatus | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [isStandalone, setIsStandalone] = useState(false);
+
+  // Detect if running as PWA (standalone mode)
+  useEffect(() => {
+    const standalone = window.matchMedia('(display-mode: standalone)').matches
+      || (window.navigator as Navigator & { standalone?: boolean }).standalone === true;
+    setIsStandalone(standalone);
+  }, []);
 
   // Redirect if not logged in
   useEffect(() => {
@@ -64,7 +72,8 @@ export default function SettingsPage() {
         <h1 className="text-2xl font-serif text-gray-800 mb-6">Settings</h1>
 
         <div className="space-y-6">
-          {/* Install App Section */}
+          {/* Install App Section - Hidden when already running as PWA */}
+          {!isStandalone && (
           <div className="bg-white rounded-2xl shadow-lg p-6">
             <h3 className="text-lg font-medium text-gray-800 flex items-center mb-4">
               <svg className="w-5 h-5 mr-2 text-rose-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -124,6 +133,7 @@ export default function SettingsPage() {
               </ol>
             </div>
           </div>
+          )}
 
           {/* Account Section */}
           <div className="bg-white rounded-2xl shadow-lg p-6">
