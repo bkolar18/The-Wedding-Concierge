@@ -246,6 +246,23 @@ async def get_my_wedding(
     if not wedding:
         raise HTTPException(status_code=404, detail="Wedding not found")
 
+    # Auto-generate slug for existing weddings that don't have one
+    if not wedding.slug and wedding.partner1_name and wedding.partner2_name:
+        base_slug = generate_slug(wedding.partner1_name, wedding.partner2_name)
+        slug = base_slug
+        counter = 1
+        while True:
+            existing = await db.execute(
+                select(Wedding).where(Wedding.slug == slug, Wedding.id != wedding.id)
+            )
+            if not existing.scalar_one_or_none():
+                break
+            slug = f"{base_slug}-{counter}"
+            counter += 1
+        wedding.slug = slug
+        await db.commit()
+        await db.refresh(wedding)
+
     return {
         "id": str(wedding.id),
         "partner1_name": wedding.partner1_name,
