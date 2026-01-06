@@ -15,13 +15,49 @@ from models.user import User
 
 router = APIRouter()
 
+# Topic keywords for categorizing questions (privacy-friendly)
+TOPIC_KEYWORDS = {
+    "Dress Code": ["dress code", "attire", "wear", "outfit", "formal", "casual", "black tie", "cocktail"],
+    "Venue & Directions": ["venue", "location", "address", "directions", "parking", "where is", "get there"],
+    "Schedule & Timing": ["time", "start", "begin", "schedule", "when", "what time", "ceremony time"],
+    "Accommodations": ["hotel", "stay", "accommodation", "room", "book", "lodging", "where to stay"],
+    "Food & Drinks": ["food", "dinner", "meal", "menu", "dietary", "vegetarian", "vegan", "allergies", "drinks", "bar", "alcohol"],
+    "RSVP & Plus Ones": ["rsvp", "plus one", "guest", "bring someone", "respond"],
+    "Registry & Gifts": ["gift", "registry", "present", "what to get"],
+    "Transportation": ["transportation", "shuttle", "uber", "taxi", "ride", "parking"],
+    "Photos & Social": ["photo", "hashtag", "instagram", "social media", "pictures"],
+    "Wedding Party": ["bridesmaid", "groomsmen", "wedding party", "best man", "maid of honor"],
+    "General Info": [],  # Fallback category
+}
+
+
+def extract_topics(messages: List[str]) -> List[str]:
+    """Extract topic categories from user messages (privacy-friendly)."""
+    topics = set()
+    combined_text = " ".join(messages).lower()
+
+    for topic, keywords in TOPIC_KEYWORDS.items():
+        if topic == "General Info":
+            continue
+        for keyword in keywords:
+            if keyword in combined_text:
+                topics.add(topic)
+                break
+
+    # If no specific topics found, mark as General Info
+    if not topics:
+        topics.add("General Info")
+
+    return sorted(list(topics))
+
 
 class ChatSessionSummary(BaseModel):
-    """Summary of a single chat session."""
+    """Summary of a single chat session (privacy-friendly - no full messages)."""
     id: str
     guest_name: Optional[str]
     channel: str
     message_count: int
+    topics: List[str]  # Topics discussed, not full messages
     created_at: datetime
     last_message_at: datetime
 
@@ -33,23 +69,8 @@ class AnalyticsResponse(BaseModel):
     unique_guests: int
     web_sessions: int
     sms_sessions: int
+    topic_breakdown: dict  # Count of questions by topic
     recent_sessions: List[ChatSessionSummary]
-
-
-class ChatTranscriptMessage(BaseModel):
-    """A single message in a chat transcript."""
-    role: str
-    content: str
-    timestamp: datetime
-
-
-class ChatTranscriptResponse(BaseModel):
-    """Full transcript of a chat session."""
-    session_id: str
-    guest_name: Optional[str]
-    channel: str
-    created_at: datetime
-    messages: List[ChatTranscriptMessage]
 
 
 @router.get("", response_model=AnalyticsResponse)
@@ -80,6 +101,7 @@ async def get_analytics(
     unique_guests = 0
     web_sessions = 0
     sms_sessions = 0
+    topic_breakdown = {}
     recent_sessions = []
 
     try:
@@ -125,9 +147,10 @@ async def get_analytics(
         )
         sms_sessions = sms_result.scalar() or 0
 
-        # Get recent sessions
+        # Get recent sessions with messages for topic extraction
         sessions_query = await db.execute(
             select(ChatSession)
+            .options(selectinload(ChatSession.messages))
             .where(ChatSession.wedding_id == wedding.id)
             .order_by(desc(ChatSession.last_message_at))
             .limit(20)
@@ -135,18 +158,25 @@ async def get_analytics(
         sessions = list(sessions_query.scalars().all())
 
         for session in sessions:
-            # Get message count for each session
-            msg_count_result = await db.execute(
-                select(func.count(ChatMessage.id))
-                .where(ChatMessage.session_id == session.id)
-            )
-            message_count = msg_count_result.scalar() or 0
+            # Extract user messages only (not assistant responses)
+            user_messages = [
+                msg.content for msg in session.messages
+                if msg.role == "user"
+            ]
+
+            # Extract topics from user messages
+            topics = extract_topics(user_messages)
+
+            # Update topic breakdown counts
+            for topic in topics:
+                topic_breakdown[topic] = topic_breakdown.get(topic, 0) + 1
 
             recent_sessions.append(ChatSessionSummary(
                 id=session.id,
                 guest_name=session.guest_name,
                 channel=session.channel,
-                message_count=message_count,
+                message_count=len(session.messages),
+                topics=topics,
                 created_at=session.created_at,
                 last_message_at=session.last_message_at
             ))
@@ -160,50 +190,10 @@ async def get_analytics(
         unique_guests=unique_guests,
         web_sessions=web_sessions,
         sms_sessions=sms_sessions,
+        topic_breakdown=topic_breakdown,
         recent_sessions=recent_sessions
     )
 
 
-@router.get("/transcript/{session_id}", response_model=ChatTranscriptResponse)
-async def get_chat_transcript(
-    session_id: str,
-    db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(get_current_user)
-):
-    """
-    Get the full transcript of a chat session.
-
-    Only accessible by the wedding owner.
-    """
-    # Get the session with messages
-    result = await db.execute(
-        select(ChatSession)
-        .options(selectinload(ChatSession.messages))
-        .where(ChatSession.id == session_id)
-    )
-    session = result.scalar_one_or_none()
-
-    if not session:
-        raise HTTPException(status_code=404, detail="Chat session not found")
-
-    # Verify ownership (User has wedding_id, not Wedding has owner_id)
-    if current_user.wedding_id != session.wedding_id:
-        raise HTTPException(status_code=403, detail="Not authorized to view this chat")
-
-    # Build transcript
-    messages = [
-        ChatTranscriptMessage(
-            role=msg.role,
-            content=msg.content,
-            timestamp=msg.created_at
-        )
-        for msg in sorted(session.messages, key=lambda m: m.created_at)
-    ]
-
-    return ChatTranscriptResponse(
-        session_id=session.id,
-        guest_name=session.guest_name,
-        channel=session.channel,
-        created_at=session.created_at,
-        messages=messages
-    )
+# Note: Full transcript endpoint removed for guest privacy.
+# Couples now see topic summaries instead of full conversations.

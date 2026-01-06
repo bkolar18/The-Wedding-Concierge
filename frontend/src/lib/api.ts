@@ -1664,6 +1664,7 @@ export interface ChatSessionSummary {
   guest_name: string | null;
   channel: string;
   message_count: number;
+  topics: string[];  // Privacy-friendly topic tags instead of full messages
   created_at: string;
   last_message_at: string;
 }
@@ -1674,25 +1675,13 @@ export interface AnalyticsData {
   unique_guests: number;
   web_sessions: number;
   sms_sessions: number;
+  topic_breakdown: Record<string, number>;  // Topic counts for insights
   recent_sessions: ChatSessionSummary[];
-}
-
-export interface ChatTranscriptMessage {
-  role: string;
-  content: string;
-  timestamp: string;
-}
-
-export interface ChatTranscript {
-  session_id: string;
-  guest_name: string | null;
-  channel: string;
-  created_at: string;
-  messages: ChatTranscriptMessage[];
 }
 
 /**
  * Get analytics data for the user's wedding.
+ * Returns topic summaries instead of full transcripts for guest privacy.
  */
 export async function getAnalytics(token: string): Promise<AnalyticsData> {
   const response = await fetch(`${API_URL}/api/analytics`, {
@@ -1707,18 +1696,5 @@ export async function getAnalytics(token: string): Promise<AnalyticsData> {
   return response.json();
 }
 
-/**
- * Get full chat transcript for a session.
- */
-export async function getChatTranscript(token: string, sessionId: string): Promise<ChatTranscript> {
-  const response = await fetch(`${API_URL}/api/analytics/transcript/${sessionId}`, {
-    headers: { Authorization: `Bearer ${token}` },
-  });
-
-  if (!response.ok) {
-    const error = await response.json();
-    throw new Error(error.detail || 'Failed to get transcript');
-  }
-
-  return response.json();
-}
+// Note: getChatTranscript removed for guest privacy.
+// Couples now see topic summaries instead of full conversation transcripts.

@@ -1,13 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import {
-  getAnalytics,
-  getChatTranscript,
-  AnalyticsData,
-  ChatTranscript,
-  ChatSessionSummary,
-} from '@/lib/api';
+import { getAnalytics, AnalyticsData } from '@/lib/api';
 
 interface AnalyticsDashboardProps {
   token: string;
@@ -17,11 +11,6 @@ export default function AnalyticsDashboard({ token }: AnalyticsDashboardProps) {
   const [analytics, setAnalytics] = useState<AnalyticsData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-
-  // Transcript modal state
-  const [selectedSession, setSelectedSession] = useState<ChatSessionSummary | null>(null);
-  const [transcript, setTranscript] = useState<ChatTranscript | null>(null);
-  const [isLoadingTranscript, setIsLoadingTranscript] = useState(false);
 
   useEffect(() => {
     loadAnalytics();
@@ -40,24 +29,6 @@ export default function AnalyticsDashboard({ token }: AnalyticsDashboardProps) {
     }
   };
 
-  const openTranscript = async (session: ChatSessionSummary) => {
-    setSelectedSession(session);
-    setIsLoadingTranscript(true);
-    try {
-      const data = await getChatTranscript(token, session.id);
-      setTranscript(data);
-    } catch (err) {
-      console.error('Failed to load transcript:', err);
-    } finally {
-      setIsLoadingTranscript(false);
-    }
-  };
-
-  const closeTranscript = () => {
-    setSelectedSession(null);
-    setTranscript(null);
-  };
-
   const formatDate = (dateStr: string) => {
     const date = new Date(dateStr);
     return date.toLocaleDateString('en-US', {
@@ -68,12 +39,22 @@ export default function AnalyticsDashboard({ token }: AnalyticsDashboardProps) {
     });
   };
 
-  const formatTime = (dateStr: string) => {
-    const date = new Date(dateStr);
-    return date.toLocaleTimeString('en-US', {
-      hour: 'numeric',
-      minute: '2-digit',
-    });
+  // Get topic color based on topic name
+  const getTopicColor = (topic: string) => {
+    const colors: Record<string, string> = {
+      'Dress Code': 'bg-pink-100 text-pink-700',
+      'Venue & Directions': 'bg-blue-100 text-blue-700',
+      'Schedule & Timing': 'bg-orange-100 text-orange-700',
+      'Accommodations': 'bg-purple-100 text-purple-700',
+      'Food & Drinks': 'bg-yellow-100 text-yellow-700',
+      'RSVP & Plus Ones': 'bg-green-100 text-green-700',
+      'Registry & Gifts': 'bg-red-100 text-red-700',
+      'Transportation': 'bg-cyan-100 text-cyan-700',
+      'Photos & Social': 'bg-indigo-100 text-indigo-700',
+      'Wedding Party': 'bg-rose-100 text-rose-700',
+      'General Info': 'bg-gray-100 text-gray-700',
+    };
+    return colors[topic] || 'bg-gray-100 text-gray-700';
   };
 
   if (isLoading) {
@@ -95,6 +76,10 @@ export default function AnalyticsDashboard({ token }: AnalyticsDashboardProps) {
   if (!analytics) {
     return null;
   }
+
+  // Sort topics by count for the breakdown
+  const sortedTopics = Object.entries(analytics.topic_breakdown || {})
+    .sort(([, a], [, b]) => b - a);
 
   return (
     <div className="space-y-6">
@@ -157,7 +142,42 @@ export default function AnalyticsDashboard({ token }: AnalyticsDashboardProps) {
         </div>
       </div>
 
-      {/* Recent Conversations */}
+      {/* Topic Breakdown */}
+      {sortedTopics.length > 0 && (
+        <div className="bg-white rounded-2xl shadow-lg p-6">
+          <h3 className="text-lg font-medium text-gray-800 mb-4 flex items-center">
+            <svg className="w-5 h-5 mr-2 text-rose-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
+            </svg>
+            What Guests Are Asking About
+          </h3>
+          <p className="text-sm text-gray-500 mb-4">
+            See the most common topics your guests have questions about
+          </p>
+          <div className="space-y-3">
+            {sortedTopics.map(([topic, count]) => {
+              const maxCount = sortedTopics[0]?.[1] || 1;
+              const percentage = Math.round((count / maxCount) * 100);
+              return (
+                <div key={topic} className="flex items-center gap-3">
+                  <span className={`text-xs px-2 py-1 rounded-full whitespace-nowrap ${getTopicColor(topic)}`}>
+                    {topic}
+                  </span>
+                  <div className="flex-1 bg-gray-100 rounded-full h-2">
+                    <div
+                      className="bg-rose-500 h-2 rounded-full transition-all"
+                      style={{ width: `${percentage}%` }}
+                    />
+                  </div>
+                  <span className="text-sm text-gray-600 w-8 text-right">{count}</span>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
+      {/* Recent Conversations (with topics, not full transcripts) */}
       <div className="bg-white rounded-2xl shadow-lg p-6">
         <h3 className="text-lg font-medium text-gray-800 mb-4 flex items-center">
           <svg className="w-5 h-5 mr-2 text-rose-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -179,107 +199,49 @@ export default function AnalyticsDashboard({ token }: AnalyticsDashboardProps) {
             {analytics.recent_sessions.map((session) => (
               <div
                 key={session.id}
-                className="py-3 flex items-center justify-between hover:bg-gray-50 -mx-2 px-2 rounded-lg cursor-pointer transition-colors"
-                onClick={() => openTranscript(session)}
+                className="py-4"
               >
-                <div className="flex items-center gap-3">
-                  <div className={`w-8 h-8 rounded-full flex items-center justify-center ${
-                    session.channel === 'sms' ? 'bg-purple-100' : 'bg-green-100'
-                  }`}>
-                    {session.channel === 'sms' ? (
-                      <svg className="w-4 h-4 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z" />
-                      </svg>
-                    ) : (
-                      <svg className="w-4 h-4 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9" />
-                      </svg>
-                    )}
-                  </div>
-                  <div>
-                    <p className="font-medium text-gray-800">
-                      {session.guest_name || 'Anonymous Guest'}
-                    </p>
-                    <p className="text-xs text-gray-500">
-                      {formatDate(session.last_message_at)}
-                    </p>
+                <div className="flex items-start justify-between mb-2">
+                  <div className="flex items-center gap-3">
+                    <div className={`w-8 h-8 rounded-full flex items-center justify-center ${
+                      session.channel === 'sms' ? 'bg-purple-100' : 'bg-green-100'
+                    }`}>
+                      {session.channel === 'sms' ? (
+                        <svg className="w-4 h-4 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z" />
+                        </svg>
+                      ) : (
+                        <svg className="w-4 h-4 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9" />
+                        </svg>
+                      )}
+                    </div>
+                    <div>
+                      <p className="font-medium text-gray-800">
+                        {session.guest_name || 'Anonymous Guest'}
+                      </p>
+                      <p className="text-xs text-gray-500">
+                        {formatDate(session.last_message_at)} · {session.message_count} messages
+                      </p>
+                    </div>
                   </div>
                 </div>
-                <div className="flex items-center gap-3">
-                  <span className="text-sm text-gray-500">
-                    {session.message_count} messages
-                  </span>
-                  <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                  </svg>
+                {/* Topics tags */}
+                <div className="flex flex-wrap gap-1.5 ml-11">
+                  {(session.topics || []).map((topic) => (
+                    <span
+                      key={topic}
+                      className={`text-xs px-2 py-0.5 rounded-full ${getTopicColor(topic)}`}
+                    >
+                      {topic}
+                    </span>
+                  ))}
                 </div>
               </div>
             ))}
           </div>
         )}
       </div>
-
-      {/* Transcript Modal */}
-      {selectedSession && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-2xl max-w-2xl w-full max-h-[80vh] flex flex-col">
-            {/* Modal Header */}
-            <div className="px-6 py-4 border-b border-gray-100 flex items-center justify-between">
-              <div>
-                <h3 className="font-medium text-gray-800">
-                  {selectedSession.guest_name || 'Anonymous Guest'}
-                </h3>
-                <p className="text-sm text-gray-500">
-                  {formatDate(selectedSession.created_at)} via {selectedSession.channel === 'sms' ? 'SMS' : 'Web'}
-                </p>
-              </div>
-              <button
-                onClick={closeTranscript}
-                className="text-gray-400 hover:text-gray-600 p-1"
-              >
-                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                </svg>
-              </button>
-            </div>
-
-            {/* Modal Body - Chat Messages */}
-            <div className="flex-1 overflow-y-auto p-6">
-              {isLoadingTranscript ? (
-                <div className="flex items-center justify-center py-8">
-                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-rose-600"></div>
-                </div>
-              ) : transcript ? (
-                <div className="space-y-4">
-                  {transcript.messages.map((message, index) => (
-                    <div
-                      key={index}
-                      className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}
-                    >
-                      <div
-                        className={`max-w-[80%] rounded-2xl px-4 py-2 ${
-                          message.role === 'user'
-                            ? 'bg-rose-500 text-white rounded-br-md'
-                            : 'bg-gray-100 text-gray-800 rounded-bl-md'
-                        }`}
-                      >
-                        <p className="text-sm whitespace-pre-wrap">{message.content}</p>
-                        <p className={`text-xs mt-1 ${
-                          message.role === 'user' ? 'text-rose-200' : 'text-gray-400'
-                        }`}>
-                          {formatTime(message.timestamp)}
-                        </p>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              ) : (
-                <p className="text-gray-500 text-center">Failed to load transcript</p>
-              )}
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 }
