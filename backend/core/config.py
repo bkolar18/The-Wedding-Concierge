@@ -60,6 +60,15 @@ class Settings(BaseSettings):
     # Frontend URL for password reset links
     FRONTEND_URL: str = "http://localhost:3000"
 
+    # Stripe Payments
+    STRIPE_SECRET_KEY: Optional[str] = None
+    STRIPE_PUBLISHABLE_KEY: Optional[str] = None
+    STRIPE_WEBHOOK_SECRET: Optional[str] = None
+
+    # Pricing (in cents)
+    PRICE_STANDARD_CENTS: int = 4900  # $49.00
+    PRICE_PREMIUM_CENTS: int = 9900   # $99.00
+
     class Config:
         env_file = str(ENV_FILE)
         case_sensitive = True

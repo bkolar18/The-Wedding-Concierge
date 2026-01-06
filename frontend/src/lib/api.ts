@@ -1411,6 +1411,130 @@ export async function createVendorCommunication(
   return response.json();
 }
 
+// ============ PAYMENT API ============
+
+export interface PaymentConfig {
+  stripe_publishable_key: string | null;
+  stripe_enabled: boolean;
+  pricing: {
+    [key: string]: {
+      name: string;
+      price_cents: number;
+      price_display: string;
+      features: {
+        chat_enabled: boolean;
+        chat_limit: number | null;
+        sms_enabled: boolean;
+        vendors_enabled: boolean;
+        branding_removable: boolean;
+        qr_codes: boolean;
+        priority_support?: boolean;
+        custom_domain?: boolean;
+      };
+    };
+  };
+}
+
+export interface PaymentStatus {
+  subscription_tier: string;
+  is_paid: boolean;
+  paid_at: string | null;
+  features: {
+    chat_enabled: boolean;
+    chat_limit: number | null;
+    sms_enabled: boolean;
+    vendors_enabled: boolean;
+    branding_removable: boolean;
+    qr_codes: boolean;
+    priority_support?: boolean;
+    custom_domain?: boolean;
+  };
+}
+
+export interface CheckoutSession {
+  checkout_url: string;
+  session_id: string;
+}
+
+/**
+ * Get Stripe configuration and pricing info (public, no auth).
+ */
+export async function getPaymentConfig(): Promise<PaymentConfig> {
+  const response = await fetch(`${API_URL}/api/payment/config`);
+
+  if (!response.ok) {
+    throw new Error('Failed to get payment config');
+  }
+
+  return response.json();
+}
+
+/**
+ * Get current user's payment status.
+ */
+export async function getPaymentStatus(token: string): Promise<PaymentStatus> {
+  const response = await fetch(`${API_URL}/api/payment/status`, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(error.detail || 'Failed to get payment status');
+  }
+
+  return response.json();
+}
+
+/**
+ * Create a Stripe checkout session for payment.
+ */
+export async function createCheckoutSession(
+  token: string,
+  tier: 'standard' | 'premium',
+  successUrl?: string,
+  cancelUrl?: string
+): Promise<CheckoutSession> {
+  const response = await fetch(`${API_URL}/api/payment/create-checkout-session`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify({
+      tier,
+      success_url: successUrl,
+      cancel_url: cancelUrl,
+    }),
+  });
+
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(error.detail || 'Failed to create checkout session');
+  }
+
+  return response.json();
+}
+
+/**
+ * Verify a checkout session after returning from Stripe.
+ */
+export async function verifyCheckoutSession(
+  token: string,
+  sessionId: string
+): Promise<{ status: string; tier?: string; message: string }> {
+  const response = await fetch(`${API_URL}/api/payment/verify-session/${sessionId}`, {
+    method: 'POST',
+    headers: { Authorization: `Bearer ${token}` },
+  });
+
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(error.detail || 'Failed to verify session');
+  }
+
+  return response.json();
+}
+
 // ============ PUBLIC API (No Auth Required) ============
 
 export interface PublicWeddingInfo {

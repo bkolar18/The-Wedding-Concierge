@@ -107,8 +107,8 @@ class ResetPasswordRequest(BaseModel):
 @router.post("/register", response_model=TokenResponse, status_code=status.HTTP_201_CREATED)
 @limiter.limit("5/minute")  # 5 registration attempts per minute per IP
 async def register(
-    request: UserRegisterRequest,
-    req: Request,  # Required for rate limiter
+    request: Request,  # Required for rate limiter - must be named 'request'
+    body: UserRegisterRequest,
     db: AsyncSession = Depends(get_db)
 ):
     """
@@ -118,7 +118,7 @@ async def register(
     """
     # Check if email already exists
     result = await db.execute(
-        select(User).where(User.email == request.email.lower())
+        select(User).where(User.email == body.email.lower())
     )
     existing_user = result.scalar_one_or_none()
 
@@ -129,7 +129,7 @@ async def register(
         )
 
     # Validate password
-    is_valid, error_msg = validate_password(request.password)
+    is_valid, error_msg = validate_password(body.password)
     if not is_valid:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
@@ -138,9 +138,9 @@ async def register(
 
     # Create user
     user = User(
-        email=request.email.lower(),
-        hashed_password=get_password_hash(request.password),
-        name=request.name
+        email=body.email.lower(),
+        hashed_password=get_password_hash(body.password),
+        name=body.name
     )
     db.add(user)
     await db.commit()
@@ -158,8 +158,8 @@ async def register(
 @router.post("/login", response_model=TokenResponse)
 @limiter.limit("10/minute")  # 10 login attempts per minute per IP (allows for typos)
 async def login(
-    request: UserLoginRequest,
-    req: Request,  # Required for rate limiter
+    request: Request,  # Required for rate limiter - must be named 'request'
+    body: UserLoginRequest,
     db: AsyncSession = Depends(get_db)
 ):
     """
@@ -169,11 +169,11 @@ async def login(
     """
     # Find user
     result = await db.execute(
-        select(User).where(User.email == request.email.lower())
+        select(User).where(User.email == body.email.lower())
     )
     user = result.scalar_one_or_none()
 
-    if not user or not verify_password(request.password, user.hashed_password):
+    if not user or not verify_password(body.password, user.hashed_password):
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Invalid email or password"
@@ -249,8 +249,8 @@ async def logout():
 @router.post("/forgot-password")
 @limiter.limit("3/minute")  # 3 password reset requests per minute per IP
 async def forgot_password(
-    request: ForgotPasswordRequest,
-    req: Request,  # Required for rate limiter
+    request: Request,  # Required for rate limiter - must be named 'request'
+    body: ForgotPasswordRequest,
     db: AsyncSession = Depends(get_db)
 ):
     """
@@ -260,7 +260,7 @@ async def forgot_password(
     """
     # Find user by email
     result = await db.execute(
-        select(User).where(User.email == request.email.lower())
+        select(User).where(User.email == body.email.lower())
     )
     user = result.scalar_one_or_none()
 
@@ -299,8 +299,8 @@ async def forgot_password(
 @router.post("/reset-password")
 @limiter.limit("5/minute")  # 5 password reset attempts per minute per IP
 async def reset_password(
-    request: ResetPasswordRequest,
-    req: Request,  # Required for rate limiter
+    request: Request,  # Required for rate limiter - must be named 'request'
+    body: ResetPasswordRequest,
     db: AsyncSession = Depends(get_db)
 ):
     """
@@ -308,7 +308,7 @@ async def reset_password(
     """
     # Find token
     result = await db.execute(
-        select(PasswordResetToken).where(PasswordResetToken.token == request.token)
+        select(PasswordResetToken).where(PasswordResetToken.token == body.token)
     )
     reset_token = result.scalar_one_or_none()
 
@@ -319,7 +319,7 @@ async def reset_password(
         )
 
     # Validate new password
-    is_valid, error_msg = validate_password(request.new_password)
+    is_valid, error_msg = validate_password(body.new_password)
     if not is_valid:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
@@ -339,7 +339,7 @@ async def reset_password(
         )
 
     # Update password
-    user.hashed_password = get_password_hash(request.new_password)
+    user.hashed_password = get_password_hash(body.new_password)
 
     # Mark token as used
     reset_token.used_at = datetime.utcnow()

@@ -3,7 +3,7 @@ import uuid
 import secrets
 from datetime import datetime, timedelta
 from typing import Optional
-from sqlalchemy import String, DateTime, Boolean, ForeignKey
+from sqlalchemy import String, DateTime, Boolean, ForeignKey, Integer
 from sqlalchemy.orm import Mapped, mapped_column
 
 from core.database import Base
@@ -37,6 +37,13 @@ class User(Base):
     # Account status
     is_active: Mapped[bool] = mapped_column(Boolean, default=True)
     is_verified: Mapped[bool] = mapped_column(Boolean, default=False)
+
+    # Payment/Subscription info
+    subscription_tier: Mapped[str] = mapped_column(String(20), default="free")  # free, standard, premium
+    stripe_customer_id: Mapped[Optional[str]] = mapped_column(String(100), nullable=True, index=True)
+    stripe_payment_id: Mapped[Optional[str]] = mapped_column(String(100), nullable=True)  # For one-time payments
+    paid_at: Mapped[Optional[datetime]] = mapped_column(DateTime, nullable=True)
+    payment_amount_cents: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)  # Amount paid in cents
 
     # Timestamps
     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)

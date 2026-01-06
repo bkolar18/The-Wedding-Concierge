@@ -17,11 +17,13 @@ import {
   createFAQ,
   updateFAQ,
   deleteFAQ,
+  getPaymentStatus,
   WeddingData,
   WeddingCreateData,
   EventCreateData,
   AccommodationCreateData,
   FAQCreateData,
+  PaymentStatus,
 } from '@/lib/api';
 
 // Format date string without timezone conversion
@@ -74,6 +76,7 @@ export default function DashboardPage() {
   const [error, setError] = useState<string | null>(null);
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [paymentStatus, setPaymentStatus] = useState<PaymentStatus | null>(null);
 
   // Form state for creating wedding
   const [formData, setFormData] = useState<WeddingCreateData>({
@@ -102,24 +105,25 @@ export default function DashboardPage() {
     }
   }, [authLoading, user, router]);
 
-  // Load wedding data
+  // Load wedding data and payment status
   useEffect(() => {
-    async function loadWedding() {
+    async function loadData() {
       if (!token) return;
 
       try {
-        const data = await getMyWedding(token);
-        setWedding(data);
-      } catch (err) {
-        // No wedding yet is fine
-        setWedding(null);
+        const [weddingData, paymentData] = await Promise.all([
+          getMyWedding(token).catch(() => null),
+          getPaymentStatus(token).catch(() => null),
+        ]);
+        setWedding(weddingData);
+        setPaymentStatus(paymentData);
       } finally {
         setIsLoading(false);
       }
     }
 
     if (token) {
-      loadWedding();
+      loadData();
     }
   }, [token]);
 
@@ -467,9 +471,24 @@ export default function DashboardPage() {
             <div className="bg-white rounded-2xl shadow-lg p-8">
               <div className="flex flex-col md:flex-row md:items-center md:justify-between">
                 <div>
-                  <h1 className="text-2xl font-serif text-gray-800">
-                    {wedding.partner1_name} & {wedding.partner2_name}
-                  </h1>
+                  <div className="flex items-center gap-3 flex-wrap">
+                    <h1 className="text-2xl font-serif text-gray-800">
+                      {wedding.partner1_name} & {wedding.partner2_name}
+                    </h1>
+                    {/* Subscription tier badge */}
+                    {paymentStatus && (
+                      <span className={`text-xs font-medium px-2.5 py-1 rounded-full ${
+                        paymentStatus.subscription_tier === 'premium'
+                          ? 'bg-purple-100 text-purple-700'
+                          : paymentStatus.subscription_tier === 'standard'
+                          ? 'bg-green-100 text-green-700'
+                          : 'bg-gray-100 text-gray-600'
+                      }`}>
+                        {paymentStatus.subscription_tier === 'premium' ? 'Premium' :
+                         paymentStatus.subscription_tier === 'standard' ? 'Standard' : 'Free'}
+                      </span>
+                    )}
+                  </div>
                   {wedding.wedding_date && (
                     <p className="text-gray-500 mt-1">
                       {formatDateString(wedding.wedding_date)}
@@ -496,6 +515,17 @@ export default function DashboardPage() {
                     </svg>
                     Edit Details
                   </button>
+                  {paymentStatus?.subscription_tier === 'free' && (
+                    <Link
+                      href="/pricing"
+                      className="text-amber-600 hover:text-amber-700 text-sm font-medium flex items-center"
+                    >
+                      <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
+                      </svg>
+                      Upgrade
+                    </Link>
+                  )}
                   <Link
                     href={`/chat/${wedding.access_code}`}
                     target="_blank"

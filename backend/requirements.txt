@@ -49,3 +49,6 @@ apscheduler
 # File Processing (CSV/Excel upload)
 openpyxl
 python-multipart
+
+# Payments
+stripe
