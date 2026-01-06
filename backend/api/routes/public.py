@@ -1,5 +1,6 @@
 """Public API endpoints (no authentication required)."""
 import re
+import logging
 from typing import Optional
 from fastapi import APIRouter, HTTPException, Depends
 from pydantic import BaseModel, field_validator
@@ -7,8 +8,12 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 
 from core.database import get_db
+from core.config import settings
 from models.wedding import Wedding
 from models.sms import Guest
+from services.sms.twilio_service import twilio_service
+
+logger = logging.getLogger(__name__)
 
 router = APIRouter()
 
@@ -146,15 +151,44 @@ async def register_guest(
     await db.commit()
     await db.refresh(guest)
 
-    # TODO: Send SMS with chat link via Twilio
-    # For now, just return the chat link in the response
+    # Send welcome SMS with chat link
+    sms_sent = False
+    if twilio_service.is_configured:
+        try:
+            # Build the full chat URL
+            frontend_url = settings.FRONTEND_URL.rstrip('/')
+            chat_url = f"{frontend_url}/chat/{wedding.access_code}"
+
+            # Compose welcome message
+            message = (
+                f"Hi {registration.name}! 🎉 You're registered for "
+                f"{wedding.partner1_name} & {wedding.partner2_name}'s wedding.\n\n"
+                f"Chat with the wedding concierge anytime:\n{chat_url}"
+            )
+
+            result = await twilio_service.send_sms(
+                to=registration.phone_number,
+                body=message
+            )
+            sms_sent = result.get("success", False)
+
+            if not sms_sent:
+                logger.warning(
+                    f"Failed to send welcome SMS to {registration.phone_number}: "
+                    f"{result.get('error_message', 'Unknown error')}"
+                )
+        except Exception as e:
+            logger.error(f"Error sending welcome SMS: {e}")
+    else:
+        logger.info("Twilio not configured - skipping welcome SMS")
 
     return {
         "success": True,
         "message": f"Welcome, {registration.name}! You're now registered.",
         "chat_url": f"/chat/{wedding.access_code}",
         "guest_id": str(guest.id),
-        "already_registered": False
+        "already_registered": False,
+        "sms_sent": sms_sent
     }
 
 

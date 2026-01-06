@@ -78,6 +78,7 @@ export default function DashboardPage() {
   const [error, setError] = useState<string | null>(null);
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [copiedRegistration, setCopiedRegistration] = useState(false);
   const [paymentStatus, setPaymentStatus] = useState<PaymentStatus | null>(null);
 
   // Form state for creating wedding
@@ -155,6 +156,15 @@ export default function DashboardPage() {
       navigator.clipboard.writeText(link);
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
+    }
+  };
+
+  const copyRegistrationLink = () => {
+    if (wedding?.slug) {
+      const link = `${window.location.origin}/join/${wedding.slug}`;
+      navigator.clipboard.writeText(link);
+      setCopiedRegistration(true);
+      setTimeout(() => setCopiedRegistration(false), 2000);
     }
   };
 
@@ -577,6 +587,35 @@ export default function DashboardPage() {
               <p className="text-rose-100 text-sm mt-4">
                 Print QR codes on your save-the-dates, invitations, or display them at your welcome table.
               </p>
+
+              {/* Guest Self-Registration Link */}
+              {wedding.slug && (
+                <div className="mt-6 pt-6 border-t border-white/20">
+                  <h3 className="text-lg font-medium mb-2 flex items-center">
+                    <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
+                    </svg>
+                    Guest Self-Registration
+                  </h3>
+                  <p className="text-rose-100 text-sm mb-3">
+                    Let guests register themselves to get instant access to the chat and receive updates.
+                  </p>
+                  <div className="flex flex-col sm:flex-row gap-3">
+                    <div className="flex-1 bg-white/10 rounded-xl px-4 py-3 font-mono text-sm overflow-hidden text-ellipsis break-all">
+                      {typeof window !== 'undefined' ? `${window.location.origin}/join/${wedding.slug}` : `/join/${wedding.slug}`}
+                    </div>
+                    <button
+                      onClick={copyRegistrationLink}
+                      className="px-6 py-3 bg-white/20 hover:bg-white/30 text-white rounded-xl font-medium transition-colors whitespace-nowrap"
+                    >
+                      {copiedRegistration ? 'Copied!' : 'Copy Link'}
+                    </button>
+                  </div>
+                  <p className="text-rose-100 text-xs mt-2">
+                    Perfect for sharing on your wedding website or social media. Guests enter their name and phone to get the chat link.
+                  </p>
+                </div>
+              )}
             </div>
 
             {/* Tab Navigation */}
