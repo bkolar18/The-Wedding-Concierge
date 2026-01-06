@@ -1213,7 +1213,8 @@ export async function getVendors(
     throw new Error(error.detail || 'Failed to get vendors');
   }
 
-  return response.json();
+  const data = await response.json();
+  return data.vendors || [];
 }
 
 /**
