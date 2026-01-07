@@ -10,6 +10,7 @@
    - `SESSION_PROMPT_WEDDING.md` (this file) - Current status & next steps
    - `SESSION_LOG_WEDDING.md` - Recent work & roadmap
    - `CLAUDE_CONTEXT_WEDDING.md` - Full project architecture
+   - `docs/FEATURE_INVENTORY.md` - **NEW** Comprehensive feature documentation
 
 2. **Project Location:**
    ```
@@ -18,140 +19,90 @@
 
 3. **Critical Rule:** Always use complete absolute Windows paths with drive letters and backslashes for ALL file operations.
 
-4. **Logging Rule:** Log ALL responses to:
-   ```
-   C:\Users\brenn\Documents\Coding Projects\Wedding Chat Tool\claude_responses.txt
-   ```
-
 ---
 
-## Current Project Status (December 30, 2024)
+## Current Project Status (January 6, 2026)
 
-### Phase: DEPLOYED - Frontend & Backend Live!
+### Phase: FEATURE COMPLETE - READY FOR USER ACQUISITION
 
-**The app is now publicly accessible and connected!**
+**The Wedding Concierge is a production-ready SaaS platform. All core features are implemented. Focus should now shift to getting real users and feedback.**
 
 ### Live URLs:
 - **Frontend:** https://the-wedding-concierge.vercel.app
 - **Backend API:** https://wedding-concierge-api.onrender.com/
 - **GitHub:** https://github.com/bkolar18/The-Wedding-Concierge.git
 
-### What's Working:
-- Full-stack wedding chat assistant application
-- **Frontend deployed on Vercel** (Next.js)
-- **Backend deployed on Render** (FastAPI + PostgreSQL)
-- Mobile-responsive navigation with hamburger menu
-- Rebranded to "The Wedding Concierge" with bell hop bell icon
-- User registration and login endpoints connected
-- AI-powered chat using Claude (Anthropic API)
-- Playwright stealth scraper for wedding websites
+### Feature Summary (10 Categories, 40+ Endpoints):
+- **AI Chat** - Context-aware responses, session persistence (1 year), guest registration
+- **Wedding Management** - Events, accommodations, FAQs, venues, custom greetings
+- **Vendor Management** - 15+ categories, payment tracking, budget summary, contract AI extraction
+- **Guest Outreach** - SMS blasts, scheduling, templates, CSV upload, RSVP tracking
+- **Analytics** - Chat engagement tracking, topic breakdown, weekly digest emails
+- **Data Import** - Scrape TheKnot/WeddingWire with Playwright stealth
+- **Authentication** - JWT tokens, password reset, rate limiting
+- **Payments** - Stripe subscriptions (Free/Standard/Premium tiers)
+- **Public Pages** - Guest chat, QR codes, wedding preview pages
+- **PWA** - Mobile-friendly, installable, offline support
 
-### What Changed Today (Dec 30):
+### What Changed Today (Jan 6, 2026):
 
-1. **Branding Updates:**
-   - Changed logo from ring to bell hop bell (concierge service bell)
-   - Bell icon positioned to right of "The Wedding Concierge" text
-   - Updated Header, Footer, login, and register pages
+1. **Guest Chat Usage Tracking**
+   - Added `has_used_chat` and `first_chat_at` fields to Guest model
+   - Tracks when guests use the chat for analytics
+   - Shows "X of Y guests have used chat" in dashboard and weekly email
 
-2. **GitHub Repository:**
-   - Initialized git and pushed to GitHub
-   - URL: https://github.com/bkolar18/The-Wedding-Concierge.git
+2. **Feature Inventory Documentation**
+   - Created comprehensive `docs/FEATURE_INVENTORY.md` (~500 lines)
+   - Documents all 40+ API endpoints, 10 pages, 8 components
+   - Complete database schema reference
+   - Tech stack and deployment info
 
-3. **Vercel Frontend Deployment:**
-   - Created `vercel.json` with build configuration
-   - Fixed 404 errors and framework detection issues
-   - Live at: https://the-wedding-concierge.vercel.app
-
-4. **Mobile Responsive Design:**
-   - Added hamburger menu to Header.tsx
-   - Mobile dropdown with all nav links and auth buttons
-   - Uses React useState for toggle
-
-5. **Render Backend Deployment:**
-   - Fixed multiple deployment errors:
-     - Added `asyncpg` and `psycopg2-binary` for PostgreSQL
-     - Added DATABASE_URL format conversion (postgres:// → postgresql+asyncpg://)
-     - Fixed missing `Wedding` import with TYPE_CHECKING
-     - Added `email-validator` for Pydantic EmailStr
-   - Live at: https://wedding-concierge-api.onrender.com/
-
-6. **Connected Frontend to Backend:**
-   - Added `NEXT_PUBLIC_API_URL` environment variable to Vercel
-   - Frontend now communicates with Render backend
-   - Authentication flow should be functional
+3. **Previous Session Accomplishments (Recent):**
+   - Fixed CORS error on dashboard authentication
+   - Fixed database migration (chat_greeting, show_branding, custom_slug columns)
+   - Consolidated guest registration into chat page (merged /join and /chat)
+   - Extended session persistence to 1 year for wedding planning timeline
+   - Added duplicate guest detection by phone number
+   - Removed redundant guest self-registration section from dashboard
 
 ---
 
-## IMMEDIATE NEXT STEPS (Pick Up Here)
+## IMMEDIATE NEXT STEPS
 
-### Priority 1: Test Registration/Login
-1. Go to https://the-wedding-concierge.vercel.app
-2. Click "Get Started" or "Sign In"
-3. Test creating a new account
-4. Test logging in
-5. Verify dashboard access works
+### Priority 1: Get Real Users
+The app is feature-complete. The most valuable next step is:
+- Get 2-5 couples to use it for their actual weddings
+- Collect feedback on what works and what's missing
+- Watch analytics to see which features get used
 
-### Priority 2: Clean Up Mobile Styling
-User mentioned mobile page needs cleanup. Check:
-- Spacing and padding on mobile
-- Button sizes
-- Text readability
-- Form layouts on small screens
+### Priority 2: If User Requests Features
+Only add features if real users request them. Potential enhancements:
+- Calendar integration (Google/Apple)
+- Multi-language chat support
+- Photo gallery
+- Native mobile apps
 
-### Priority 3: Test Full Flow
-1. Register an account
-2. Import a wedding website
-3. Test the chat functionality
-4. Verify all features work end-to-end
+### Priority 3: Deferred Technical Items
+- Add automated tests
+- Set up CI/CD pipeline
+- Configure production monitoring/alerting
+
+---
+
+## Key Documentation Files
+
+| File | Purpose |
+|------|---------|
+| `docs/FEATURE_INVENTORY.md` | **START HERE** - Complete feature documentation |
+| `docs/VENDOR_MANAGEMENT_PROPOSAL.md` | Vendor feature planning (implemented) |
+| `docs/session-notes/CLAUDE_CONTEXT_WEDDING.md` | Full architecture reference |
+| `docs/session-notes/SESSION_LOG_WEDDING.md` | Detailed work history |
 
 ---
 
 ## Important: Render Free Tier Cold Starts
 
 The Render free tier has "cold starts" - if no one visits for 15 minutes, the server spins down. The first request after that takes ~30 seconds to wake up. This is normal behavior for free tier hosting.
-
----
-
-## Key Files Modified (Dec 30)
-
-### Frontend
-| File | Changes |
-|------|---------|
-| `frontend/src/components/Header.tsx` | Bell icon + hamburger mobile menu |
-| `frontend/src/components/Footer.tsx` | Bell icon |
-| `frontend/src/app/login/page.tsx` | Bell icon |
-| `frontend/src/app/register/page.tsx` | Bell icon |
-
-### Backend
-| File | Changes |
-|------|---------|
-| `backend/requirements.txt` | Added asyncpg, psycopg2-binary, email-validator, pydantic[email] |
-| `backend/core/database.py` | Added get_database_url() for URL format conversion |
-| `backend/services/chat/chat_engine.py` | Added TYPE_CHECKING import for Wedding |
-
-### Root
-| File | Changes |
-|------|---------|
-| `vercel.json` | **NEW** - Vercel build configuration |
-| `.gitignore` | **NEW** - Comprehensive gitignore |
-
----
-
-## Environment & Secrets
-
-### Backend Secrets (in Render Dashboard)
-- `DATABASE_URL` - PostgreSQL connection (auto-provided by Render)
-- `ANTHROPIC_API_KEY` - Claude API key
-- `SECRET_KEY` - JWT signing key
-
-### Local Backend (.env - gitignored)
-```
-ANTHROPIC_API_KEY=sk-ant-api03-...
-SECRET_KEY=xK9#mP2vL5nQ8@wR3jT6yU0bN4cF7hA
-```
-
-### Frontend Secrets (in Vercel Dashboard)
-- `NEXT_PUBLIC_API_URL` = https://wedding-concierge-api.onrender.com
 
 ---
 
@@ -176,42 +127,55 @@ npm run dev
 
 ---
 
-## Full Development Roadmap
+## Environment & Secrets
 
-### Phase 1: MVP (COMPLETE)
-- [x] Project structure setup
-- [x] Database models
-- [x] Chat engine with Claude
-- [x] Wedding CRUD API
-- [x] Chat widget component
-- [x] Landing page
+### Backend Secrets (in Render Dashboard)
+- `DATABASE_URL` - PostgreSQL connection (auto-provided by Render)
+- `ANTHROPIC_API_KEY` - Claude API key
+- `SECRET_KEY` - JWT signing key
+- `TWILIO_ACCOUNT_SID`, `TWILIO_AUTH_TOKEN`, `TWILIO_PHONE_NUMBER` - SMS
+- `RESEND_API_KEY` - Email service
+- `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET` - Payments
 
-### Phase 1.5: Scraper Enhancement (COMPLETE - Dec 29)
-- [x] Multi-page scraping
-- [x] Playwright stealth for anti-bot bypass
-- [x] Claude-based intelligent data extraction
+### Frontend Secrets (in Vercel Dashboard)
+- `NEXT_PUBLIC_API_URL` = https://wedding-concierge-api.onrender.com
+- `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY` - Stripe public key
 
-### Phase 2: Deployment & Auth (COMPLETE - Dec 30)
-- [x] GitHub repository setup
-- [x] Vercel frontend deployment
-- [x] Render backend deployment
-- [x] PostgreSQL database (Render)
-- [x] Mobile responsive navigation
-- [x] Connect frontend to backend
-- [ ] **Test registration/login** ← CURRENT STEP
+---
 
-### Phase 3: Dashboard & Polish (NEXT)
-- [ ] Test full user flow end-to-end
-- [ ] Clean up mobile styling
-- [ ] Wedding dashboard UI improvements
-- [ ] Import flow testing
-- [ ] Chat analytics
+## Development Roadmap
 
-### Phase 4+: (Future)
-- SMS Integration (Twilio)
-- Custom domains
-- Payment integration
-- Wedding planner accounts
+### Phase 1-3: Core Features (COMPLETE)
+- [x] AI Chat with Claude
+- [x] Wedding management (events, accommodations, FAQs)
+- [x] Website scraping with Playwright stealth
+- [x] User authentication with JWT
+- [x] Deployment (Vercel + Render + PostgreSQL)
+
+### Phase 4: Guest Outreach (COMPLETE)
+- [x] Guest management with CSV import
+- [x] Twilio SMS integration
+- [x] Scheduled campaigns (fixed & relative)
+- [x] Delivery tracking
+
+### Phase 5: Vendor Management (COMPLETE)
+- [x] Vendor directory with 15+ categories
+- [x] Payment tracking and budget summary
+- [x] Communication log
+- [x] Contract AI extraction
+
+### Phase 6: Analytics & Polish (COMPLETE)
+- [x] Chat analytics with topic breakdown
+- [x] Guest engagement tracking
+- [x] Weekly digest emails
+- [x] Stripe payment integration
+- [x] PWA support
+- [x] Dark mode for chat
+
+### Phase 7: User Acquisition (CURRENT)
+- [ ] Get real couples using the platform
+- [ ] Collect user feedback
+- [ ] Iterate based on actual usage patterns
 
 ---
 
@@ -226,8 +190,7 @@ C:\Users\brenn\Documents\Coding Projects\Wedding Chat Tool\docs\session-notes\
 - `SESSION_LOG_WEDDING.md` - Detailed work log
 - `CLAUDE_CONTEXT_WEDDING.md` - Full architecture reference
 
-Additional context:
+Feature documentation:
 ```
-C:\Users\brenn\Documents\Coding Projects\Wedding Chat Tool\claude_responses.txt
+C:\Users\brenn\Documents\Coding Projects\Wedding Chat Tool\docs\FEATURE_INVENTORY.md
 ```
-- Contains detailed session notes and debugging logs
