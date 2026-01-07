@@ -1,6 +1,7 @@
 """Public API endpoints (no authentication required)."""
 import re
 import logging
+from datetime import datetime
 from typing import Optional
 from fastapi import APIRouter, HTTPException, Depends
 from pydantic import BaseModel, field_validator
@@ -258,11 +259,24 @@ async def register_guest_by_access_code(
     existing_guest = result.scalar_one_or_none()
 
     if existing_guest:
+        # Track if we need to commit changes
+        needs_commit = False
+
         # Update name if different (people use nicknames)
         if existing_guest.name != registration.name:
             existing_guest.name = registration.name
-            if registration.email:
-                existing_guest.email = registration.email
+            needs_commit = True
+        if registration.email and existing_guest.email != registration.email:
+            existing_guest.email = registration.email
+            needs_commit = True
+
+        # Mark that this guest has used the chat
+        if not existing_guest.has_used_chat:
+            existing_guest.has_used_chat = True
+            existing_guest.first_chat_at = datetime.utcnow()
+            needs_commit = True
+
+        if needs_commit:
             await db.commit()
 
         return {
@@ -273,14 +287,16 @@ async def register_guest_by_access_code(
             "already_registered": True
         }
 
-    # Create new guest record
+    # Create new guest record (they're using chat, so mark it)
     guest = Guest(
         wedding_id=wedding.id,
         name=registration.name,
         phone_number=registration.phone_number,
         email=registration.email,
         sms_consent=True,
-        group_name="Chat-registered"
+        group_name="Chat-registered",
+        has_used_chat=True,
+        first_chat_at=datetime.utcnow()
     )
     db.add(guest)
     await db.commit()

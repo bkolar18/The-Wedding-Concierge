@@ -79,7 +79,9 @@ class EmailService:
         top_topics: list[tuple[str, int]],
         week_start: datetime,
         week_end: datetime,
-        dashboard_url: str
+        dashboard_url: str,
+        guests_who_used_chat: int = 0,
+        total_guests: int = 0
     ) -> str:
         """
         Generate HTML content for weekly digest email.
@@ -94,6 +96,8 @@ class EmailService:
             week_start: Start of the week
             week_end: End of the week
             dashboard_url: URL to the dashboard
+            guests_who_used_chat: Total guests who have used chat (all-time)
+            total_guests: Total guests in guest list
 
         Returns:
             HTML string for the email body
@@ -161,6 +165,27 @@ class EmailService:
                                     <td width="33%" style="text-align: center; padding: 20px 10px; background-color: #fdf2f8; border-radius: 8px;">
                                         <div style="font-size: 32px; font-weight: bold; color: #be185d;">{unique_guests}</div>
                                         <div style="font-size: 12px; color: #666; margin-top: 5px;">Guests</div>
+                                    </td>
+                                </tr>
+                            </table>
+                        </td>
+                    </tr>
+
+                    <!-- Guest Engagement -->
+                    <tr>
+                        <td style="padding: 0 40px 30px;">
+                            <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #f0fdf4; border-radius: 8px; padding: 20px;">
+                                <tr>
+                                    <td style="padding: 20px;">
+                                        <h3 style="margin: 0 0 10px; color: #166534; font-size: 16px; font-weight: 600;">
+                                            Guest Chat Engagement
+                                        </h3>
+                                        <p style="margin: 0; color: #15803d; font-size: 28px; font-weight: bold;">
+                                            {guests_who_used_chat} of {total_guests}
+                                        </p>
+                                        <p style="margin: 5px 0 0; color: #666; font-size: 13px;">
+                                            guests have used the concierge chat
+                                        </p>
                                     </td>
                                 </tr>
                             </table>

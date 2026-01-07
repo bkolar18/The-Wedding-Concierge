@@ -142,6 +142,48 @@ export default function AnalyticsDashboard({ token }: AnalyticsDashboardProps) {
         </div>
       </div>
 
+      {/* Guest Chat Engagement */}
+      {analytics.total_guests > 0 && (
+        <div className="bg-gradient-to-r from-emerald-500 to-teal-500 rounded-2xl shadow-lg p-6 text-white">
+          <div className="flex items-center justify-between">
+            <div>
+              <h3 className="text-lg font-medium mb-1 flex items-center">
+                <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                </svg>
+                Guest Chat Engagement
+              </h3>
+              <p className="text-white/80 text-sm">
+                Registered guests who have used the concierge chat
+              </p>
+            </div>
+            <div className="text-right">
+              <p className="text-4xl font-bold">
+                {analytics.guests_who_used_chat}
+                <span className="text-2xl font-normal text-white/80"> / {analytics.total_guests}</span>
+              </p>
+              <p className="text-sm text-white/80 mt-1">
+                {analytics.total_guests > 0
+                  ? `${Math.round((analytics.guests_who_used_chat / analytics.total_guests) * 100)}% engagement`
+                  : '0% engagement'
+                }
+              </p>
+            </div>
+          </div>
+          {/* Progress bar */}
+          <div className="mt-4 bg-white/20 rounded-full h-2">
+            <div
+              className="bg-white h-2 rounded-full transition-all"
+              style={{
+                width: analytics.total_guests > 0
+                  ? `${(analytics.guests_who_used_chat / analytics.total_guests) * 100}%`
+                  : '0%'
+              }}
+            />
+          </div>
+        </div>
+      )}
+
       {/* Topic Breakdown */}
       {sortedTopics.length > 0 && (
         <div className="bg-white rounded-2xl shadow-lg p-6">

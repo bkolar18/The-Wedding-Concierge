@@ -12,6 +12,7 @@ from core.auth import get_current_user
 from models.wedding import Wedding
 from models.chat import ChatSession, ChatMessage
 from models.user import User
+from models.sms import Guest
 
 router = APIRouter()
 
@@ -71,6 +72,9 @@ class AnalyticsResponse(BaseModel):
     sms_sessions: int
     topic_breakdown: dict  # Count of questions by topic
     recent_sessions: List[ChatSessionSummary]
+    # Guest engagement stats
+    guests_who_used_chat: int = 0
+    total_guests: int = 0
 
 
 @router.get("", response_model=AnalyticsResponse)
@@ -103,6 +107,8 @@ async def get_analytics(
     sms_sessions = 0
     topic_breakdown = {}
     recent_sessions = []
+    guests_who_used_chat = 0
+    total_guests = 0
 
     try:
         # Get total sessions count
@@ -180,6 +186,23 @@ async def get_analytics(
                 created_at=session.created_at,
                 last_message_at=session.last_message_at
             ))
+
+        # Get guest engagement stats
+        total_guests_result = await db.execute(
+            select(func.count(Guest.id))
+            .where(Guest.wedding_id == wedding.id)
+        )
+        total_guests = total_guests_result.scalar() or 0
+
+        guests_who_used_chat_result = await db.execute(
+            select(func.count(Guest.id))
+            .where(
+                Guest.wedding_id == wedding.id,
+                Guest.has_used_chat == True
+            )
+        )
+        guests_who_used_chat = guests_who_used_chat_result.scalar() or 0
+
     except Exception:
         # If chat tables don't exist yet, just return zeros
         pass
@@ -191,7 +214,9 @@ async def get_analytics(
         web_sessions=web_sessions,
         sms_sessions=sms_sessions,
         topic_breakdown=topic_breakdown,
-        recent_sessions=recent_sessions
+        recent_sessions=recent_sessions,
+        guests_who_used_chat=guests_who_used_chat,
+        total_guests=total_guests
     )
 
 

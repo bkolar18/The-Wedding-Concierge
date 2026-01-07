@@ -41,6 +41,10 @@ class Guest(Base):
     opted_out: Mapped[bool] = mapped_column(Boolean, default=False)
     opted_out_at: Mapped[Optional[datetime]] = mapped_column(DateTime, nullable=True)
 
+    # Chat engagement tracking
+    has_used_chat: Mapped[bool] = mapped_column(Boolean, default=False)
+    first_chat_at: Mapped[Optional[datetime]] = mapped_column(DateTime, nullable=True)
+
     # Metadata
     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
     updated_at: Mapped[datetime] = mapped_column(

@@ -1723,6 +1723,9 @@ export interface AnalyticsData {
   sms_sessions: number;
   topic_breakdown: Record<string, number>;  // Topic counts for insights
   recent_sessions: ChatSessionSummary[];
+  // Guest engagement stats
+  guests_who_used_chat: number;
+  total_guests: number;
 }
 
 /**

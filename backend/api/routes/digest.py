@@ -12,6 +12,7 @@ from core.auth import get_current_user
 from models.user import User
 from models.wedding import Wedding
 from models.chat import ChatSession, ChatMessage
+from models.sms import Guest
 from services.email import email_service
 from core.config import settings
 
@@ -90,7 +91,8 @@ async def get_weekly_stats(
     Get chat statistics for the past week.
 
     Returns:
-        Dict with total_conversations, total_messages, unique_guests, top_topics
+        Dict with total_conversations, total_messages, unique_guests, top_topics,
+        and guest engagement stats (guests_who_used_chat, total_guests)
     """
     week_ago = datetime.utcnow() - timedelta(days=7)
 
@@ -107,6 +109,22 @@ async def get_weekly_stats(
 
     total_conversations = len(sessions)
     unique_guests = len(set(s.guest_name for s in sessions if s.guest_name))
+
+    # Get guest engagement stats (all-time, not just this week)
+    total_guests_result = await db.execute(
+        select(func.count(Guest.id))
+        .where(Guest.wedding_id == wedding_id)
+    )
+    total_guests = total_guests_result.scalar() or 0
+
+    guests_who_used_chat_result = await db.execute(
+        select(func.count(Guest.id))
+        .where(
+            Guest.wedding_id == wedding_id,
+            Guest.has_used_chat == True
+        )
+    )
+    guests_who_used_chat = guests_who_used_chat_result.scalar() or 0
 
     # Get messages this week
     top_topics = []
@@ -143,7 +161,9 @@ async def get_weekly_stats(
         "total_conversations": total_conversations,
         "total_messages": total_messages,
         "unique_guests": unique_guests,
-        "top_topics": top_topics
+        "top_topics": top_topics,
+        "guests_who_used_chat": guests_who_used_chat,
+        "total_guests": total_guests
     }
 
 
@@ -190,7 +210,9 @@ async def send_my_weekly_digest(
         top_topics=stats["top_topics"],
         week_start=week_start,
         week_end=week_end,
-        dashboard_url=dashboard_url
+        dashboard_url=dashboard_url,
+        guests_who_used_chat=stats["guests_who_used_chat"],
+        total_guests=stats["total_guests"]
     )
 
     # Send email

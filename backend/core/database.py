@@ -135,6 +135,30 @@ async def run_migrations():
             END IF;
         END $$;
         """,
+        # Add has_used_chat column to track guest chat engagement
+        """
+        DO $$
+        BEGIN
+            IF NOT EXISTS (
+                SELECT 1 FROM information_schema.columns
+                WHERE table_name = 'guests' AND column_name = 'has_used_chat'
+            ) THEN
+                ALTER TABLE guests ADD COLUMN has_used_chat BOOLEAN DEFAULT false;
+            END IF;
+        END $$;
+        """,
+        # Add first_chat_at column to track when guest first used chat
+        """
+        DO $$
+        BEGIN
+            IF NOT EXISTS (
+                SELECT 1 FROM information_schema.columns
+                WHERE table_name = 'guests' AND column_name = 'first_chat_at'
+            ) THEN
+                ALTER TABLE guests ADD COLUMN first_chat_at TIMESTAMP;
+            END IF;
+        END $$;
+        """,
     ]
 
     async with engine.begin() as conn:
