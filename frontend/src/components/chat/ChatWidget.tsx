@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useRef, useEffect, FormEvent } from 'react';
-import { startChat, sendMessage, WeddingPreview } from '@/lib/api';
+import { startChat, sendMessage, WeddingPreview, registerGuestByAccessCode, verifyGuest } from '@/lib/api';
 
 interface Message {
   role: 'user' | 'assistant';
@@ -18,22 +18,34 @@ interface ChatWidgetProps {
 const STORAGE_KEY_PREFIX = 'wedding_chat_';
 const getStorageKey = (accessCode: string) => `${STORAGE_KEY_PREFIX}${accessCode}`;
 
+// Session expiry: 1 year (covers wedding planning timeline)
+const SESSION_EXPIRY_MS = 365 * 24 * 60 * 60 * 1000;
+
 interface StoredSession {
+  guestId: string;
   guestName: string;
   timestamp: number;
 }
 
 export default function ChatWidget({ accessCode: initialAccessCode, weddingPreview, embedded = false }: ChatWidgetProps) {
   const [accessCode, setAccessCode] = useState(initialAccessCode || '');
-  const [guestName, setGuestName] = useState('');
   const [sessionId, setSessionId] = useState<string | null>(null);
   const [weddingTitle, setWeddingTitle] = useState('');
   const [messages, setMessages] = useState<Message[]>([]);
   const [inputValue, setInputValue] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [showNamePrompt, setShowNamePrompt] = useState(!!weddingPreview);
-  const [rememberedGuest, setRememberedGuest] = useState<string | null>(null);
+  const [showRegistrationForm, setShowRegistrationForm] = useState(!!weddingPreview);
+
+  // Returning guest state
+  const [rememberedGuest, setRememberedGuest] = useState<{ id: string; name: string } | null>(null);
+  const [isVerifyingGuest, setIsVerifyingGuest] = useState(true);
+
+  // Registration form fields
+  const [firstName, setFirstName] = useState('');
+  const [lastName, setLastName] = useState('');
+  const [phone, setPhone] = useState('');
+  const [email, setEmail] = useState('');
 
   // Dark mode state - respects system preference by default
   const [isDarkMode, setIsDarkMode] = useState(false);
@@ -57,25 +69,43 @@ export default function ChatWidget({ accessCode: initialAccessCode, weddingPrevi
     // Check for remembered guest session
     const code = weddingPreview?.access_code || initialAccessCode;
     if (code) {
-      try {
-        const stored = localStorage.getItem(getStorageKey(code));
-        if (stored) {
-          const session: StoredSession = JSON.parse(stored);
-          // Session valid for 30 days
-          const thirtyDays = 30 * 24 * 60 * 60 * 1000;
-          if (Date.now() - session.timestamp < thirtyDays) {
-            setRememberedGuest(session.guestName);
-            setGuestName(session.guestName);
-          } else {
-            // Expired, remove it
-            localStorage.removeItem(getStorageKey(code));
-          }
-        }
-      } catch {
-        // Invalid stored data, ignore
-      }
+      checkForReturningGuest(code);
+    } else {
+      setIsVerifyingGuest(false);
     }
   }, [weddingPreview, initialAccessCode]);
+
+  // Check if there's a valid returning guest
+  const checkForReturningGuest = async (code: string) => {
+    try {
+      const stored = localStorage.getItem(getStorageKey(code));
+      if (stored) {
+        const session: StoredSession = JSON.parse(stored);
+
+        // Check if session is still valid (1 year expiry)
+        if (Date.now() - session.timestamp < SESSION_EXPIRY_MS) {
+          // Verify guest still exists in backend
+          try {
+            const verified = await verifyGuest(session.guestId);
+            if (verified.valid) {
+              setRememberedGuest({ id: verified.guest_id, name: verified.guest_name });
+              setIsVerifyingGuest(false);
+              return;
+            }
+          } catch {
+            // Guest no longer valid, clear storage
+            localStorage.removeItem(getStorageKey(code));
+          }
+        } else {
+          // Expired, remove it
+          localStorage.removeItem(getStorageKey(code));
+        }
+      }
+    } catch {
+      // Invalid stored data, ignore
+    }
+    setIsVerifyingGuest(false);
+  };
 
   // Toggle dark mode
   const toggleDarkMode = () => {
@@ -91,18 +121,32 @@ export default function ChatWidget({ accessCode: initialAccessCode, weddingPrevi
       localStorage.removeItem(getStorageKey(code));
     }
     setRememberedGuest(null);
-    setGuestName('');
   };
 
-  // Save guest to localStorage after successful chat start
-  const saveGuestSession = (name: string) => {
+  // Save guest to localStorage after successful registration
+  const saveGuestSession = (guestId: string, name: string) => {
     const code = weddingPreview?.access_code || accessCode;
-    if (code && name) {
+    if (code && guestId) {
       const session: StoredSession = {
+        guestId,
         guestName: name,
         timestamp: Date.now()
       };
       localStorage.setItem(getStorageKey(code), JSON.stringify(session));
+    }
+  };
+
+  // Format phone number as user types
+  const handlePhoneChange = (value: string) => {
+    const digits = value.replace(/\D/g, '');
+    if (digits.length <= 3) {
+      setPhone(digits);
+    } else if (digits.length <= 6) {
+      setPhone(`(${digits.slice(0, 3)}) ${digits.slice(3)}`);
+    } else if (digits.length <= 10) {
+      setPhone(`(${digits.slice(0, 3)}) ${digits.slice(3, 6)}-${digits.slice(6)}`);
+    } else {
+      setPhone(digits.slice(0, 15));
     }
   };
 
@@ -120,22 +164,52 @@ export default function ChatWidget({ accessCode: initialAccessCode, weddingPrevi
     }
   }, [sessionId]);
 
-  const handleStartChat = async (e: FormEvent) => {
+  // Handle registration and start chat for new guests
+  const handleRegisterAndStartChat = async (e: FormEvent) => {
+    e.preventDefault();
+    setError(null);
+    setIsLoading(true);
+
+    const code = weddingPreview ? weddingPreview.access_code : accessCode;
+    const fullName = `${firstName.trim()} ${lastName.trim()}`.trim();
+
+    try {
+      // Register the guest first
+      const regResult = await registerGuestByAccessCode(code, {
+        name: fullName,
+        phone_number: phone,
+        email: email || undefined,
+      });
+
+      // Save to localStorage
+      if (regResult.guest_id) {
+        saveGuestSession(regResult.guest_id, regResult.guest_name || fullName);
+      }
+
+      // Now start the chat
+      const chatResponse = await startChat(code, fullName);
+      setSessionId(chatResponse.session_id);
+      setWeddingTitle(chatResponse.wedding_title);
+      setMessages([{ role: 'assistant', content: chatResponse.greeting }]);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to connect');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Handle start chat for returning guests
+  const handleReturnGuestStartChat = async (e: FormEvent) => {
     e.preventDefault();
     setError(null);
     setIsLoading(true);
 
     try {
       const code = weddingPreview ? weddingPreview.access_code : accessCode;
-      const response = await startChat(code, guestName || undefined);
+      const response = await startChat(code, rememberedGuest?.name);
       setSessionId(response.session_id);
       setWeddingTitle(response.wedding_title);
       setMessages([{ role: 'assistant', content: response.greeting }]);
-
-      // Save guest name for future visits
-      if (guestName) {
-        saveGuestSession(guestName);
-      }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to connect');
     } finally {
@@ -172,7 +246,6 @@ export default function ChatWidget({ accessCode: initialAccessCode, weddingPrevi
   const handleQuickQuestion = (question: string) => {
     if (sessionId && !isLoading) {
       setInputValue(question);
-      // Auto-submit the question
       setMessages(prev => [...prev, { role: 'user', content: question }]);
       setIsLoading(true);
       sendMessage(sessionId, question)
@@ -201,8 +274,19 @@ export default function ChatWidget({ accessCode: initialAccessCode, weddingPrevi
     assistantBubble: isDarkMode ? 'bg-gray-800 text-gray-100 border-gray-700' : 'bg-white text-gray-800 border-gray-100',
   };
 
-  // Name prompt screen (when accessed via direct link)
-  if (showNamePrompt && !sessionId) {
+  // Loading state while verifying returning guest
+  if (isVerifyingGuest) {
+    return (
+      <div className={`${darkStyles.bg} overflow-hidden ${embedded ? 'h-full flex flex-col justify-center' : 'rounded-2xl shadow-lg'}`}>
+        <div className="p-6 flex items-center justify-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-rose-600"></div>
+        </div>
+      </div>
+    );
+  }
+
+  // Registration form screen (when accessed via direct link)
+  if (showRegistrationForm && !sessionId) {
     return (
       <div className={`${darkStyles.bg} overflow-hidden ${embedded ? 'h-full flex flex-col justify-center' : 'rounded-2xl shadow-lg'}`}>
         <div className="p-6">
@@ -217,7 +301,7 @@ export default function ChatWidget({ accessCode: initialAccessCode, weddingPrevi
             {rememberedGuest ? (
               <>
                 <h3 className={`text-lg font-medium ${darkStyles.text} mb-1`}>
-                  Welcome back, {rememberedGuest}!
+                  Welcome back, {rememberedGuest.name}!
                 </h3>
                 <p className={`${darkStyles.textSecondary} text-sm`}>
                   Ready to continue chatting?
@@ -235,61 +319,136 @@ export default function ChatWidget({ accessCode: initialAccessCode, weddingPrevi
             )}
           </div>
 
-          <form onSubmit={handleStartChat} className="space-y-4">
-            {/* Only show name input if not a remembered guest */}
-            {!rememberedGuest && (
-              <div>
-                <label htmlFor="guestName" className={`block text-sm font-medium ${darkStyles.text} mb-1`}>
-                  Your Name <span className={darkStyles.textSecondary}>(optional)</span>
-                </label>
-                <input
-                  type="text"
-                  id="guestName"
-                  value={guestName}
-                  onChange={(e) => setGuestName(e.target.value)}
-                  placeholder="e.g., Sarah"
-                  className={`w-full px-4 py-3 border rounded-xl focus:ring-2 focus:ring-rose-500 focus:border-rose-500 transition-colors ${darkStyles.input}`}
-                />
-              </div>
-            )}
-
-            {error && (
-              <div className="text-red-600 text-sm bg-red-50 p-3 rounded-lg">
-                {error}
-              </div>
-            )}
-
-            <button
-              type="submit"
-              disabled={isLoading}
-              className="w-full py-3 px-4 bg-rose-600 text-white rounded-xl font-medium hover:bg-rose-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all transform hover:scale-[1.02] active:scale-[0.98]"
-            >
-              {isLoading ? (
-                <span className="flex items-center justify-center">
-                  <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" fill="none" viewBox="0 0 24 24">
-                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                  </svg>
-                  Connecting...
-                </span>
-              ) : rememberedGuest ? (
-                'Continue Chatting'
-              ) : (
-                'Start Chatting'
+          {/* Form for returning guest - just a button */}
+          {rememberedGuest ? (
+            <form onSubmit={handleReturnGuestStartChat} className="space-y-4">
+              {error && (
+                <div className="text-red-600 text-sm bg-red-50 p-3 rounded-lg">
+                  {error}
+                </div>
               )}
-            </button>
 
-            {/* "Not you?" link for remembered guests */}
-            {rememberedGuest && (
+              <button
+                type="submit"
+                disabled={isLoading}
+                className="w-full py-3 px-4 bg-rose-600 text-white rounded-xl font-medium hover:bg-rose-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all transform hover:scale-[1.02] active:scale-[0.98]"
+              >
+                {isLoading ? (
+                  <span className="flex items-center justify-center">
+                    <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" fill="none" viewBox="0 0 24 24">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                    Connecting...
+                  </span>
+                ) : (
+                  'Continue Chatting'
+                )}
+              </button>
+
               <button
                 type="button"
                 onClick={clearRememberedGuest}
                 className={`w-full text-sm ${darkStyles.textSecondary} hover:text-rose-600 transition-colors`}
               >
-                Not {rememberedGuest}? Click here to change
+                Not {rememberedGuest.name}? Click here to change
               </button>
-            )}
-          </form>
+            </form>
+          ) : (
+            /* Full registration form for new guests */
+            <form onSubmit={handleRegisterAndStartChat} className="space-y-4">
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label htmlFor="firstName" className={`block text-sm font-medium ${darkStyles.text} mb-1`}>
+                    First Name *
+                  </label>
+                  <input
+                    type="text"
+                    id="firstName"
+                    value={firstName}
+                    onChange={(e) => setFirstName(e.target.value)}
+                    placeholder="John"
+                    className={`w-full px-4 py-3 border rounded-xl focus:ring-2 focus:ring-rose-500 focus:border-rose-500 transition-colors ${darkStyles.input}`}
+                    required
+                  />
+                </div>
+                <div>
+                  <label htmlFor="lastName" className={`block text-sm font-medium ${darkStyles.text} mb-1`}>
+                    Last Name *
+                  </label>
+                  <input
+                    type="text"
+                    id="lastName"
+                    value={lastName}
+                    onChange={(e) => setLastName(e.target.value)}
+                    placeholder="Smith"
+                    className={`w-full px-4 py-3 border rounded-xl focus:ring-2 focus:ring-rose-500 focus:border-rose-500 transition-colors ${darkStyles.input}`}
+                    required
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label htmlFor="phone" className={`block text-sm font-medium ${darkStyles.text} mb-1`}>
+                  Phone Number *
+                </label>
+                <input
+                  type="tel"
+                  id="phone"
+                  value={phone}
+                  onChange={(e) => handlePhoneChange(e.target.value)}
+                  placeholder="(555) 123-4567"
+                  className={`w-full px-4 py-3 border rounded-xl focus:ring-2 focus:ring-rose-500 focus:border-rose-500 transition-colors ${darkStyles.input}`}
+                  required
+                />
+                <p className={`text-xs ${darkStyles.textSecondary} mt-1`}>
+                  For wedding updates via text
+                </p>
+              </div>
+
+              <div>
+                <label htmlFor="email" className={`block text-sm font-medium ${darkStyles.text} mb-1`}>
+                  Email <span className={darkStyles.textSecondary}>(optional)</span>
+                </label>
+                <input
+                  type="email"
+                  id="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="john@example.com"
+                  className={`w-full px-4 py-3 border rounded-xl focus:ring-2 focus:ring-rose-500 focus:border-rose-500 transition-colors ${darkStyles.input}`}
+                />
+              </div>
+
+              {error && (
+                <div className="text-red-600 text-sm bg-red-50 p-3 rounded-lg">
+                  {error}
+                </div>
+              )}
+
+              <button
+                type="submit"
+                disabled={isLoading || !firstName.trim() || !lastName.trim() || !phone.trim()}
+                className="w-full py-3 px-4 bg-rose-600 text-white rounded-xl font-medium hover:bg-rose-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all transform hover:scale-[1.02] active:scale-[0.98]"
+              >
+                {isLoading ? (
+                  <span className="flex items-center justify-center">
+                    <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" fill="none" viewBox="0 0 24 24">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                    Getting Started...
+                  </span>
+                ) : (
+                  'Start Chatting'
+                )}
+              </button>
+
+              <p className={`text-xs ${darkStyles.textSecondary} text-center`}>
+                By continuing, you agree to receive SMS updates about this wedding.
+              </p>
+            </form>
+          )}
         </div>
       </div>
     );
@@ -309,7 +468,7 @@ export default function ChatWidget({ accessCode: initialAccessCode, weddingPrevi
           <p className="text-gray-600">Enter your access code to get started</p>
         </div>
 
-        <form onSubmit={handleStartChat} className="w-full space-y-4">
+        <form onSubmit={(e) => { e.preventDefault(); setShowRegistrationForm(true); }} className="w-full space-y-4">
           <div>
             <label htmlFor="accessCode" className="block text-sm font-medium text-gray-700 mb-1">
               Access Code
@@ -325,20 +484,6 @@ export default function ChatWidget({ accessCode: initialAccessCode, weddingPrevi
             />
           </div>
 
-          <div>
-            <label htmlFor="guestNameAccess" className="block text-sm font-medium text-gray-700 mb-1">
-              Your Name <span className="text-gray-400">(optional)</span>
-            </label>
-            <input
-              type="text"
-              id="guestNameAccess"
-              value={guestName}
-              onChange={(e) => setGuestName(e.target.value)}
-              placeholder="e.g., Sarah"
-              className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-rose-500 focus:border-rose-500 transition-colors"
-            />
-          </div>
-
           {error && (
             <div className="text-red-600 text-sm bg-red-50 p-3 rounded-lg">
               {error}
@@ -347,10 +492,10 @@ export default function ChatWidget({ accessCode: initialAccessCode, weddingPrevi
 
           <button
             type="submit"
-            disabled={isLoading || !accessCode}
+            disabled={!accessCode}
             className="w-full py-3 px-4 bg-rose-600 text-white rounded-xl font-medium hover:bg-rose-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all transform hover:scale-[1.02] active:scale-[0.98]"
           >
-            {isLoading ? 'Connecting...' : 'Start Chat'}
+            Continue
           </button>
         </form>
       </div>

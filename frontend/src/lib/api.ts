@@ -1662,6 +1662,47 @@ export async function registerGuest(
   return response.json();
 }
 
+/**
+ * Register a guest for a wedding using access code (for chat widget).
+ */
+export async function registerGuestByAccessCode(
+  accessCode: string,
+  data: GuestRegistrationData
+): Promise<GuestRegistrationResponse> {
+  const response = await fetch(`${API_URL}/api/public/wedding/by-access-code/${encodeURIComponent(accessCode)}/register`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(data),
+  });
+
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(error.detail || 'Failed to register');
+  }
+
+  return response.json();
+}
+
+export interface GuestVerifyResponse {
+  valid: boolean;
+  guest_id: string;
+  guest_name: string;
+  phone_number: string | null;  // Last 4 digits only
+}
+
+/**
+ * Verify a guest ID is valid (for returning guests).
+ */
+export async function verifyGuest(guestId: string): Promise<GuestVerifyResponse> {
+  const response = await fetch(`${API_URL}/api/public/guest/${encodeURIComponent(guestId)}/verify`);
+
+  if (!response.ok) {
+    throw new Error('Guest not found');
+  }
+
+  return response.json();
+}
+
 // ============ ANALYTICS API ============
 
 export interface ChatSessionSummary {

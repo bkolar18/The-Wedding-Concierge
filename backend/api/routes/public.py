@@ -222,3 +222,125 @@ async def get_wedding_by_access_code(
         access_code=wedding.access_code,
         show_branding=wedding.show_branding if wedding.show_branding is not None else True
     )
+
+
+@router.post("/wedding/by-access-code/{access_code}/register")
+async def register_guest_by_access_code(
+    access_code: str,
+    registration: GuestRegistration,
+    db: AsyncSession = Depends(get_db)
+):
+    """
+    Register a guest for a wedding using access code.
+
+    This is used by the chat widget to register guests before chatting.
+    Detects duplicates by phone number and returns existing guest if found.
+    """
+    # Find the wedding by access code
+    result = await db.execute(
+        select(Wedding).where(Wedding.access_code == access_code, Wedding.is_active == True)
+    )
+    wedding = result.scalar_one_or_none()
+
+    if not wedding:
+        raise HTTPException(
+            status_code=404,
+            detail="Wedding not found. Please check the access code and try again."
+        )
+
+    # Check if guest with this phone number already exists for this wedding
+    result = await db.execute(
+        select(Guest).where(
+            Guest.wedding_id == wedding.id,
+            Guest.phone_number == registration.phone_number
+        )
+    )
+    existing_guest = result.scalar_one_or_none()
+
+    if existing_guest:
+        # Update name if different (people use nicknames)
+        if existing_guest.name != registration.name:
+            existing_guest.name = registration.name
+            if registration.email:
+                existing_guest.email = registration.email
+            await db.commit()
+
+        return {
+            "success": True,
+            "message": f"Welcome back, {existing_guest.name}!",
+            "guest_id": str(existing_guest.id),
+            "guest_name": existing_guest.name,
+            "already_registered": True
+        }
+
+    # Create new guest record
+    guest = Guest(
+        wedding_id=wedding.id,
+        name=registration.name,
+        phone_number=registration.phone_number,
+        email=registration.email,
+        sms_consent=True,
+        group_name="Chat-registered"
+    )
+    db.add(guest)
+    await db.commit()
+    await db.refresh(guest)
+
+    # Send welcome SMS with chat link
+    sms_sent = False
+    if twilio_service.is_configured:
+        try:
+            frontend_url = settings.FRONTEND_URL.rstrip('/')
+            chat_url = f"{frontend_url}/chat/{wedding.access_code}"
+
+            message = (
+                f"Hi {registration.name}! 🎉 You're registered for "
+                f"{wedding.partner1_name} & {wedding.partner2_name}'s wedding.\n\n"
+                f"Chat with the wedding concierge anytime:\n{chat_url}"
+            )
+
+            result = await twilio_service.send_sms(
+                to=registration.phone_number,
+                body=message
+            )
+            sms_sent = result.get("success", False)
+        except Exception as e:
+            logger.error(f"Error sending welcome SMS: {e}")
+
+    return {
+        "success": True,
+        "message": f"Welcome, {registration.name}!",
+        "guest_id": str(guest.id),
+        "guest_name": guest.name,
+        "already_registered": False,
+        "sms_sent": sms_sent
+    }
+
+
+@router.get("/guest/{guest_id}/verify")
+async def verify_guest(
+    guest_id: str,
+    db: AsyncSession = Depends(get_db)
+):
+    """
+    Verify a guest ID is valid and return guest info.
+
+    Used by the chat widget to check if a returning guest's session is still valid.
+    """
+    result = await db.execute(
+        select(Guest).where(Guest.id == guest_id)
+    )
+    guest = result.scalar_one_or_none()
+
+    if not guest:
+        raise HTTPException(
+            status_code=404,
+            detail="Guest not found"
+        )
+
+    return {
+        "valid": True,
+        "guest_id": str(guest.id),
+        "guest_name": guest.name,
+        "phone_number": guest.phone_number[-4:] if guest.phone_number else None  # Last 4 digits only for privacy
+    }
